@@ -789,17 +789,17 @@ async function renderModalBody(){
     content=`<div class="matchup-card" style="background:#fff"><div class="matchup-cols">
       <div>
         <div class="matchup-col-title">Attack</div>
-        ${mrow('Very Effective','var(--green)',atkSE.map(typeChip).join(''))}
-        ${mrow('Not Very Effective','var(--accent)',atkNVE.map(typeChip).join(''))}
-        ${mrow('No Effect','var(--text-muted)',atkNone.map(typeChip).join(''))}
+        ${mrow('Very Effective','#34d399',atkSE.map(typeChip).join(''))}
+        ${mrow('Not Very Effective','#ff3d3d',atkNVE.map(typeChip).join(''))}
+        ${mrow('No Effect','#6b6b80',atkNone.map(typeChip).join(''))}
       </div>
       <div>
         <div class="matchup-col-title">Defense</div>
         ${defWeak4.length?mrow('Very Effective','#f87171',defWeak4.map(typeChip).join('')):''}
-        ${mrow('Effective','var(--accent)',defWeak2.map(typeChip).join(''))}
-        ${mrow('Not Very Effective','var(--green)',defResist.map(typeChip).join(''))}
+        ${mrow('Effective','#ff3d3d',defWeak2.map(typeChip).join(''))}
+        ${mrow('Not Very Effective','#34d399',defResist.map(typeChip).join(''))}
         ${defResist2.length?mrow('Not Effective','#60a5fa',defResist2.map(typeChip).join('')):''}
-        ${mrow('No Effect','var(--text-muted)',defImmune.map(typeChip).join(''))}
+        ${mrow('No Effect','#6b6b80',defImmune.map(typeChip).join(''))}
       </div>
     </div></div>`;
   }
