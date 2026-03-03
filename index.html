@@ -786,8 +786,8 @@ async function renderModalBody(){
       else if(mult<1) defResist.push(at);
     });
     const mrow=(label,color,chips)=>`<div style="background:${color}12;border:1px solid ${color}35;border-radius:10px;padding:8px 12px;margin-bottom:6px;"><div class="matchup-row-label" style="color:${color};margin-bottom:6px;">${label}</div><div class="chips">${chips||'<span class="none-label">none</span>'}</div></div>`;
-    content=`<div class="matchup-card" style="background:#fff"><div class="matchup-cols">
-      <div>
+    content=`<div class="matchup-card" style="background:#fff;padding:16px;">
+      <div style="margin-bottom:20px;">
         <div class="matchup-col-title">Attack</div>
         ${mrow('Very Effective','#34d399',atkSE.map(typeChip).join(''))}
         ${mrow('Not Very Effective','#ff3d3d',atkNVE.map(typeChip).join(''))}
@@ -801,7 +801,7 @@ async function renderModalBody(){
         ${defResist2.length?mrow('Not Effective','#60a5fa',defResist2.map(typeChip).join('')):''}
         ${mrow('No Effect','#6b6b80',defImmune.map(typeChip).join(''))}
       </div>
-    </div></div>`;
+    </div>`;
   }
 
   document.getElementById('modal-body').innerHTML = `
