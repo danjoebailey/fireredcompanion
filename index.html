@@ -785,7 +785,7 @@ async function renderModalBody(){
       else if(mult<=0.25) defResist2.push(at);
       else if(mult<1) defResist.push(at);
     });
-    const mrow=(label,color,chips)=>`<div class="matchup-row"><div class="matchup-row-label" style="color:${color}">${label}</div><div class="chips">${chips||'<span class="none-label">none</span>'}</div></div>`;
+    const mrow=(label,color,chips)=>`<div style="background:${color}12;border:1px solid ${color}35;border-radius:10px;padding:8px 12px;margin-bottom:6px;"><div class="matchup-row-label" style="color:${color};margin-bottom:6px;">${label}</div><div class="chips">${chips||'<span class="none-label">none</span>'}</div></div>`;
     content=`<div class="matchup-card" style="background:#fff"><div class="matchup-cols">
       <div>
         <div class="matchup-col-title">Attack</div>
