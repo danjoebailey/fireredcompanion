@@ -758,7 +758,7 @@ async function renderModalBody(){
       if (!tms.length) {
         content = `<p class="modal-empty">No TM/HM compatibility found for Fire Red.</p>`;
       } else {
-        content = `<div class="tm-grid">${tms.map(t=>`<div class="tm-card">${t.num?`<span class="tm-num">${t.num}</span>`:''}<span class="tm-move">${t.name}</span>${typeChip(t.type)}<span class="tm-meta">${t.pw!=='—'?`${t.pw} pw`:'Status'}</span></div>`).join('')}</div>`;
+        content = `<div class="tm-grid">${tms.map(t=>`<div class="tm-card">${t.num?`<span class="tm-num">${t.num}</span>`:''}<span class="tm-move">${t.name}</span>${typeChip(t.type)}<span class="tm-meta">${t.pw!=='—'?t.pw:'—'}</span></div>`).join('')}</div>`;
       }
     }
 
@@ -856,7 +856,7 @@ function showTypeMatchup(type,el){
   document.getElementById('type-result').innerHTML=`<div class="matchup-card" style="border-color:${c}30"><div style="font-size:22px;font-weight:800;color:${c};margin-bottom:20px;">${TYPE_EMOJI[type]} ${type.charAt(0).toUpperCase()+type.slice(1)}</div><div class="matchup-cols"><div><div class="matchup-col-title">⚔️ As Attacker</div><div class="matchup-row"><div class="matchup-row-label" style="color:var(--green)">Super Effective ×2</div><div class="chips">${SE.length?SE.map(typeChip).join(''):'<span class="none-label">none</span>'}</div></div><div class="matchup-row"><div class="matchup-row-label" style="color:var(--accent)">Not Very Effective ×½</div><div class="chips">${NVE.length?NVE.map(typeChip).join(''):'<span class="none-label">none</span>'}</div></div><div class="matchup-row"><div class="matchup-row-label" style="color:var(--text-muted)">No Effect ×0</div><div class="chips">${IMM.length?IMM.map(typeChip).join(''):'<span class="none-label">none</span>'}</div></div></div><div><div class="matchup-col-title">🛡️ As Defender</div><div class="matchup-row"><div class="matchup-row-label" style="color:var(--accent)">Weak To ×2</div><div class="chips">${dW.length?dW.map(typeChip).join(''):'<span class="none-label">none</span>'}</div></div><div class="matchup-row"><div class="matchup-row-label" style="color:var(--green)">Resists ×½</div><div class="chips">${dR.length?dR.map(typeChip).join(''):'<span class="none-label">none</span>'}</div></div><div class="matchup-row"><div class="matchup-row-label" style="color:var(--text-muted)">Immune ×0</div><div class="chips">${dI.length?dI.map(typeChip).join(''):'<span class="none-label">none</span>'}</div></div></div></div></div>`;
 }
 
-function renderTMs(data){document.getElementById('tm-grid').innerHTML=data.map(tm=>`<div class="tm-card"><span class="tm-num">${tm.num}</span><span class="tm-move">${tm.move}</span>${typeChip(tm.type)}<span class="tm-meta">${tm.power!=='—'?`${tm.power} pw`:'Status'}</span></div>`).join('');}
+function renderTMs(data){document.getElementById('tm-grid').innerHTML=data.map(tm=>`<div class="tm-card"><span class="tm-num">${tm.num}</span><span class="tm-move">${tm.move}</span>${typeChip(tm.type)}<span class="tm-meta">${tm.power!=='—'?tm.power:'—'}</span></div>`).join('');}
 function renderTMFilters(){
   const types=[...new Set(TM_DATA.map(t=>t.type))].sort();
   const sel=document.getElementById('tm-type-select');
