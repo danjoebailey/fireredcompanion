@@ -270,7 +270,7 @@ body::before {
 .move-row { display: grid; grid-template-columns: 28px 1fr auto 36px 40px 30px; align-items: center; gap: 8px; padding: 6px 10px; background: rgba(0,0,0,0.04); border-radius: 8px; font-size: 12px; }
 .move-lv { font-family: 'DM Mono', monospace; font-size: 11px; font-weight: 700; color: var(--text-muted); }
 .move-name { font-weight: 600; color: var(--text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.move-pw { font-family: 'DM Mono', monospace; font-size: 11px; font-weight: 600; text-align: right; color: var(--text-muted); }
+.move-pw { font-family: 'DM Mono', monospace; font-size: 11px; font-weight: 600; text-align: right; }
 .move-acc { font-family: 'DM Mono', monospace; font-size: 11px; font-weight: 600; text-align: right; }
 .move-pp { font-family: 'DM Mono', monospace; font-size: 11px; font-weight: 600; text-align: right; }
 .tm-pill-list { display: flex; flex-wrap: wrap; gap: 6px; }
@@ -564,6 +564,7 @@ function sprite(id){
 }
 function typeChip(t){const c=TYPE_COLORS[t]||'#888';return`<span class="type-chip" style="background:${c}20;color:${c};border:1px solid ${c}40">${t}</span>`;}
 function statColor(v){return v>=100?'#34d399':v>=60?'#fbbf24':'#f87171';}
+function pwColor(v){return v==='—'?'var(--text-muted)':v>=90?'#f87171':v>=60?'#fbbf24':'#34d399';}
 function accColor(v){return v==null?'var(--text-muted)':v>=100?'#34d399':v>=85?'#fbbf24':'#f87171';}
 function ppColor(v){return !v?'var(--text-muted)':v>=30?'#34d399':v>=15?'#fbbf24':'#f87171';}
 
@@ -745,7 +746,7 @@ async function renderModalBody(){
             <span class="move-lv">${m.lv||'—'}</span>
             <span class="move-name">${m.name}</span>
             <span class="type-chip" style="background:${c}20;color:${c};border:1px solid ${c}40">${m.type}</span>
-            <span class="move-pw">${m.pw!=='—'?m.pw:'—'}</span>
+            <span class="move-pw" style="color:${pwColor(m.pw)}">${m.pw!=='—'?m.pw:'—'}</span>
             <span class="move-acc" style="color:${accColor(m.acc)}">${m.acc!=null?m.acc+'%':'—'}</span>
             <span class="move-pp" style="color:${ppColor(m.pp)}">${m.pp||'—'}</span>
           </div>`;
