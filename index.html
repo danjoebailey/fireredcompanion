@@ -829,8 +829,8 @@ function saveTeam(){localStorage.setItem('frTeam',JSON.stringify(team));}
 function removeFromTeam(i){team[i]=null;saveTeam();renderTeam();}
 function clearTeam(){team=[null,null,null,null,null,null];saveTeam();renderTeam();}
 
-function openPicker(slot){pickingSlot=slot!==undefined?slot:team.indexOf(null);if(pickingSlot===-1){alert('Team is full!');return;}document.getElementById('picker-modal').classList.add('open');renderPickerGrid(pokemonData);}
-function closePicker(){document.getElementById('picker-modal').classList.remove('open');}
+function openPicker(slot){pickingSlot=slot!==undefined?slot:team.indexOf(null);if(pickingSlot===-1){alert('Team is full!');return;}document.getElementById('picker-modal').classList.add('open');document.body.style.overflow='hidden';renderPickerGrid(pokemonData);}
+function closePicker(){document.getElementById('picker-modal').classList.remove('open');document.body.style.overflow='';}
 function renderPickerGrid(data){const g=document.getElementById('picker-grid');if(!g)return;g.innerHTML=data.map(p=>`<div class="poke-card" onclick="pickPokemon(${p.id})"><div class="poke-num">#${String(p.id).padStart(3,'0')}</div><img class="poke-sprite" src="${sprite(p.id)}" alt="${p.name}" loading="lazy"><div class="poke-name">${p.name}</div><div class="poke-types">${p.types.map(typeChip).join('')}</div></div>`).join('');}
 function filterPicker(){const q=document.getElementById('picker-search').value.toLowerCase();renderPickerGrid(pokemonData.filter(p=>p.name.includes(q)||String(p.id).includes(q)));}
 function pickPokemon(id){if(pickingSlot!==null)team[pickingSlot]=id;saveTeam();closePicker();renderTeam();switchTab('team');}
