@@ -713,8 +713,7 @@ async function renderModalBody(){
     {id:'stats', label:'Stats'},
     {id:'moves', label:'Moves'},
     {id:'tms',   label:'TMs'},
-    {id:'good',  label:'Good vs'},
-    {id:'bad',   label:'Bad vs'},
+    {id:'types', label:'Types'},
   ];
   const tabBar = `<div class="modal-tabs">${tabs.map(t=>`<button class="modal-tab ${modalTab===t.id?'active':''}" onclick="switchModalTab('${t.id}')">${t.label}</button>`).join('')}</div>`;
   let content = '';
@@ -767,68 +766,44 @@ async function renderModalBody(){
       }
     }
 
-  } else if(modalTab==='good'){
+  } else if(modalTab==='types'){
     const allTypes = Object.keys(TYPE_COLORS);
-    const se=[], resists=[], immune=[];
-    p.types.forEach(at => {
-      allTypes.forEach(dt => {
-        const v = (TYPE_CHART[at]||{})[dt];
-        if(v===2 && !se.includes(dt)) se.push(dt);
-      });
-    });
-    allTypes.forEach(at=>{
-      let mult = 1;
-      p.types.forEach(dt=>{ mult *= (TYPE_CHART[at]||{})[dt] ?? 1; });
-      if(mult===0 && !immune.includes(at)) immune.push(at);
-      else if(mult < 1 && !resists.includes(at)) resists.push(at);
-    });
-    const matchupBlock = (emoji, label, color, bg, chips) => `
-      <div style="background:${bg};border:1px solid ${color}30;border-radius:12px;padding:12px 14px;margin-bottom:10px;">
-        <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.6px;color:${color};margin-bottom:10px;">${emoji} ${label}</div>
-        <div class="chips">${chips}</div>
-      </div>`;
-    content =
-      matchupBlock('⚔️','Deals super effective damage to','#34d399','rgba(52,211,153,0.07)', se.length?se.map(typeChip).join(''):'<span class="modal-empty-inline">none</span>') +
-      matchupBlock('🛡️','Resists attacks from','#60a5fa','rgba(96,165,250,0.07)', resists.length?resists.map(typeChip).join(''):'<span class="modal-empty-inline">none</span>') +
-      matchupBlock('✨','Immune to','#a78bfa','rgba(167,139,250,0.07)', immune.length?immune.map(typeChip).join(''):'<span class="modal-empty-inline">none</span>');
-
-  } else if(modalTab==='bad'){
-    const allTypes = Object.keys(TYPE_COLORS);
-    const weakTo=[], badAtk=[];
-    allTypes.forEach(at=>{
-      let mult = 1;
-      p.types.forEach(dt=>{ mult *= (TYPE_CHART[at]||{})[dt] ?? 1; });
-      if(mult > 1) weakTo.push({t:at, mult});
-    });
+    // Attacker columns
+    const atkSE=[], atkNVE=[], atkNone=[];
     p.types.forEach(at=>{
       allTypes.forEach(dt=>{
         const v=(TYPE_CHART[at]||{})[dt];
-        if((v===0.5||v===0||v===0.25) && !badAtk.includes(dt)) badAtk.push(dt);
+        if(v===2 && !atkSE.includes(dt)) atkSE.push(dt);
+        if(v===0 && !atkNone.includes(dt)) atkNone.push(dt);
+        else if(v===0.5 && !atkNVE.includes(dt) && !atkNone.includes(dt)) atkNVE.push(dt);
       });
     });
-    const x4 = weakTo.filter(x=>x.mult>=4);
-    const x2 = weakTo.filter(x=>x.mult===2);
-    const weakChips = [
-      ...x4.map(x=>`<span style="display:inline-flex;align-items:center;gap:5px;background:rgba(248,113,113,0.15);border:1.5px solid #f8717160;border-radius:8px;padding:5px 10px;">
-        ${typeChip(x.t)}
-        <span style="font-size:10px;font-weight:800;color:#f87171;background:rgba(248,113,113,0.2);padding:2px 5px;border-radius:4px;">×4 — very weak</span>
-      </span>`),
-      ...x2.map(x=>`<span style="display:inline-flex;align-items:center;gap:5px;background:rgba(251,191,36,0.1);border:1.5px solid #fbbf2450;border-radius:8px;padding:5px 10px;">
-        ${typeChip(x.t)}
-        <span style="font-size:10px;font-weight:800;color:#fbbf24;background:rgba(251,191,36,0.15);padding:2px 5px;border-radius:4px;">×2 — weak</span>
-      </span>`),
-    ].join('');
-    content = `
-      <div style="background:rgba(248,113,113,0.07);border:1px solid #f8717130;border-radius:12px;padding:12px 14px;margin-bottom:10px;">
-        <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.6px;color:#f87171;margin-bottom:4px;">💥 Weak to</div>
-        <div style="font-size:11px;color:var(--text-muted);margin-bottom:10px;">Incoming damage multiplier from these types</div>
-        <div style="display:flex;flex-direction:column;gap:6px;">${weakTo.length ? weakChips : '<span class="modal-empty-inline">No weaknesses!</span>'}</div>
+    // Defender columns
+    const defWeak4=[], defWeak2=[], defResist=[], defImmune=[];
+    allTypes.forEach(at=>{
+      let mult=1;
+      p.types.forEach(dt=>{ mult*=(TYPE_CHART[at]||{})[dt]??1; });
+      if(mult>=4) defWeak4.push(at);
+      else if(mult===2) defWeak2.push(at);
+      else if(mult===0) defImmune.push(at);
+      else if(mult<1) defResist.push(at);
+    });
+    const mrow=(label,color,chips)=>`<div class="matchup-row"><div class="matchup-row-label" style="color:${color}">${label}</div><div class="chips">${chips||'<span class="none-label">none</span>'}</div></div>`;
+    content=`<div class="matchup-card"><div class="matchup-cols">
+      <div>
+        <div class="matchup-col-title">⚔️ As Attacker</div>
+        ${mrow('Super Effective ×2','var(--green)',atkSE.map(typeChip).join(''))}
+        ${mrow('Not Very Effective ×½','var(--accent)',atkNVE.map(typeChip).join(''))}
+        ${mrow('No Effect ×0','var(--text-muted)',atkNone.map(typeChip).join(''))}
       </div>
-      <div style="background:rgba(251,191,36,0.07);border:1px solid #fbbf2430;border-radius:12px;padding:12px 14px;margin-bottom:10px;">
-        <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.6px;color:#fbbf24;margin-bottom:4px;">⚔️ Attacks do reduced damage to</div>
-        <div style="font-size:11px;color:var(--text-muted);margin-bottom:10px;">This Pokémon's moves are less effective against these types</div>
-        <div class="chips">${badAtk.length?badAtk.map(typeChip).join(''):'<span class="modal-empty-inline">none</span>'}</div>
-      </div>`;
+      <div>
+        <div class="matchup-col-title">🛡️ As Defender</div>
+        ${defWeak4.length?mrow('Very Weak ×4','#f87171',defWeak4.map(typeChip).join('')):''}
+        ${mrow('Weak To ×2','var(--accent)',defWeak2.map(typeChip).join(''))}
+        ${mrow('Resists ×½','var(--green)',defResist.map(typeChip).join(''))}
+        ${mrow('Immune ×0','var(--text-muted)',defImmune.map(typeChip).join(''))}
+      </div>
+    </div></div>`;
   }
 
   document.getElementById('modal-body').innerHTML = `
