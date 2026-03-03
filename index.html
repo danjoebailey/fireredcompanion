@@ -758,11 +758,7 @@ async function renderModalBody(){
       if (!tms.length) {
         content = `<p class="modal-empty">No TM/HM compatibility found for Fire Red.</p>`;
       } else {
-        content = `<div class="tm-pill-list">${tms.map(t=>{
-          const c = TYPE_COLORS[t.type]||'#888';
-          const label = t.num ? `${t.num} ${t.name}` : t.name;
-          return `<span class="tm-pill" style="background:${c}15;color:${c};border:1px solid ${c}35">${label}</span>`;
-        }).join('')}</div>`;
+        content = `<div class="tm-grid">${tms.map(t=>`<div class="tm-card">${t.num?`<span class="tm-num">${t.num}</span>`:''}<span class="tm-move">${t.name}</span>${typeChip(t.type)}<span class="tm-meta">${t.pw!=='—'?`${t.pw} pw`:'Status'}</span></div>`).join('')}</div>`;
       }
     }
 
