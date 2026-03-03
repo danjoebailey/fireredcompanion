@@ -564,7 +564,7 @@ function sprite(id){
 }
 function typeChip(t){const c=TYPE_COLORS[t]||'#888';return`<span class="type-chip" style="background:${c}20;color:${c};border:1px solid ${c}40">${t}</span>`;}
 function statColor(v){return v>=100?'#34d399':v>=60?'#fbbf24':'#f87171';}
-function pwColor(v){return v==='—'?'var(--text-muted)':v>=90?'#f87171':v>=60?'#fbbf24':'#34d399';}
+function pwColor(v){return v==='—'?'var(--text-muted)':v>=90?'#34d399':v>=60?'#fbbf24':'#f87171';}
 function accColor(v){return v==null?'var(--text-muted)':v>=100?'#34d399':v>=85?'#fbbf24':'#f87171';}
 function ppColor(v){return !v?'var(--text-muted)':v>=30?'#34d399':v>=15?'#fbbf24':'#f87171';}
 
