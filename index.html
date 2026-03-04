@@ -714,6 +714,7 @@ async function renderModalBody(){
     {id:'moves', label:'Moves'},
     {id:'tms',   label:'TMs'},
     {id:'types', label:'Types'},
+    {id:'evos',  label:'Evos'},
   ];
   const tabBar = `<div class="modal-tabs">${tabs.map(t=>`<button class="modal-tab ${modalTab===t.id?'active':''}" onclick="switchModalTab('${t.id}')">${t.label}</button>`).join('')}</div>`;
   let content = '';
@@ -792,6 +793,15 @@ async function renderModalBody(){
         ${mrow('No Effect','#6b6b80',defImmune.map(typeChip).join(''))}
       </div>
     </div>`;
+  }
+
+  if(modalTab==='evos'){
+    const chains=EVO_DATA.filter(({chain})=>chain.some(m=>m.id===p.id));
+    if(!chains.length){
+      content=`<p class="modal-empty">No evolution data for ${p.name}.</p>`;
+    } else {
+      content=chains.map(({chain})=>`<div class="evo-card" style="margin-bottom:10px;"><div class="evo-chain">${chain.map((m,i)=>`${i>0?`<div style="display:flex;flex-direction:column;align-items:center;padding:0 6px;flex-shrink:0;"><div class="evo-arr">→</div><div class="evo-cond">${m.m}</div></div>`:''}<div class="evo-mon" onclick="openPokeModal(${m.id})"><img src="${sprite(m.id)}" alt="${m.name}"><div class="evo-mon-name">${m.name}</div></div>`).join('')}</div></div>`).join('');
+    }
   }
 
   document.getElementById('modal-body').innerHTML = `
