@@ -820,7 +820,7 @@ function renderTeam(){
     if(!id)return`<div class="team-slot" onclick="openPicker(${i})"><div class="slot-label">Slot ${i+1}</div><div class="plus">+</div><div class="add-text">Add Pokémon</div></div>`;
     const p=pokemonData.find(x=>x.id===id);if(!p)return'';
     const c=TYPE_COLORS[p.types[0]]||'#888';
-    return`<div class="team-slot filled" style="background:#fff;"><button class="rm" onclick="removeFromTeam(${i});event.stopPropagation()">✕</button><div class="slot-label">Slot ${i+1}</div><img src="${sprite(id)}" style="width:64px;height:64px;image-rendering:pixelated;filter:drop-shadow(0 4px 8px rgba(0,0,0,0.3))"><div class="slot-name">${p.name}</div><div class="poke-types" style="margin-top:4px;">${p.types.map(typeChip).join('')}</div></div>`;
+    return`<div class="team-slot filled" style="background:#fff;cursor:pointer;" onclick="openPokeModal(${id})"><button class="rm" onclick="removeFromTeam(${i});event.stopPropagation()">✕</button><div class="slot-label">Slot ${i+1}</div><img src="${sprite(id)}" style="width:64px;height:64px;image-rendering:pixelated;filter:drop-shadow(0 4px 8px rgba(0,0,0,0.3))"><div class="slot-name">${p.name}</div><div class="poke-types" style="margin-top:4px;">${p.types.map(typeChip).join('')}</div></div>`;
   }).join('');
   renderCoverage();
 }
