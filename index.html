@@ -370,14 +370,14 @@ body::before {
       <button class="rank-stat-btn" onclick="setRankStat('sp-def',this)">Sp. Def</button>
       <button class="rank-stat-btn" onclick="setRankStat('speed',this)">Speed</button>
     </div>
-    <div style="margin-bottom:12px;">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+      <div style="position:relative;display:inline-block;">
+        <select id="rank-type-select" onchange="setRankType(this.value)" style="appearance:none;-webkit-appearance:none;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text);font-family:'Outfit',sans-serif;font-size:14px;font-weight:500;padding:10px 40px 10px 14px;outline:none;cursor:pointer;transition:border-color 0.2s;">
+          <option value="">All types</option>
+        </select>
+        <span style="position:absolute;right:12px;top:50%;transform:translateY(-50%);pointer-events:none;color:var(--text-muted);font-size:12px;">▾</span>
+      </div>
       <button id="rank-team-btn" class="rank-stat-btn" onclick="toggleRankTeam(this)">⭐ My Team</button>
-    </div>
-    <div style="position:relative;display:inline-block;margin-bottom:16px;">
-      <select id="rank-type-select" onchange="setRankType(this.value)" style="appearance:none;-webkit-appearance:none;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text);font-family:'Outfit',sans-serif;font-size:14px;font-weight:500;padding:10px 40px 10px 14px;outline:none;cursor:pointer;transition:border-color 0.2s;">
-        <option value="">All types</option>
-      </select>
-      <span style="position:absolute;right:12px;top:50%;transform:translateY(-50%);pointer-events:none;color:var(--text-muted);font-size:12px;">▾</span>
     </div>
     <div id="rankings-list"></div>
   </div>
