@@ -370,6 +370,9 @@ body::before {
       <button class="rank-stat-btn" onclick="setRankStat('sp-def',this)">Sp. Def</button>
       <button class="rank-stat-btn" onclick="setRankStat('speed',this)">Speed</button>
     </div>
+    <div style="margin-bottom:12px;">
+      <button id="rank-team-btn" class="rank-stat-btn" onclick="toggleRankTeam(this)">⭐ My Team</button>
+    </div>
     <div style="position:relative;display:inline-block;margin-bottom:16px;">
       <select id="rank-type-select" onchange="setRankType(this.value)" style="appearance:none;-webkit-appearance:none;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text);font-family:'Outfit',sans-serif;font-size:14px;font-weight:500;padding:10px 40px 10px 14px;outline:none;cursor:pointer;transition:border-color 0.2s;">
         <option value="">All types</option>
@@ -949,6 +952,13 @@ function setRankType(t) {
   renderRankings();
 }
 
+let rankHighlightTeam = false;
+function toggleRankTeam(btn) {
+  rankHighlightTeam = !rankHighlightTeam;
+  btn.classList.toggle('active', rankHighlightTeam);
+  renderRankings();
+}
+
 function populateRankTypeSelect() {
   const sel = document.getElementById('rank-type-select');
   if (!sel || sel.options.length > 1) return;
@@ -976,10 +986,12 @@ function renderRankings() {
     const val = getStatVal(p, rankStat);
     const pct = Math.min(100, (val / maxVal) * 100);
     const color = val >= 120 ? '#34d399' : val >= 80 ? '#60a5fa' : val >= 50 ? '#fbbf24' : '#f87171';
-    return `<div class="rank-row" onclick="openPokeModal(${p.id})">
+    const onTeam = rankHighlightTeam && team.includes(p.id);
+    return `<div class="rank-row" onclick="openPokeModal(${p.id})" style="${onTeam ? 'border-color:var(--accent);background:rgba(255,61,61,0.06);' : ''}">
       <span class="rank-pos ${i < 3 ? 'top3' : ''}">#${i + 1}</span>
       <img class="rank-sprite" src="${sprite(p.id)}" alt="${p.name}">
       <span class="rank-name">${p.name}</span>
+      ${onTeam ? '<span style="font-size:12px;">⭐</span>' : ''}
       <div class="rank-bar-wrap">
         <div class="rank-bar-track"><div class="rank-bar-fill" style="width:${pct}%;background:${color}"></div></div>
       </div>
