@@ -694,20 +694,19 @@ async function fetchPokeLocations(id) {
     const data = await res.json();
     const fmtName = s => s.replace(/-area$/,'').split('-').map(w=>w.charAt(0).toUpperCase()+w.slice(1)).join(' ');
     const fmtMethod = m => ({'walk':'Walking','surf':'Surfing','old-rod':'Old Rod','good-rod':'Good Rod','super-rod':'Super Rod','rock-smash':'Rock Smash'}[m]||m.replace(/-/g,' ').replace(/\b\w/g,c=>c.toUpperCase()));
-    const locations = [];
+    const merged = {};
     for (const enc of data) {
       for (const vd of enc.version_details) {
         if (vd.version.name === 'firered') {
           for (const e of vd.encounter_details) {
-            const lvl = e.min_level === e.max_level ? `Lv. ${e.min_level}` : `Lv. ${e.min_level}–${e.max_level}`;
-            locations.push({ area: fmtName(enc.location_area.name), method: fmtMethod(e.method.name), lvl });
+            const key = `${fmtName(enc.location_area.name)}|${fmtMethod(e.method.name)}`;
+            if (!merged[key]) merged[key] = { area: fmtName(enc.location_area.name), method: fmtMethod(e.method.name), min: e.min_level, max: e.max_level };
+            else { merged[key].min = Math.min(merged[key].min, e.min_level); merged[key].max = Math.max(merged[key].max, e.max_level); }
           }
         }
       }
     }
-    // Deduplicate by area+method+lvl
-    const seen = new Set();
-    const unique = locations.filter(l => { const k=`${l.area}|${l.method}|${l.lvl}`; if(seen.has(k))return false; seen.add(k); return true; });
+    const unique = Object.values(merged).map(l => ({ area: l.area, method: l.method, lvl: l.min === l.max ? `Lv. ${l.min}` : `Lv. ${l.min}–${l.max}` }));
     locationCache[id] = unique;
     return unique;
   } catch { return null; }
