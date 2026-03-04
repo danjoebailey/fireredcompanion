@@ -741,17 +741,7 @@ async function renderModalBody(){
       if (!moves.length) {
         content = `<p class="modal-empty">No level-up moves found for Fire Red.</p>`;
       } else {
-        content = `<div class="move-list"><div class="move-head"><span>Lv</span><span>Move</span><span>Type</span><span>Pow</span><span>Acc</span><span>PP</span></div>${moves.map(m=>{
-          const c=TYPE_COLORS[m.type]||'#888';
-          return `<div class="move-row">
-            <span class="move-lv">${m.lv||'—'}</span>
-            <span class="move-name">${m.name}</span>
-            <span class="type-chip" style="background:${c}20;color:${c};border:1px solid ${c}40">${m.type}</span>
-            <span class="move-pw" style="color:${pwColor(m.pw)}">${m.pw!=='—'?m.pw:'—'}</span>
-            <span class="move-acc" style="color:${accColor(m.acc)}">${m.acc!=null?m.acc+'%':'—'}</span>
-            <span class="move-pp" style="color:${ppColor(m.pp)}">${m.pp||'—'}</span>
-          </div>`;
-        }).join('')}</div>`;
+        content = `<div class="tm-grid">${moves.map(m=>`<div class="tm-card"><span class="tm-num">${m.lv||'—'}</span><span class="tm-move">${m.name}</span>${typeChip(m.type)}<span class="tm-meta">${m.pw!=='—'?m.pw:'—'}</span></div>`).join('')}</div>`;
       }
     } else {
       const tms = data.tms;
