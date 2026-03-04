@@ -685,6 +685,34 @@ async function fetchPokeMovesAndTMs(id) {
   }
 }
 
+const locationCache = {};
+
+async function fetchPokeLocations(id) {
+  if (locationCache[id]) return locationCache[id];
+  try {
+    const res = await fetch(`https://pokeapi.co/api/v2/pokemon/${id}/encounters`);
+    const data = await res.json();
+    const fmtName = s => s.replace(/-area$/,'').split('-').map(w=>w.charAt(0).toUpperCase()+w.slice(1)).join(' ');
+    const fmtMethod = m => ({'walk':'Walking','surf':'Surfing','old-rod':'Old Rod','good-rod':'Good Rod','super-rod':'Super Rod','rock-smash':'Rock Smash'}[m]||m.replace(/-/g,' ').replace(/\b\w/g,c=>c.toUpperCase()));
+    const locations = [];
+    for (const enc of data) {
+      for (const vd of enc.version_details) {
+        if (vd.version.name === 'firered') {
+          for (const e of vd.encounter_details) {
+            const lvl = e.min_level === e.max_level ? `Lv. ${e.min_level}` : `Lv. ${e.min_level}–${e.max_level}`;
+            locations.push({ area: fmtName(enc.location_area.name), method: fmtMethod(e.method.name), lvl });
+          }
+        }
+      }
+    }
+    // Deduplicate by area+method+lvl
+    const seen = new Set();
+    const unique = locations.filter(l => { const k=`${l.area}|${l.method}|${l.lvl}`; if(seen.has(k))return false; seen.add(k); return true; });
+    locationCache[id] = unique;
+    return unique;
+  } catch { return null; }
+}
+
 let modalTab = 'stats';
 let modalPoke = null;
 
@@ -714,7 +742,8 @@ async function renderModalBody(){
     {id:'moves', label:'Moves'},
     {id:'tms',   label:'TMs'},
     {id:'types', label:'Types'},
-    {id:'evos',  label:'Evos'},
+    {id:'evos',     label:'Evos'},
+    {id:'location', label:'Location'},
   ];
   const tabBar = `<div class="modal-tabs">${tabs.map(t=>`<button class="modal-tab ${modalTab===t.id?'active':''}" onclick="switchModalTab('${t.id}')">${t.label}</button>`).join('')}</div>`;
   let content = '';
@@ -725,6 +754,22 @@ async function renderModalBody(){
         <div class="stat-top"><span>${s.name.replace(/-/g,' ')}</span><span>${s.val}</span></div>
         <div class="stat-track"><div class="stat-fill" style="width:${Math.min(100,(s.val/255)*100)}%;background:${statColor(s.val)}"></div></div>
       </div>`).join('');
+
+  } else if(modalTab==='location'){
+    document.getElementById('modal-body').innerHTML = `${tabBar}<div class="modal-tab-content"><div style="display:flex;align-items:center;gap:10px;padding:24px 0;color:var(--text-muted);font-size:13px;"><div class="spinner" style="width:20px;height:20px;border-width:2px;flex-shrink:0;"></div>Loading location data…</div></div><button class="btn btn-primary" style="width:100%;margin-top:16px;" onclick="addFromModal(${p.id})">+ Add to Team</button>`;
+    const locs = await fetchPokeLocations(p.id);
+    if (!modalPoke || modalPoke.id !== p.id) return;
+    if (!locs) {
+      content = `<p class="modal-empty">⚠️ Couldn't load location data.</p>`;
+    } else if (!locs.length) {
+      const evoChain = EVO_DATA.find(({chain})=>chain.some(m=>m.id===p.id));
+      const prevEvo = evoChain ? evoChain.chain[evoChain.chain.findIndex(m=>m.id===p.id)-1] : null;
+      content = prevEvo
+        ? `<p class="modal-empty">Not found in the wild. Evolve from <strong>${prevEvo.name}</strong>.</p>`
+        : `<p class="modal-empty">Not found in the wild in Fire Red.</p>`;
+    } else {
+      content = `<div class="tm-grid">${locs.map(l=>`<div class="tm-card"><span class="tm-move">${l.area}</span><span class="tm-num">${l.method}</span><span class="tm-meta">${l.lvl}</span></div>`).join('')}</div>`;
+    }
 
   } else if(modalTab==='moves' || modalTab==='tms'){
     // Show spinner immediately, then load
