@@ -741,7 +741,7 @@ async function renderModalBody(){
       if (!moves.length) {
         content = `<p class="modal-empty">No level-up moves found for Fire Red.</p>`;
       } else {
-        content = `<div class="tm-grid">${moves.map(m=>`<div class="tm-card"><span class="tm-num">${m.lv||'—'}</span><span class="tm-move">${m.name}</span>${typeChip(m.type)}<span class="tm-meta">${m.pw!=='—'?m.pw:'—'}</span></div>`).join('')}</div>`;
+        content = `<div class="tm-grid">${moves.map(m=>`<div class="tm-card"><span class="tm-num">${m.lv?String(m.lv).padStart(2,'0'):'—'}</span><span class="tm-move">${m.name}</span>${typeChip(m.type)}<span class="tm-meta">${m.pw!=='—'?m.pw:'—'}</span></div>`).join('')}</div>`;
       }
     } else {
       const tms = data.tms;
