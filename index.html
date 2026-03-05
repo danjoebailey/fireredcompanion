@@ -648,7 +648,7 @@ function updateTypeDdBtn(btnId, type) {
   } else {
     const pid = TYPE_POKEMON[type];
     const c = TYPE_COLORS[type]||'#888';
-    btn.innerHTML = `${pid?`<img src="${sprite(pid)}" style="width:22px;height:22px;image-rendering:pixelated;">`:``}<span class="type-chip" style="background:${c}20;color:${c};border:1px solid ${c}40;font-size:11px;">${type}</span> <span style="color:var(--text-muted);font-size:11px;">▾</span>`;
+    btn.innerHTML = `${pid?`<img src="${sprite(pid)}" style="width:22px;height:22px;image-rendering:pixelated;">`:``}<span style="text-transform:capitalize;">${type}</span> <span style="color:var(--text-muted);font-size:11px;">▾</span>`;
   }
   // update active state in menu
   const menuId = btnId.replace('-dd-btn', '-menu');
