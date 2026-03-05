@@ -815,22 +815,19 @@ async function renderModalBody(){
       else if(mult<=0.25) defResist2.push(at);
       else if(mult<1) defResist.push(at);
     });
-    const multBadge=(label,color)=>`<span style="font-family:'DM Mono',monospace;font-size:10px;font-weight:700;color:${color};background:${color}18;border:1px solid ${color}40;border-radius:5px;padding:1px 5px;flex-shrink:0;">${label}</span>`;
-    const typeMult=(t,label,color)=>`<div style="display:flex;align-items:center;gap:5px;">${typeChip(t)}${multBadge(label,color)}</div>`;
-    const section=(title,icon,items)=>`<div style="margin-bottom:18px;"><div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.8px;color:var(--text-muted);margin-bottom:8px;">${icon} ${title}</div><div style="display:flex;flex-wrap:wrap;gap:6px;">${items.length?items.join(''):'<span style="font-size:12px;color:var(--text-muted);">—</span>'}</div></div>`;
-    content=`<div style="background:#fff;border-radius:12px;padding:16px;">
-      ${section('Attack','⚔️',[
-        ...atkSE.map(t=>typeMult(t,'×2','#34d399')),
-        ...atkNVE.map(t=>typeMult(t,'×0.5','#f87171')),
-        ...atkNone.map(t=>typeMult(t,'×0','#9898aa')),
-      ])}
-      ${section('Defense','🛡️',[
-        ...defWeak4.map(t=>typeMult(t,'×4','#f87171')),
-        ...defWeak2.map(t=>typeMult(t,'×2','#fbbf24')),
-        ...defResist.map(t=>typeMult(t,'×0.5','#34d399')),
-        ...defResist2.map(t=>typeMult(t,'×0.25','#60a5fa')),
-        ...defImmune.map(t=>typeMult(t,'×0','#9898aa')),
-      ])}
+    const bubble=(label,color,chips)=>chips.length?`<div style="border-radius:12px;border:1px solid ${color}30;background:${color}0d;padding:10px 12px;margin-bottom:8px;"><div style="font-family:'DM Mono',monospace;font-size:10px;font-weight:700;color:${color};margin-bottom:8px;">${label}</div><div style="display:flex;flex-wrap:wrap;gap:5px;">${chips.map(typeChip).join('')}</div></div>`:'';
+    const sectionTitle=(label)=>`<div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.8px;color:var(--text-muted);margin:14px 0 6px;">${label}</div>`;
+    content=`<div>
+      ${sectionTitle('⚔️ Attack')}
+      ${bubble('×2 — Super Effective','#34d399',atkSE)||bubble('','#9898aa',[])||'<div style="font-size:12px;color:var(--text-muted);padding:4px 0;">—</div>'}
+      ${bubble('×0.5 — Not Very Effective','#fbbf24',atkNVE)}
+      ${bubble('×0 — No Effect','#9898aa',atkNone)}
+      ${sectionTitle('🛡️ Defense')}
+      ${bubble('×4 — Very Weak','#f87171',defWeak4)}
+      ${bubble('×2 — Weak','#fbbf24',defWeak2)||'<div style="font-size:12px;color:var(--text-muted);padding:4px 0;">—</div>'}
+      ${bubble('×0.5 — Resists','#34d399',defResist)}
+      ${bubble('×0.25 — Double Resists','#60a5fa',defResist2)}
+      ${bubble('×0 — Immune','#9898aa',defImmune)}
     </div>`;
   }
 
