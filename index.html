@@ -111,7 +111,7 @@ body::before {
 }
 .poke-card:hover { border-color: rgba(0,0,0,0.15); transform: translateY(-3px); box-shadow: 0 12px 32px rgba(0,0,0,0.15); }
 .poke-card:hover::before { opacity: 1; }
-.poke-num { font-family: 'DM Mono', monospace; font-size: 10px; color: #aaa; margin-bottom: 6px; }
+.poke-num { font-family: 'DM Mono', monospace; font-size: 10px; color: #aaa; margin-bottom: 6px; font-feature-settings: "zero" 0; }
 .poke-sprite {
   width: 72px; height: 72px; image-rendering: pixelated;
   display: block; margin: 0 auto 8px;
@@ -146,7 +146,7 @@ body::before {
   display: flex; align-items: center; justify-content: center; transition: all 0.15s;
 }
 .modal-close:hover { background: var(--surface3); color: var(--text); }
-.modal-num { font-family: 'DM Mono', monospace; font-size: 12px; color: var(--text-muted); margin-bottom: 4px; }
+.modal-num { font-family: 'DM Mono', monospace; font-size: 12px; color: var(--text-muted); margin-bottom: 4px; font-feature-settings: "zero" 0; }
 .modal-sprite { width: 120px; height: 120px; image-rendering: pixelated; display: block; margin: 0 auto 12px; filter: drop-shadow(0 8px 16px rgba(0,0,0,0.4)); }
 .modal-name { font-size: 26px; font-weight: 800; text-transform: capitalize; letter-spacing: -0.5px; margin-bottom: 10px; }
 .modal-body { padding: 20px 24px; }
@@ -249,7 +249,7 @@ body::before {
 .type-dd-opt.sel{color:var(--accent);background:rgba(255,61,61,0.08);font-weight:700;}
 .rank-row { display:flex; align-items:center; gap:10px; background:#fff; border:1px solid rgba(0,0,0,0.08); border-radius:12px; padding:9px 14px; margin-bottom:6px; cursor:pointer; transition:all 0.15s; }
 .rank-row:hover { border-color:rgba(0,0,0,0.15); background:#fafafa; }
-.rank-pos { font-family:'DM Mono',monospace; font-size:11px; font-weight:700; color:#bbb; width:26px; flex-shrink:0; }
+.rank-pos { font-family:'DM Mono',monospace; font-size:11px; font-weight:700; color:#bbb; width:26px; flex-shrink:0; font-feature-settings:"zero" 0; }
 .rank-pos.top3 { color:var(--gold); }
 .rank-sprite { width:36px; height:36px; image-rendering:pixelated; flex-shrink:0; }
 .rank-name { font-size:13px; font-weight:700; color:#222; text-transform:capitalize; width:90px; flex-shrink:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
