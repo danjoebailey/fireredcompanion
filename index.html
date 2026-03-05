@@ -302,11 +302,14 @@ body::before {
 <div class="main">
   <div id="panel-pokedex" class="panel active">
     <div class="search-wrap"><span class="search-icon"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="6.5" cy="6.5" r="5" stroke="currentColor" stroke-width="1.8"/><line x1="10.5" y1="10.5" x2="14" y2="14" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></span><input type="text" id="dex-search" placeholder="Gotta search em all…" oninput="filterPokedex()"></div>
-    <div style="position:relative;display:inline-block;margin-bottom:20px;">
-      <select id="type-filter-select" onchange="selectDexType(this.value)" style="appearance:none;-webkit-appearance:none;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text);font-family:'Outfit',sans-serif;font-size:14px;font-weight:500;padding:10px 40px 10px 14px;outline:none;cursor:pointer;transition:border-color 0.2s;">
-        <option value="">All types</option>
-      </select>
-      <span style="position:absolute;right:12px;top:50%;transform:translateY(-50%);pointer-events:none;color:var(--text-muted);font-size:12px;">▾</span>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;">
+      <div style="position:relative;display:inline-block;">
+        <select id="type-filter-select" onchange="selectDexType(this.value)" style="appearance:none;-webkit-appearance:none;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text);font-family:'Outfit',sans-serif;font-size:14px;font-weight:500;padding:10px 40px 10px 14px;outline:none;cursor:pointer;transition:border-color 0.2s;">
+          <option value="">All types</option>
+        </select>
+        <span style="position:absolute;right:12px;top:50%;transform:translateY(-50%);pointer-events:none;color:var(--text-muted);font-size:12px;">▾</span>
+      </div>
+      <button id="dex-view-btn" class="rank-stat-btn" onclick="toggleDexView()">Row View</button>
     </div>
     <div id="pokedex-grid" class="pokemon-grid"><div class="loading-state" style="grid-column:1/-1"><div class="spinner"></div><p>Loading Pokédex…</p></div></div>
   </div>
@@ -580,10 +583,38 @@ function typeChipFilter(t){
   return `<span class="type-chip" style="background:${c}${active?'40':'20'};color:${c};border:1.5px solid ${c}${active?'90':'40'};cursor:pointer;transition:all 0.15s;" onclick="event.stopPropagation();toggleDexType('${t}')">${t}</span>`;
 }
 
+let dexView = 'grid';
+
+function toggleDexView(){
+  dexView = dexView === 'grid' ? 'row' : 'grid';
+  const btn = document.getElementById('dex-view-btn');
+  btn.textContent = dexView === 'grid' ? 'Row View' : 'Grid View';
+  btn.classList.toggle('active', dexView === 'row');
+  filterPokedex();
+}
+
 function renderPokedex(data){
   const g=document.getElementById('pokedex-grid');
   if(!data.length){g.innerHTML='<p style="color:var(--text-muted);font-size:14px;">No results found.</p>';return;}
-  g.innerHTML=data.map(p=>`<div class="poke-card" onclick="openPokeModal(${p.id})" style="--card-color:${TYPE_COLORS[p.types[0]]||'#888'}22"><div class="poke-num">#${String(p.id).padStart(3,'0')}</div><img class="poke-sprite" src="${sprite(p.id)}" alt="${p.name}" loading="lazy"><div class="poke-name">${p.name}</div><div class="poke-types">${p.types.map(typeChipFilter).join('')}</div></div>`).join('');
+  if(dexView==='row'){
+    g.className='';
+    g.innerHTML=data.map((p,i)=>{
+      const val=p.stats.reduce((s,x)=>s+x.val,0);
+      const pct=Math.min(100,(val/780)*100);
+      const color=val>=420?'#34d399':val>=300?'#60a5fa':val>=200?'#fbbf24':'#f87171';
+      return `<div class="rank-row" onclick="openPokeModal(${p.id})">
+        <span class="rank-pos">#${String(p.id).padStart(3,'0')}</span>
+        <img class="rank-sprite" src="${sprite(p.id)}" alt="${p.name}">
+        <span class="rank-name">${p.name}</span>
+        <div class="rank-types">${p.types.map(typeChipFilter).join('')}</div>
+        <div class="rank-bar-wrap"><div class="rank-bar-track"><div class="rank-bar-fill" style="width:${pct}%;background:${color}"></div></div></div>
+        <span class="rank-val">${val}</span>
+      </div>`;
+    }).join('');
+  } else {
+    g.className='pokemon-grid';
+    g.innerHTML=data.map(p=>`<div class="poke-card" onclick="openPokeModal(${p.id})" style="--card-color:${TYPE_COLORS[p.types[0]]||'#888'}22"><div class="poke-num">#${String(p.id).padStart(3,'0')}</div><img class="poke-sprite" src="${sprite(p.id)}" alt="${p.name}" loading="lazy"><div class="poke-name">${p.name}</div><div class="poke-types">${p.types.map(typeChipFilter).join('')}</div></div>`).join('');
+  }
 }
 
 function filterPokedex(){const q=document.getElementById('dex-search').value.toLowerCase();let f=pokemonData.filter(p=>p.name.includes(q)||String(p.id).includes(q));if(dexTF)f=f.filter(p=>p.types.includes(dexTF));renderPokedex(f);}
