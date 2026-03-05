@@ -943,7 +943,7 @@ function renderCoverage(){
   c.innerHTML=`<div class="coverage-section"><div class="coverage-section-label"><span style="color:var(--green)">✓</span> Super Effective Against</div><div class="coverage-chips">${strong.map(typeChip).join('')}</div></div><div class="coverage-section"><div class="coverage-section-label"><span style="color:var(--accent)">✗</span> No Coverage Against</div><div class="coverage-chips">${weak.length?weak.map(typeChip).join(''):'<span style="font-size:13px;color:var(--green)">Full coverage! 🎉</span>'}</div></div>`;
 }
 
-function renderTypeSelector(){document.getElementById('type-selector').innerHTML=Object.entries(TYPE_COLORS).map(([t,c])=>{const pid=TYPE_POKEMON[t];return`<div class="type-select-card" onclick="showTypeMatchup('${t}',this)">${pid?`<img class="type-select-emoji" src="${sprite(pid)}" alt="${t}">`:`<div class="type-select-emoji" style="font-size:22px;width:auto;height:auto;">${TYPE_EMOJI[t]||'?'}</div>`}<div class="type-select-name" style="color:${c}">${t}</div></div>`;}).join('');}
+function renderTypeSelector(){document.getElementById('type-selector').innerHTML=Object.entries(TYPE_COLORS).filter(([t])=>t!=='dark').map(([t,c])=>{const pid=TYPE_POKEMON[t];return`<div class="type-select-card" onclick="showTypeMatchup('${t}',this)">${pid?`<img class="type-select-emoji" src="${sprite(pid)}" alt="${t}">`:`<div class="type-select-emoji" style="font-size:22px;width:auto;height:auto;">${TYPE_EMOJI[t]||'?'}</div>`}<div class="type-select-name" style="color:${c}">${t}</div></div>`;}).join('');}
 
 function showTypeMatchup(type,el){
   document.querySelectorAll('.type-select-card').forEach(x=>x.classList.remove('selected'));
