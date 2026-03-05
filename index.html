@@ -192,7 +192,7 @@ body::before {
 .type-select-card { background: var(--surface2); border: 1px solid var(--border); border-radius: 12px; padding: 12px 8px; cursor: pointer; text-align: center; transition: all 0.2s; }
 .type-select-card:hover { border-color: var(--border-hover); transform: translateY(-2px); }
 .type-select-card.selected { border-color: rgba(255,255,255,0.25); background: var(--surface3); }
-.type-select-emoji { font-size: 22px; margin-bottom: 5px; }
+.type-select-emoji { width: 40px; height: 40px; image-rendering: pixelated; display: block; margin: 0 auto 5px; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3)); }
 .type-select-name { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
 .matchup-card { background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius); padding: 24px; animation: slideUp 0.2s ease; }
 .matchup-cols { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
@@ -943,7 +943,7 @@ function renderCoverage(){
   c.innerHTML=`<div class="coverage-section"><div class="coverage-section-label"><span style="color:var(--green)">✓</span> Super Effective Against</div><div class="coverage-chips">${strong.map(typeChip).join('')}</div></div><div class="coverage-section"><div class="coverage-section-label"><span style="color:var(--accent)">✗</span> No Coverage Against</div><div class="coverage-chips">${weak.length?weak.map(typeChip).join(''):'<span style="font-size:13px;color:var(--green)">Full coverage! 🎉</span>'}</div></div>`;
 }
 
-function renderTypeSelector(){document.getElementById('type-selector').innerHTML=Object.entries(TYPE_COLORS).map(([t,c])=>`<div class="type-select-card" onclick="showTypeMatchup('${t}',this)"><div class="type-select-emoji">${TYPE_EMOJI[t]||'?'}</div><div class="type-select-name" style="color:${c}">${t}</div></div>`).join('');}
+function renderTypeSelector(){document.getElementById('type-selector').innerHTML=Object.entries(TYPE_COLORS).map(([t,c])=>{const pid=TYPE_POKEMON[t];return`<div class="type-select-card" onclick="showTypeMatchup('${t}',this)">${pid?`<img class="type-select-emoji" src="${sprite(pid)}" alt="${t}">`:`<div class="type-select-emoji" style="font-size:22px;width:auto;height:auto;">${TYPE_EMOJI[t]||'?'}</div>`}<div class="type-select-name" style="color:${c}">${t}</div></div>`;}).join('');}
 
 function showTypeMatchup(type,el){
   document.querySelectorAll('.type-select-card').forEach(x=>x.classList.remove('selected'));
