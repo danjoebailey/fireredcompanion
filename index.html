@@ -955,7 +955,7 @@ async function renderModalBody(){
       else if(mult<=0.25) defResist2.push(at);
       else if(mult<1) defResist.push(at);
     });
-    const bubble=(label,color,chips)=>chips.length?`<div style="border-radius:12px;border:1px solid rgba(0,0,0,0.08);background:#fff;padding:10px 12px;margin-bottom:8px;"><div style="font-family:'Outfit',sans-serif;font-size:13px;font-weight:700;color:#222;margin-bottom:8px;">${label}</div><div style="display:flex;flex-wrap:wrap;gap:5px;">${chips.map(typeChip).join('')}</div></div>`:'';
+    const bubble=(label,color,chips)=>{const[main,sub]=label.split('(');const labelHtml=sub?`${main}<span style="font-weight:400;color:#666;">(${sub}</span>`:main;return chips.length?`<div style="border-radius:12px;border:1px solid rgba(0,0,0,0.08);background:#fff;padding:10px 12px;margin-bottom:8px;"><div style="font-family:'Outfit',sans-serif;font-size:13px;font-weight:700;color:#222;margin-bottom:8px;">${labelHtml}</div><div style="display:flex;flex-wrap:wrap;gap:5px;">${chips.map(typeChip).join('')}</div></div>`:'';};
     const sectionTitle=(label)=>`<div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.8px;color:var(--text-muted);margin:14px 0 6px;">${label}</div>`;
     content=`<div>
       ${sectionTitle('⚔️ Attack')}
