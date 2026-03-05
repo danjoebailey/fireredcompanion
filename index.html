@@ -952,8 +952,18 @@ function showTypeMatchup(type,el){
   const SE=[],NVE=[],IMM=[],dW=[],dR=[],dI=[];
   Object.entries(off).forEach(([t,v])=>{if(v>=2)SE.push(t);else if(v>0&&v<1)NVE.push(t);else if(v===0)IMM.push(t);});
   allTypes.forEach(at=>{const v=(TYPE_CHART[at]||{})[type];if(v>=2)dW.push(at);else if(v>0&&v<1)dR.push(at);else if(v===0)dI.push(at);});
-  const c=TYPE_COLORS[type];
-  document.getElementById('type-result').innerHTML=`<div class="matchup-card" style="border-color:${c}30"><div style="font-size:22px;font-weight:800;color:${c};margin-bottom:20px;">${TYPE_EMOJI[type]} ${type.charAt(0).toUpperCase()+type.slice(1)}</div><div class="matchup-cols"><div><div class="matchup-col-title">⚔️ As Attacker</div><div class="matchup-row"><div class="matchup-row-label" style="color:var(--green)">Super Effective ×2</div><div class="chips">${SE.length?SE.map(typeChip).join(''):'<span class="none-label">none</span>'}</div></div><div class="matchup-row"><div class="matchup-row-label" style="color:var(--accent)">Not Very Effective ×½</div><div class="chips">${NVE.length?NVE.map(typeChip).join(''):'<span class="none-label">none</span>'}</div></div><div class="matchup-row"><div class="matchup-row-label" style="color:var(--text-muted)">No Effect ×0</div><div class="chips">${IMM.length?IMM.map(typeChip).join(''):'<span class="none-label">none</span>'}</div></div></div><div><div class="matchup-col-title">🛡️ As Defender</div><div class="matchup-row"><div class="matchup-row-label" style="color:var(--accent)">Weak To ×2</div><div class="chips">${dW.length?dW.map(typeChip).join(''):'<span class="none-label">none</span>'}</div></div><div class="matchup-row"><div class="matchup-row-label" style="color:var(--green)">Resists ×½</div><div class="chips">${dR.length?dR.map(typeChip).join(''):'<span class="none-label">none</span>'}</div></div><div class="matchup-row"><div class="matchup-row-label" style="color:var(--text-muted)">Immune ×0</div><div class="chips">${dI.length?dI.map(typeChip).join(''):'<span class="none-label">none</span>'}</div></div></div></div></div>`;
+  const bubble=(label,chips)=>chips.length?`<div style="border-radius:12px;border:1px solid rgba(0,0,0,0.08);background:#fff;padding:10px 12px;margin-bottom:8px;"><div style="font-family:'Outfit',sans-serif;font-size:13px;font-weight:700;color:#222;margin-bottom:8px;">${label}</div><div style="display:flex;flex-wrap:wrap;gap:5px;">${chips.map(typeChip).join('')}</div></div>`:'';
+  const sectionTitle=label=>`<div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.8px;color:var(--text-muted);margin:14px 0 6px;">${label}</div>`;
+  document.getElementById('type-result').innerHTML=`<div style="margin-top:8px;">
+    ${sectionTitle('⚔️ Attack')}
+    ${bubble('×2 — Super Effective',SE)||'<div style="font-size:12px;color:var(--text-muted);padding:4px 0;">—</div>'}
+    ${bubble('×0.5 — Not Very Effective',NVE)}
+    ${bubble('×0 — No Effect',IMM)}
+    ${sectionTitle('🛡️ Defense')}
+    ${bubble('×2 — Weak To',dW)||'<div style="font-size:12px;color:var(--text-muted);padding:4px 0;">—</div>'}
+    ${bubble('×0.5 — Resists',dR)}
+    ${bubble('×0 — Immune',dI)}
+  </div>`;
 }
 
 function renderTMs(data){document.getElementById('tm-grid').innerHTML=data.map(tm=>`<div class="tm-card"><span class="tm-num">${tm.num}</span><span class="tm-move">${tm.move}</span>${typeChip(tm.type)}<span class="tm-meta">${tm.power!=='—'?tm.power:'—'}</span></div>`).join('');}
