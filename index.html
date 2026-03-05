@@ -377,7 +377,7 @@ body::before {
         </select>
         <span style="position:absolute;right:12px;top:50%;transform:translateY(-50%);pointer-events:none;color:var(--text-muted);font-size:12px;">▾</span>
       </div>
-      <button id="rank-team-btn" class="rank-stat-btn" onclick="toggleRankTeam(this)">⭐ My Team</button>
+      <button id="rank-team-btn" class="rank-stat-btn" onclick="toggleRankTeam(this)">My Team</button>
     </div>
     <div id="rankings-list"></div>
   </div>
@@ -988,7 +988,6 @@ function renderRankings() {
       <span class="rank-pos ${i < 3 ? 'top3' : ''}">#${i + 1}</span>
       <img class="rank-sprite" src="${sprite(p.id)}" alt="${p.name}">
       <span class="rank-name">${p.name}</span>
-      ${onTeam ? '<span style="font-size:12px;">⭐</span>' : ''}
       <div class="rank-bar-wrap">
         <div class="rank-bar-track"><div class="rank-bar-fill" style="width:${pct}%;background:${color}"></div></div>
       </div>
