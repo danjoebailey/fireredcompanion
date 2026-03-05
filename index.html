@@ -239,6 +239,14 @@ body::before {
 .rank-stat-btn { font-family:'Outfit',sans-serif; font-size:13px; font-weight:600; padding:7px 14px; border-radius:100px; border:1.5px solid var(--border); background:none; color:var(--text-muted); cursor:pointer; transition:all 0.15s; }
 .rank-stat-btn:hover { color:var(--text); border-color:var(--border-hover); }
 .rank-stat-btn.active { background:var(--accent); border-color:var(--accent); color:#fff; }
+.type-dd{position:relative;display:inline-block;}
+.type-dd-btn{display:flex;align-items:center;gap:6px;background:var(--surface2);border:1px solid var(--border);border-radius:100px;color:var(--text);font-family:'Outfit',sans-serif;font-size:13px;font-weight:600;padding:7px 14px;cursor:pointer;transition:all 0.15s;white-space:nowrap;}
+.type-dd-btn:hover{border-color:var(--border-hover);}
+.type-dd-menu{position:absolute;top:calc(100% + 6px);left:0;background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden;min-width:160px;box-shadow:0 8px 32px rgba(0,0,0,0.4);z-index:100;display:none;max-height:280px;overflow-y:auto;}
+.type-dd-menu.open{display:block;}
+.type-dd-opt{display:flex;align-items:center;gap:8px;padding:7px 14px;cursor:pointer;transition:background 0.1s;font-family:'Outfit',sans-serif;font-size:13px;font-weight:500;color:var(--text);}
+.type-dd-opt:hover{background:var(--surface2);}
+.type-dd-opt.sel{color:var(--accent);background:rgba(255,61,61,0.08);font-weight:700;}
 .rank-row { display:flex; align-items:center; gap:10px; background:#fff; border:1px solid rgba(0,0,0,0.08); border-radius:12px; padding:9px 14px; margin-bottom:6px; cursor:pointer; transition:all 0.15s; }
 .rank-row:hover { border-color:rgba(0,0,0,0.15); background:#fafafa; }
 .rank-pos { font-family:'DM Mono',monospace; font-size:11px; font-weight:700; color:#bbb; width:26px; flex-shrink:0; }
@@ -303,11 +311,9 @@ body::before {
   <div id="panel-pokedex" class="panel active">
     <div class="search-wrap"><span class="search-icon"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="6.5" cy="6.5" r="5" stroke="currentColor" stroke-width="1.8"/><line x1="10.5" y1="10.5" x2="14" y2="14" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></span><input type="text" id="dex-search" placeholder="Gotta search em all…" oninput="filterPokedex()"></div>
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;">
-      <div style="position:relative;display:inline-block;">
-        <select id="type-filter-select" onchange="selectDexType(this.value)" style="appearance:none;-webkit-appearance:none;background:var(--surface2);border:1px solid var(--border);border-radius:100px;color:var(--text);font-family:'Outfit',sans-serif;font-size:13px;font-weight:600;padding:7px 36px 7px 14px;outline:none;cursor:pointer;transition:border-color 0.2s;">
-          <option value="">All types</option>
-        </select>
-        <span style="position:absolute;right:12px;top:50%;transform:translateY(-50%);pointer-events:none;color:var(--text-muted);font-size:12px;">▾</span>
+      <div class="type-dd">
+        <button class="type-dd-btn" id="dex-type-dd-btn" onclick="toggleTypeDd('dex-type-menu')">All types <span style="color:var(--text-muted);font-size:11px;">▾</span></button>
+        <div class="type-dd-menu" id="dex-type-menu"></div>
       </div>
       <button id="dex-view-btn" class="rank-stat-btn" onclick="toggleDexView()">Row View</button>
     </div>
@@ -374,11 +380,9 @@ body::before {
       <button class="rank-stat-btn" onclick="setRankStat('speed',this)">Speed</button>
     </div>
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
-      <div style="position:relative;display:inline-block;">
-        <select id="rank-type-select" onchange="setRankType(this.value)" style="appearance:none;-webkit-appearance:none;background:var(--surface2);border:1px solid var(--border);border-radius:100px;color:var(--text);font-family:'Outfit',sans-serif;font-size:13px;font-weight:600;padding:7px 36px 7px 14px;outline:none;cursor:pointer;transition:border-color 0.2s;">
-          <option value="">All types</option>
-        </select>
-        <span style="position:absolute;right:12px;top:50%;transform:translateY(-50%);pointer-events:none;color:var(--text-muted);font-size:12px;">▾</span>
+      <div class="type-dd">
+        <button class="type-dd-btn" id="rank-type-dd-btn" onclick="toggleTypeDd('rank-type-menu')">All types <span style="color:var(--text-muted);font-size:11px;">▾</span></button>
+        <div class="type-dd-menu" id="rank-type-menu"></div>
       </div>
       <button id="rank-team-btn" class="rank-stat-btn" onclick="toggleRankTeam(this)">My Team</button>
     </div>
@@ -610,38 +614,71 @@ function renderPokedex(data){
   }
 }
 
+function buildTypeDdMenu(menuId, callbackName) {
+  const menu = document.getElementById(menuId);
+  if (!menu || menu.children.length > 0) return;
+  const types = [...new Set(pokemonData.flatMap(p => p.types))].sort();
+  menu.innerHTML = `<div class="type-dd-opt sel" onclick="${callbackName}('');closeTypeDd('${menuId}')">All types</div>`
+    + types.map(t => {
+        const pid = TYPE_POKEMON[t];
+        const c = TYPE_COLORS[t]||'#888';
+        return `<div class="type-dd-opt" onclick="${callbackName}('${t}');closeTypeDd('${menuId}')">
+          ${pid?`<img src="${sprite(pid)}" style="width:24px;height:24px;image-rendering:pixelated;flex-shrink:0;">`:``}
+          <span class="type-chip" style="background:${c}20;color:${c};border:1px solid ${c}40;">${t}</span>
+        </div>`;
+      }).join('');
+}
+
+function toggleTypeDd(menuId) {
+  const menu = document.getElementById(menuId);
+  const wasOpen = menu.classList.contains('open');
+  document.querySelectorAll('.type-dd-menu').forEach(m => m.classList.remove('open'));
+  if (!wasOpen) menu.classList.add('open');
+}
+
+function closeTypeDd(menuId) {
+  document.getElementById(menuId).classList.remove('open');
+}
+
+function updateTypeDdBtn(btnId, type) {
+  const btn = document.getElementById(btnId);
+  if (!btn) return;
+  if (!type) {
+    btn.innerHTML = `All types <span style="color:var(--text-muted);font-size:11px;">▾</span>`;
+  } else {
+    const pid = TYPE_POKEMON[type];
+    const c = TYPE_COLORS[type]||'#888';
+    btn.innerHTML = `${pid?`<img src="${sprite(pid)}" style="width:22px;height:22px;image-rendering:pixelated;">`:``}<span class="type-chip" style="background:${c}20;color:${c};border:1px solid ${c}40;font-size:11px;">${type}</span> <span style="color:var(--text-muted);font-size:11px;">▾</span>`;
+  }
+  // update active state in menu
+  const menuId = btnId.replace('-dd-btn', '-menu');
+  document.querySelectorAll(`#${menuId} .type-dd-opt`).forEach(el => el.classList.remove('sel'));
+  const opts = document.querySelectorAll(`#${menuId} .type-dd-opt`);
+  if (!type && opts[0]) opts[0].classList.add('sel');
+  else opts.forEach(el => { if (el.querySelector('.type-chip')?.textContent === type) el.classList.add('sel'); });
+}
+
 function filterPokedex(){const q=document.getElementById('dex-search').value.toLowerCase();let f=pokemonData.filter(p=>p.name.includes(q)||String(p.id).includes(q));if(dexTF)f=f.filter(p=>p.types.includes(dexTF));renderPokedex(f);}
 
 function renderDexFilters(){
-  const types=[...new Set(pokemonData.flatMap(p=>p.types))].sort();
-  const sel=document.getElementById('type-filter-select');
-  types.forEach(t=>{
-    const opt=document.createElement('option');
-    opt.value=t;
-    opt.textContent=(TYPE_EMOJI[t]||'') + ' ' + t.charAt(0).toUpperCase()+t.slice(1);
-    sel.appendChild(opt);
-  });
+  buildTypeDdMenu('dex-type-menu','selectDexType');
 }
 
 function selectDexType(t){
   dexTF=t||null;
+  updateTypeDdBtn('dex-type-dd-btn', dexTF);
   filterPokedex();
-  // also re-render cards so typeChipFilter highlights correctly
-  const q=document.getElementById('dex-search').value.toLowerCase();
-  let f=pokemonData.filter(p=>p.name.includes(q)||String(p.id).includes(q));
-  if(dexTF)f=f.filter(p=>p.types.includes(dexTF));
-  renderPokedex(f);
 }
 
 function toggleDexType(t){
   dexTF=dexTF===t?null:t;
-  const sel=document.getElementById('type-filter-select');
-  if(sel) sel.value=dexTF||'';
+  updateTypeDdBtn('dex-type-dd-btn', dexTF);
   filterPokedex();
 }
 
 // ── PER-POKÉMON LEVEL-UP MOVES (Fire Red) ──────────────────────────────────
 // Move + TM data fetched live from PokeAPI, cached per session
+const TYPE_POKEMON = {normal:133,fire:4,water:7,grass:1,electric:25,ice:131,fighting:106,poison:109,ground:50,flying:16,psychic:63,bug:10,rock:74,ghost:92,dragon:147,dark:197,steel:81,fairy:35};
 const moveCache = {}; // id -> {levelup: [...], tms: [...]}
 
 async function fetchPokeMovesAndTMs(id) {
@@ -970,6 +1007,7 @@ function setRankStat(stat, btn) {
 
 function setRankType(t) {
   rankType = t || null;
+  updateTypeDdBtn('rank-type-dd-btn', rankType);
   renderRankings();
 }
 
@@ -981,15 +1019,7 @@ function toggleRankTeam(btn) {
 }
 
 function populateRankTypeSelect() {
-  const sel = document.getElementById('rank-type-select');
-  if (!sel || sel.options.length > 1) return;
-  const types = [...new Set(pokemonData.flatMap(p => p.types))].sort();
-  types.forEach(t => {
-    const opt = document.createElement('option');
-    opt.value = t;
-    opt.textContent = (TYPE_EMOJI[t] || '') + ' ' + t.charAt(0).toUpperCase() + t.slice(1);
-    sel.appendChild(opt);
-  });
+  buildTypeDdMenu('rank-type-menu','setRankType');
 }
 
 function getStatVal(p, stat) {
@@ -1048,6 +1078,9 @@ document.addEventListener('click',e=>{
 });
 
 document.getElementById('poke-modal').addEventListener('click',e=>{if(e.target===e.currentTarget)closePokeModal();});
+document.addEventListener('click', e => {
+  if (!e.target.closest('.type-dd')) document.querySelectorAll('.type-dd-menu').forEach(m => m.classList.remove('open'));
+});
 document.getElementById('picker-modal').addEventListener('click',e=>{if(e.target===e.currentTarget)closePicker();});
 
 loadPokedex();renderTMFilters();renderTMs(TM_DATA);renderItemFilters();renderItems(ITEM_DATA);renderEvolutions(EVO_DATA);renderTeam();
