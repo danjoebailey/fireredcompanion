@@ -624,7 +624,7 @@ function buildTypeDdMenu(menuId, callbackName) {
         const c = TYPE_COLORS[t]||'#888';
         return `<div class="type-dd-opt" onclick="${callbackName}('${t}');closeTypeDd('${menuId}')">
           ${pid?`<img src="${sprite(pid)}" style="width:24px;height:24px;image-rendering:pixelated;flex-shrink:0;">`:``}
-          <span class="type-chip" style="background:${c}20;color:${c};border:1px solid ${c}40;">${t}</span>
+          <span class="type-chip" style="background:${c}20;color:${t==='bug'?'#fff':c};border:1px solid ${c}40;">${t}</span>
         </div>`;
       }).join('');
 }
