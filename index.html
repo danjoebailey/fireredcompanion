@@ -314,6 +314,7 @@ body::before {
       <button class="snav-item" onclick="switchTab('moves');toggleSiteNav()" data-label="TMs">TMs</button>
       <button class="snav-item" onclick="switchTab('items');toggleSiteNav()" data-label="Items">Items</button>
       <button class="snav-item" onclick="switchTab('types');toggleSiteNav()" data-label="Types">Types</button>
+      <button class="snav-item" onclick="switchTab('gymleaders');toggleSiteNav()" data-label="Gym Leaders">Gym Leaders</button>
     </div>
   </div>
 </div>
@@ -360,6 +361,10 @@ body::before {
   <div id="panel-types" class="panel">
     <div class="type-select-grid" id="type-selector"></div>
     <div id="type-result"></div>
+  </div>
+
+  <div id="panel-gymleaders" class="panel">
+    <div id="gym-leaders-list"></div>
   </div>
 
   <div id="panel-moves" class="panel">
@@ -623,19 +628,19 @@ const ITEM_DATA=[
 {icon:'🔑',name:"Oak's Parcel",cat:'key',loc:'Viridian City Mart → deliver to Prof. Oak',fx:'Unlocks the Pokédex'},{icon:'🗺️',name:'Town Map',cat:'key',loc:"Pallet Town — rival's sister",fx:'View Kanto region map'},{icon:'🚲',name:'Bicycle',cat:'key',loc:'Cerulean City Bike Shop (free with voucher)',fx:'Doubles movement speed'},{icon:'🎶',name:'Poké Flute',cat:'key',loc:'Mr. Fuji — rescue from Pokémon Tower, Lavender Town',fx:'Wakes sleeping Snorlax'},{icon:'🔭',name:'Silph Scope',cat:'key',loc:'Rocket Hideout, Celadon City (defeat Giovanni)',fx:'Reveals ghost Pokémon in Lavender Tower'},{icon:'🗝️',name:'Secret Key',cat:'key',loc:'Cinnabar Lab (fossil restoration area)',fx:'Unlocks Cinnabar Gym door'},{icon:'🪪',name:'Card Key',cat:'key',loc:'Silph Co. 5F',fx:'Opens all doors in Silph Co.'},{icon:'🔑',name:'Lift Key',cat:'key',loc:'Rocket Hideout B4F',fx:'Activates Team Rocket elevator'},{icon:'🦷',name:'Gold Teeth',cat:'key',loc:'Safari Zone (north area)',fx:'Trade to warden for HM Strength'},{icon:'💎',name:'Ruby',cat:'key',loc:'Mt. Ember — Sevii Islands (defeat Team Rocket)',fx:"Upgrades Celio's machine for Johto trading"},{icon:'💎',name:'Sapphire',cat:'key',loc:"Dotted Hole → recover from Five Isle Meadow",fx:"Completes Celio's machine"},{icon:'🎫',name:'Tri-Pass',cat:'key',loc:'Bill — after beating 7 gyms',fx:'Access to Islands 1–3'},{icon:'🎫',name:'Rainbow Pass',cat:'key',loc:'Celio — after Ruby/Sapphire quest',fx:'Access to all 7 Sevii Islands'},{icon:'🎣',name:'Old Rod',cat:'fishing',loc:'Vermilion City (Fisherman)',fx:'Fish for Magikarp'},{icon:'🎣',name:'Good Rod',cat:'fishing',loc:"Route 12 (Fisherman's house)",fx:'Fish for mid-level Water Pokémon'},{icon:'🎣',name:'Super Rod',cat:'fishing',loc:"Fuchsia City (Fishing Guru's house)",fx:'Fish for rare Pokémon including Dratini'},{icon:'⚙️',name:'Vs Seeker',cat:'useful',loc:'Vermilion City Pokémon Center',fx:'Re-battle trainers to grind EXP'},{icon:'💰',name:'Amulet Coin',cat:'useful',loc:'Rocket Hideout B1F',fx:'Doubles prize money after battle'},{icon:'🧬',name:'Exp. Share',cat:'useful',loc:"Route 15 (Oak's Aide, need 50+ caught)",fx:'Shares EXP to non-battling party members'},{icon:'🍀',name:'Lucky Egg',cat:'useful',loc:'Held by wild Chansey (rare, Safari Zone)',fx:'+50% EXP — best farming item in game'},{icon:'💪',name:'Macho Brace',cat:'useful',loc:'Viridian Gym (after Giovanni)',fx:'Doubles EV gain, halves Speed stat'}];
 
 const GYM_DATA=[
-{name:'Brock',title:'Pewter Gym',badge:'Boulder Badge',pokemon:[{id:74,types:['rock','ground']},{id:95,types:['rock','ground']}]},
-{name:'Misty',title:'Cerulean Gym',badge:'Cascade Badge',pokemon:[{id:120,types:['water']},{id:121,types:['water','psychic']}]},
-{name:'Lt. Surge',title:'Vermilion Gym',badge:'Thunder Badge',pokemon:[{id:100,types:['electric']},{id:25,types:['electric']},{id:26,types:['electric']}]},
-{name:'Erika',title:'Celadon Gym',badge:'Rainbow Badge',pokemon:[{id:71,types:['grass','poison']},{id:114,types:['grass']},{id:45,types:['grass','poison']}]},
-{name:'Koga',title:'Fuchsia Gym',badge:'Soul Badge',pokemon:[{id:109,types:['poison']},{id:88,types:['poison']},{id:109,types:['poison']},{id:110,types:['poison']}]},
-{name:'Sabrina',title:'Saffron Gym',badge:'Marsh Badge',pokemon:[{id:64,types:['psychic']},{id:122,types:['psychic']},{id:49,types:['bug','poison']},{id:65,types:['psychic']}]},
-{name:'Blaine',title:'Cinnabar Gym',badge:'Volcano Badge',pokemon:[{id:58,types:['fire']},{id:77,types:['fire']},{id:78,types:['fire']},{id:59,types:['fire']}]},
-{name:'Giovanni',title:'Viridian Gym',badge:'Earth Badge',pokemon:[{id:111,types:['ground','rock']},{id:51,types:['ground']},{id:31,types:['poison','ground']},{id:34,types:['poison','ground']},{id:112,types:['ground','rock']}]},
-{name:'Lorelei',title:'Elite Four',badge:'',pokemon:[{id:87,types:['water','ice']},{id:91,types:['water','ice']},{id:80,types:['water','psychic']},{id:124,types:['ice','psychic']},{id:131,types:['water','ice']}]},
-{name:'Bruno',title:'Elite Four',badge:'',pokemon:[{id:95,types:['rock','ground']},{id:107,types:['fighting']},{id:106,types:['fighting']},{id:95,types:['rock','ground']},{id:68,types:['fighting']}]},
-{name:'Agatha',title:'Elite Four',badge:'',pokemon:[{id:94,types:['ghost','poison']},{id:93,types:['ghost','poison']},{id:94,types:['ghost','poison']},{id:24,types:['poison']},{id:94,types:['ghost','poison']}]},
-{name:'Lance',title:'Elite Four',badge:'',pokemon:[{id:130,types:['water','flying']},{id:148,types:['dragon']},{id:148,types:['dragon']},{id:142,types:['rock','flying']},{id:149,types:['dragon','flying']}]},
-{name:'Blue',title:'Champion',badge:'',pokemon:[{id:18,types:['normal','flying']},{id:65,types:['psychic']},{id:112,types:['ground','rock']},{id:59,types:['fire']},{id:130,types:['water','flying']},{id:149,types:['dragon','flying']}]},
+{name:'Brock',title:'Pewter Gym',badge:'Boulder Badge',specialty:'rock',location:'Pewter City',pokemon:[{id:74,lv:12,types:['rock','ground']},{id:95,lv:14,types:['rock','ground']}]},
+{name:'Misty',title:'Cerulean Gym',badge:'Cascade Badge',specialty:'water',location:'Cerulean City',pokemon:[{id:120,lv:18,types:['water']},{id:121,lv:21,types:['water','psychic']}]},
+{name:'Lt. Surge',title:'Vermilion Gym',badge:'Thunder Badge',specialty:'electric',location:'Vermilion City',pokemon:[{id:100,lv:21,types:['electric']},{id:25,lv:18,types:['electric']},{id:26,lv:24,types:['electric']}]},
+{name:'Erika',title:'Celadon Gym',badge:'Rainbow Badge',specialty:'grass',location:'Celadon City',pokemon:[{id:71,lv:29,types:['grass','poison']},{id:114,lv:24,types:['grass']},{id:45,lv:29,types:['grass','poison']}]},
+{name:'Koga',title:'Fuchsia Gym',badge:'Soul Badge',specialty:'poison',location:'Fuchsia City',pokemon:[{id:109,lv:37,types:['poison']},{id:88,lv:39,types:['poison']},{id:109,lv:37,types:['poison']},{id:110,lv:43,types:['poison']}]},
+{name:'Sabrina',title:'Saffron Gym',badge:'Marsh Badge',specialty:'psychic',location:'Saffron City',pokemon:[{id:64,lv:38,types:['psychic']},{id:122,lv:37,types:['psychic']},{id:49,lv:38,types:['bug','poison']},{id:65,lv:43,types:['psychic']}]},
+{name:'Blaine',title:'Cinnabar Gym',badge:'Volcano Badge',specialty:'fire',location:'Cinnabar Island',pokemon:[{id:58,lv:42,types:['fire']},{id:77,lv:40,types:['fire']},{id:78,lv:42,types:['fire']},{id:59,lv:47,types:['fire']}]},
+{name:'Giovanni',title:'Viridian Gym',badge:'Earth Badge',specialty:'ground',location:'Viridian City',pokemon:[{id:111,lv:45,types:['ground','rock']},{id:51,lv:42,types:['ground']},{id:31,lv:44,types:['poison','ground']},{id:34,lv:45,types:['poison','ground']},{id:112,lv:50,types:['ground','rock']}]},
+{name:'Lorelei',title:'Elite Four',badge:'',specialty:'ice',location:'Indigo Plateau',pokemon:[{id:87,lv:54,types:['water','ice']},{id:91,lv:53,types:['water','ice']},{id:80,lv:54,types:['water','psychic']},{id:124,lv:56,types:['ice','psychic']},{id:131,lv:56,types:['water','ice']}]},
+{name:'Bruno',title:'Elite Four',badge:'',specialty:'fighting',location:'Indigo Plateau',pokemon:[{id:95,lv:53,types:['rock','ground']},{id:107,lv:55,types:['fighting']},{id:106,lv:55,types:['fighting']},{id:95,lv:56,types:['rock','ground']},{id:68,lv:58,types:['fighting']}]},
+{name:'Agatha',title:'Elite Four',badge:'',specialty:'ghost',location:'Indigo Plateau',pokemon:[{id:94,lv:54,types:['ghost','poison']},{id:93,lv:54,types:['ghost','poison']},{id:94,lv:58,types:['ghost','poison']},{id:24,lv:54,types:['poison']},{id:94,lv:58,types:['ghost','poison']}]},
+{name:'Lance',title:'Elite Four',badge:'',specialty:'dragon',location:'Indigo Plateau',pokemon:[{id:130,lv:56,types:['water','flying']},{id:148,lv:54,types:['dragon']},{id:148,lv:54,types:['dragon']},{id:142,lv:58,types:['rock','flying']},{id:149,lv:60,types:['dragon','flying']}]},
+{name:'Blue',title:'Champion',badge:'',specialty:'mixed',location:'Indigo Plateau',note:'Team varies by starter chosen',pokemon:[{id:18,lv:59,types:['normal','flying']},{id:65,lv:63,types:['psychic']},{id:112,lv:61,types:['ground','rock']},{id:103,lv:61,types:['grass','psychic']},{id:130,lv:61,types:['water','flying']},{id:59,lv:65,types:['fire']}]},
 ];
 
 let pokemonData=[],team=JSON.parse(localStorage.getItem('frTeam')||'[null,null,null,null,null,null]'),pickingSlot=null,dexTF=null,tmTF=null,itemCF=null;
@@ -1023,6 +1028,26 @@ function renderCoverage(){
   c.innerHTML=`<div class="coverage-section"><div class="coverage-section-label"><span style="color:var(--green)">✓</span> Super Effective Against</div><div class="coverage-chips">${strong.map(typeChip).join('')}</div></div><div class="coverage-section"><div class="coverage-section-label"><span style="color:var(--accent)">✗</span> No Coverage Against</div><div class="coverage-chips">${weak.length?weak.map(typeChip).join(''):'<span style="font-size:13px;color:var(--green)">Full coverage! 🎉</span>'}</div></div>`;
 }
 
+function renderGymLeaders(){
+  const groups=[
+    {label:'Gym Leaders',entries:GYM_DATA.slice(0,8)},
+    {label:'Elite Four',entries:GYM_DATA.slice(8,12)},
+    {label:'Champion',entries:GYM_DATA.slice(12)},
+  ];
+  document.getElementById('gym-leaders-list').innerHTML=groups.map(({label,entries})=>
+    `<div style="font-size:16px;font-weight:800;color:var(--text);margin:0 0 12px;">${label}</div>`+
+    entries.map(t=>{
+      const pokemonCards=t.pokemon.map(fp=>{
+        const pd=pokemonData.find(x=>x.id===fp.id);
+        return `<div style="text-align:center;min-width:56px;"><img src="${sprite(fp.id)}" style="width:48px;height:48px;image-rendering:pixelated;display:block;margin:0 auto;filter:drop-shadow(0 2px 4px rgba(0,0,0,0.2));"><div style="font-size:10px;font-weight:600;text-transform:capitalize;color:#222;margin-top:2px;">${pd?pd.name:''}</div><div style="font-size:10px;color:#888;margin-bottom:3px;">Lv.${fp.lv}</div><div style="display:flex;flex-wrap:wrap;gap:2px;justify-content:center;">${fp.types.map(typeChip).join('')}</div></div>`;
+      }).join('');
+      const specialtyChip=t.specialty&&t.specialty!=='mixed'?typeChip(t.specialty):`<span style="font-size:11px;color:var(--text-muted);">Mixed</span>`;
+      const meta=[t.location,t.badge].filter(Boolean).join(' · ');
+      return `<div class="evo-card" style="margin-bottom:10px;"><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;"><div><div style="font-size:16px;font-weight:800;color:#111;">${t.name}</div><div style="font-size:11px;color:#888;margin-top:1px;">${meta}</div>${t.note?`<div style="font-size:11px;color:var(--text-muted);font-style:italic;margin-top:2px;">${t.note}</div>`:''}</div>${specialtyChip}</div><div style="display:flex;flex-wrap:wrap;gap:10px;margin-top:10px;">${pokemonCards}</div></div>`;
+    }).join('')+`<div style="margin-bottom:24px;"></div>`
+  ).join('');
+}
+
 function renderGymMatchups(){
   const el=document.getElementById('gym-matchups');
   const mons=team.filter(Boolean).map(id=>pokemonData.find(p=>p.id===id)).filter(Boolean);
@@ -1224,7 +1249,7 @@ document.addEventListener('click', e => {
 });
 document.getElementById('picker-modal').addEventListener('click',e=>{if(e.target===e.currentTarget)closePicker();});
 
-loadPokedex();renderTMFilters();renderTMs(TM_DATA);renderItemFilters();renderItems(ITEM_DATA);renderEvolutions(EVO_DATA);renderTeam();
+loadPokedex();renderTMFilters();renderTMs(TM_DATA);renderItemFilters();renderItems(ITEM_DATA);renderEvolutions(EVO_DATA);renderTeam();renderGymLeaders();
 </script>
 </body>
 </html>
