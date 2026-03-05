@@ -608,7 +608,6 @@ function renderPokedex(data){
         <span class="rank-name">${p.name}</span>
         <div class="rank-types">${p.types.map(typeChipFilter).join('')}</div>
         <div class="rank-bar-wrap"><div class="rank-bar-track"><div class="rank-bar-fill" style="width:${pct}%;background:${color}"></div></div></div>
-        <span class="rank-val">${val}</span>
       </div>`;
     }).join('');
   } else {
