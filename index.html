@@ -64,7 +64,7 @@ body::before {
 }
 .nav-tab:hover { color: var(--text); background: var(--surface2); }
 .nav-tab.active { color: var(--accent); background: rgba(255,61,61,0.1); }
-.snav-item { display:block;width:100%;text-align:center;padding:11px 16px;background:none;border:none;color:var(--text);font-family:'Outfit',sans-serif;font-size:14px;font-weight:500;cursor:pointer;transition:background 0.15s; }
+.snav-item { display:block;width:100%;text-align:center;padding:11px 16px;background:none;border:none;color:var(--text);font-family:'Outfit',sans-serif;font-size:13px;font-weight:600;cursor:pointer;transition:background 0.15s; }
 .snav-item:hover { background:var(--surface2); }
 .snav-item.active { color:var(--accent);background:rgba(255,61,61,0.08);font-weight:700; }
 .main { position: relative; z-index: 1; max-width: 1100px; margin: 0 auto; padding: 32px 24px 80px; }
@@ -304,7 +304,7 @@ body::before {
     <div class="search-wrap"><span class="search-icon"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="6.5" cy="6.5" r="5" stroke="currentColor" stroke-width="1.8"/><line x1="10.5" y1="10.5" x2="14" y2="14" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></span><input type="text" id="dex-search" placeholder="Gotta search em all…" oninput="filterPokedex()"></div>
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;">
       <div style="position:relative;display:inline-block;">
-        <select id="type-filter-select" onchange="selectDexType(this.value)" style="appearance:none;-webkit-appearance:none;background:var(--surface2);border:1px solid var(--border);border-radius:100px;color:var(--text);font-family:'Outfit',sans-serif;font-size:14px;font-weight:500;padding:7px 36px 7px 14px;outline:none;cursor:pointer;transition:border-color 0.2s;">
+        <select id="type-filter-select" onchange="selectDexType(this.value)" style="appearance:none;-webkit-appearance:none;background:var(--surface2);border:1px solid var(--border);border-radius:100px;color:var(--text);font-family:'Outfit',sans-serif;font-size:13px;font-weight:600;padding:7px 36px 7px 14px;outline:none;cursor:pointer;transition:border-color 0.2s;">
           <option value="">All types</option>
         </select>
         <span style="position:absolute;right:12px;top:50%;transform:translateY(-50%);pointer-events:none;color:var(--text-muted);font-size:12px;">▾</span>
@@ -344,7 +344,7 @@ body::before {
   <div id="panel-moves" class="panel">
     <div class="search-wrap"><span class="search-icon"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="6.5" cy="6.5" r="5" stroke="currentColor" stroke-width="1.8"/><line x1="10.5" y1="10.5" x2="14" y2="14" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></span><input type="text" id="tm-search" placeholder="Gotta search em all…" oninput="filterTMs()"></div>
     <div style="position:relative;display:inline-block;margin-bottom:20px;">
-      <select id="tm-type-select" onchange="selectTMType(this.value)" style="appearance:none;-webkit-appearance:none;background:var(--surface2);border:1px solid var(--border);border-radius:100px;color:var(--text);font-family:'Outfit',sans-serif;font-size:14px;font-weight:500;padding:7px 36px 7px 14px;outline:none;cursor:pointer;transition:border-color 0.2s;">
+      <select id="tm-type-select" onchange="selectTMType(this.value)" style="appearance:none;-webkit-appearance:none;background:var(--surface2);border:1px solid var(--border);border-radius:100px;color:var(--text);font-family:'Outfit',sans-serif;font-size:13px;font-weight:600;padding:7px 36px 7px 14px;outline:none;cursor:pointer;transition:border-color 0.2s;">
         <option value="">All types</option>
       </select>
       <span style="position:absolute;right:12px;top:50%;transform:translateY(-50%);pointer-events:none;color:var(--text-muted);font-size:12px;">▾</span>
@@ -375,7 +375,7 @@ body::before {
     </div>
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
       <div style="position:relative;display:inline-block;">
-        <select id="rank-type-select" onchange="setRankType(this.value)" style="appearance:none;-webkit-appearance:none;background:var(--surface2);border:1px solid var(--border);border-radius:100px;color:var(--text);font-family:'Outfit',sans-serif;font-size:14px;font-weight:500;padding:7px 36px 7px 14px;outline:none;cursor:pointer;transition:border-color 0.2s;">
+        <select id="rank-type-select" onchange="setRankType(this.value)" style="appearance:none;-webkit-appearance:none;background:var(--surface2);border:1px solid var(--border);border-radius:100px;color:var(--text);font-family:'Outfit',sans-serif;font-size:13px;font-weight:600;padding:7px 36px 7px 14px;outline:none;cursor:pointer;transition:border-color 0.2s;">
           <option value="">All types</option>
         </select>
         <span style="position:absolute;right:12px;top:50%;transform:translateY(-50%);pointer-events:none;color:var(--text-muted);font-size:12px;">▾</span>
