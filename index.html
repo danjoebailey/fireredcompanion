@@ -953,7 +953,7 @@ function showTypeMatchup(type,el){
   Object.entries(off).forEach(([t,v])=>{if(v>=2)SE.push(t);else if(v>0&&v<1)NVE.push(t);else if(v===0)IMM.push(t);});
   allTypes.forEach(at=>{const v=(TYPE_CHART[at]||{})[type];if(v>=2)dW.push(at);else if(v>0&&v<1)dR.push(at);else if(v===0)dI.push(at);});
   const bubble=(label,chips)=>chips.length?`<div style="border-radius:12px;border:1px solid rgba(0,0,0,0.08);background:#fff;padding:10px 12px;margin-bottom:8px;"><div style="font-family:'Outfit',sans-serif;font-size:13px;font-weight:700;color:#222;margin-bottom:8px;">${label}</div><div style="display:flex;flex-wrap:wrap;gap:5px;">${chips.map(typeChip).join('')}</div></div>`:'';
-  const sectionTitle=label=>`<div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.8px;color:var(--text-muted);margin:14px 0 6px;">${label}</div>`;
+  const sectionTitle=label=>`<div style="font-size:16px;font-weight:800;color:var(--text);margin:18px 0 8px;">${label}</div>`;
   document.getElementById('type-result').innerHTML=`<div style="margin-top:8px;">
     <div style="font-size:22px;font-weight:800;color:var(--text);margin-bottom:8px;">${type.charAt(0).toUpperCase()+type.slice(1)}</div>
     <div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:12px;">${pokemonData.filter(p=>p.types.includes(type)).map(p=>`<img src="${sprite(p.id)}" alt="${p.name}" title="${p.name}" style="width:40px;height:40px;image-rendering:pixelated;cursor:pointer;" onclick="openPokeModal(${p.id})">`).join('')}</div>
