@@ -336,6 +336,7 @@ body::before {
     <div class="team-grid" id="team-slots"></div>
     <div style="display:flex;gap:8px;margin-bottom:24px;">
       <button class="btn btn-primary" onclick="openPicker()">+ Add Pokémon</button>
+      <button class="btn btn-secondary" onclick="randomizeTeam()">Randomize</button>
       <button class="btn btn-secondary" onclick="clearTeam()">Clear Team</button>
     </div>
     <div class="coverage-card">
@@ -1010,6 +1011,7 @@ function renderTeam(){
 function saveTeam(){localStorage.setItem('frTeam',JSON.stringify(team));}
 function removeFromTeam(i){team[i]=null;saveTeam();renderTeam();}
 function clearTeam(){team=[null,null,null,null,null,null];saveTeam();renderTeam();}
+function randomizeTeam(){const filled=team.filter(Boolean);const pool=pokemonData.filter(p=>!filled.includes(p.id));for(let i=0;i<team.length;i++){if(team[i]===null&&pool.length>0){const idx=Math.floor(Math.random()*pool.length);team[i]=pool[idx].id;pool.splice(idx,1);}}saveTeam();renderTeam();}
 
 function openPicker(slot){pickingSlot=slot!==undefined?slot:team.indexOf(null);if(pickingSlot===-1){alert('Team is full!');return;}document.getElementById('picker-modal').classList.add('open');document.body.style.overflow='hidden';renderPickerGrid(pokemonData);}
 function closePicker(){document.getElementById('picker-modal').classList.remove('open');document.body.style.overflow='';}
