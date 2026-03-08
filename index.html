@@ -1062,7 +1062,7 @@ function renderGymLeaders(){
       }).join('');
       const specialtyChip=t.specialty&&t.specialty!=='mixed'?typeChip(t.specialty):`<span style="font-size:11px;color:var(--text-muted);">Mixed</span>`;
       const meta=[t.location,t.badge].filter(Boolean).join(' · ');
-      return `<div class="evo-card" style="margin-bottom:10px;">
+      return `<div class="evo-card" style="margin-bottom:10px;padding:14px 12px;">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
           <div style="display:flex;align-items:center;gap:10px;">
             ${trainerImg(t.name)}
