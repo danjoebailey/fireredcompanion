@@ -1057,7 +1057,8 @@ function renderGymLeaders(){
           <img class="rank-sprite" src="${sprite(fp.id)}" alt="${pd?pd.name:''}">
           <span class="rank-name">${pd?pd.name:''}</span>
           <span style="font-family:'DM Mono',monospace;font-size:11px;color:var(--text-muted);flex-shrink:0;">Lv.${fp.lv}</span>
-          <div style="display:flex;flex-wrap:nowrap;gap:4px;margin-left:auto;align-items:center;">${fp.types.map(typeChip).join('')}</div>
+          <div style="flex:1"></div>
+          <div style="display:flex;gap:4px;align-items:center;flex-shrink:0;">${fp.types.map(typeChip).join('')}</div>
         </div>`;
       }).join('');
       const specialtyChip=t.specialty&&t.specialty!=='mixed'?typeChip(t.specialty):`<span style="font-size:11px;color:var(--text-muted);">Mixed</span>`;
