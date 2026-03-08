@@ -189,10 +189,10 @@ body::before {
 .coverage-section { margin-bottom: 14px; }
 .coverage-section-label { font-size: 11px; font-weight: 600; color: var(--text-muted); margin-bottom: 8px; display: flex; align-items: center; gap: 6px; }
 .coverage-chips { display: flex; flex-wrap: wrap; gap: 5px; }
-.gym-card { background:var(--surface2); border-radius:12px; padding:14px 16px; margin-bottom:10px; }
+.gym-card { background:#fff; border:1px solid rgba(0,0,0,0.08); border-radius:12px; padding:14px 16px; margin-bottom:10px; }
 .gym-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:8px; }
-.gym-name { font-weight:700; font-size:14px; color:var(--text); }
-.gym-subtitle { font-size:11px; color:var(--text-muted); margin-top:1px; }
+.gym-name { font-weight:700; font-size:14px; color:#111; }
+.gym-subtitle { font-size:11px; color:#888; margin-top:1px; }
 .gym-rating { font-size:11px; font-weight:700; padding:3px 10px; border-radius:100px; white-space:nowrap; }
 .gym-rating.favorable { background:#22c55e20; color:#22c55e; }
 .gym-rating.neutral { background:#eab30820; color:#eab308; }
@@ -343,8 +343,8 @@ body::before {
       <div class="coverage-title">Type Coverage Analysis</div>
       <div id="team-coverage"><p style="font-size:13px;color:var(--text-muted)">Add Pokémon to see coverage</p></div>
     </div>
-    <div class="coverage-card" style="margin-top:16px;">
-      <div class="coverage-title">Gym &amp; Elite Four Matchups</div>
+    <div style="margin-top:24px;">
+      <div style="font-size:16px;font-weight:800;color:var(--text);margin-bottom:12px;">Gym &amp; Elite Four Matchups</div>
       <div id="gym-matchups"><p style="font-size:13px;color:var(--text-muted)">Add Pokémon to see matchups</p></div>
     </div>
     <div id="picker-modal" class="modal-overlay" style="align-items:flex-start;padding-top:5vh;">
