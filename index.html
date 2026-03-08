@@ -1039,17 +1039,31 @@ function renderGymLeaders(){
   document.getElementById('gym-leaders-list').innerHTML=groups.map(({label,entries})=>
     `<div style="font-size:16px;font-weight:800;color:var(--text);margin:0 0 12px;">${label}</div>`+
     entries.map(t=>{
-      const pokemonCards=t.pokemon.map(fp=>{
+      const pokemonRows=t.pokemon.map(fp=>{
         const pd=pokemonData.find(x=>x.id===fp.id);
-        return `<div style="text-align:center;min-width:56px;"><img src="${sprite(fp.id)}" style="width:48px;height:48px;image-rendering:pixelated;display:block;margin:0 auto;filter:drop-shadow(0 2px 4px rgba(0,0,0,0.2));"><div style="font-size:10px;font-weight:600;text-transform:capitalize;color:#222;margin-top:2px;">${pd?pd.name:''}</div><div style="font-size:10px;color:#888;margin-bottom:3px;">Lv.${fp.lv}</div><div style="display:flex;flex-wrap:wrap;gap:2px;justify-content:center;">${fp.types.map(typeChip).join('')}</div></div>`;
+        return `<div class="rank-row" onclick="openPokeModal(${fp.id})">
+          <img class="rank-sprite" src="${sprite(fp.id)}" alt="${pd?pd.name:''}">
+          <span class="rank-name">${pd?pd.name:''}</span>
+          <span style="font-family:'DM Mono',monospace;font-size:11px;color:var(--text-muted);flex-shrink:0;">Lv.${fp.lv}</span>
+          <div style="display:flex;flex-wrap:wrap;gap:4px;margin-left:auto;">${fp.types.map(typeChip).join('')}</div>
+        </div>`;
       }).join('');
       const specialtyChip=t.specialty&&t.specialty!=='mixed'?typeChip(t.specialty):`<span style="font-size:11px;color:var(--text-muted);">Mixed</span>`;
       const meta=[t.location,t.badge].filter(Boolean).join(' · ');
-      return `<div class="evo-card" style="margin-bottom:10px;"><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;"><div><div style="font-size:16px;font-weight:800;color:#111;">${t.name}</div><div style="font-size:11px;color:#888;margin-top:1px;">${meta}</div>${t.note?`<div style="font-size:11px;color:var(--text-muted);font-style:italic;margin-top:2px;">${t.note}</div>`:''}</div>${specialtyChip}</div><div style="display:flex;flex-wrap:wrap;gap:10px;margin-top:10px;">${pokemonCards}</div></div>`;
+      return `<div class="evo-card" style="margin-bottom:10px;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+          <div>
+            <div style="font-size:16px;font-weight:800;color:#111;">${t.name}</div>
+            <div style="font-size:11px;color:#888;margin-top:1px;">${meta}</div>
+            ${t.note?`<div style="font-size:11px;color:var(--text-muted);font-style:italic;margin-top:2px;">${t.note}</div>`:''}
+          </div>
+          ${specialtyChip}
+        </div>
+        ${pokemonRows}
+      </div>`;
     }).join('')+`<div style="margin-bottom:24px;"></div>`
   ).join('');
 }
-
 function renderGymMatchups(){
   const el=document.getElementById('gym-matchups');
   const mons=team.filter(Boolean).map(id=>pokemonData.find(p=>p.id===id)).filter(Boolean);
