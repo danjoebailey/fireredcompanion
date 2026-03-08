@@ -1121,8 +1121,6 @@ function renderGymMatchups(){
         <span class="gym-rating ${ratingClass}">${ratingLabel}</span>
       </div>
       <div class="gym-sprites">${opponentSprites}</div>
-      ${coverChips?`<div class="gym-row-label">Your coverage</div><div style="display:flex;flex-wrap:wrap;gap:4px;">${coverChips}</div>`:''}
-      ${threatChips?`<div class="gym-row-label">Watch out for</div><div style="display:flex;flex-wrap:wrap;gap:4px;">${threatChips}</div>`:''}
     </div>`;
   }).join('');
 }
