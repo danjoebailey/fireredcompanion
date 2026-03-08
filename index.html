@@ -1031,6 +1031,18 @@ function renderCoverage(){
 }
 
 function renderGymLeaders(){
+  const TRAINER_SPRITES={
+    'Brock':'brock','Misty':'misty-gen3','Lt. Surge':'ltsurge',
+    'Erika':'erika-gen3','Koga':'koga-gen3','Sabrina':'sabrina',
+    'Blaine':'blaine-gen3','Giovanni':'giovanni',
+    'Lorelei':'lorelei-gen3','Bruno':'bruno-gen3','Agatha':'agatha-gen3',
+    'Lance':'lance-gen3','Blue':'blue-gen1champion',
+  };
+  const trainerImg=name=>{
+    const key=TRAINER_SPRITES[name];
+    if(!key)return'';
+    return `<img src="https://play.pokemonshowdown.com/sprites/trainers/${key}.png" style="width:48px;height:48px;object-fit:contain;image-rendering:pixelated;flex-shrink:0;" onerror="this.style.display='none'">`;
+  };
   const groups=[
     {label:'Gym Leaders',entries:GYM_DATA.slice(0,8)},
     {label:'Elite Four',entries:GYM_DATA.slice(8,12)},
@@ -1045,17 +1057,20 @@ function renderGymLeaders(){
           <img class="rank-sprite" src="${sprite(fp.id)}" alt="${pd?pd.name:''}">
           <span class="rank-name">${pd?pd.name:''}</span>
           <span style="font-family:'DM Mono',monospace;font-size:11px;color:var(--text-muted);flex-shrink:0;">Lv.${fp.lv}</span>
-          <div style="display:flex;flex-wrap:wrap;gap:4px;margin-left:auto;">${fp.types.map(typeChip).join('')}</div>
+          <div style="display:flex;flex-wrap:wrap;gap:4px;margin-left:auto;align-items:center;">${fp.types.map(typeChip).join('')}</div>
         </div>`;
       }).join('');
       const specialtyChip=t.specialty&&t.specialty!=='mixed'?typeChip(t.specialty):`<span style="font-size:11px;color:var(--text-muted);">Mixed</span>`;
       const meta=[t.location,t.badge].filter(Boolean).join(' · ');
       return `<div class="evo-card" style="margin-bottom:10px;">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
-          <div>
-            <div style="font-size:16px;font-weight:800;color:#111;">${t.name}</div>
-            <div style="font-size:11px;color:#888;margin-top:1px;">${meta}</div>
-            ${t.note?`<div style="font-size:11px;color:var(--text-muted);font-style:italic;margin-top:2px;">${t.note}</div>`:''}
+          <div style="display:flex;align-items:center;gap:10px;">
+            ${trainerImg(t.name)}
+            <div>
+              <div style="font-size:16px;font-weight:800;color:#111;">${t.name}</div>
+              <div style="font-size:11px;color:#888;margin-top:1px;">${meta}</div>
+              ${t.note?`<div style="font-size:11px;color:var(--text-muted);font-style:italic;margin-top:2px;">${t.note}</div>`:''}
+            </div>
           </div>
           ${specialtyChip}
         </div>
