@@ -1055,9 +1055,8 @@ function renderGymLeaders(){
         const pd=pokemonData.find(x=>x.id===fp.id);
         return `<div class="rank-row" onclick="openPokeModal(${fp.id})">
           <img class="rank-sprite" src="${sprite(fp.id)}" alt="${pd?pd.name:''}">
-          <span class="rank-name">${pd?pd.name:''}</span>
+          <span style="font-size:13px;font-weight:700;color:#222;text-transform:capitalize;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${pd?pd.name:''}</span>
           <span style="font-family:'DM Mono',monospace;font-size:11px;color:var(--text-muted);flex-shrink:0;">Lv.${fp.lv}</span>
-          <div style="flex:1"></div>
           <div style="display:flex;gap:4px;align-items:center;flex-shrink:0;">${fp.types.map(typeChip).join('')}</div>
         </div>`;
       }).join('');
