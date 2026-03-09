@@ -370,11 +370,9 @@ body::before {
 
   <div id="panel-moves" class="panel">
     <div class="search-wrap"><span class="search-icon"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="6.5" cy="6.5" r="5" stroke="currentColor" stroke-width="1.8"/><line x1="10.5" y1="10.5" x2="14" y2="14" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></span><input type="text" id="tm-search" placeholder="Gotta search em all…" oninput="filterTMs()"></div>
-    <div style="position:relative;display:inline-block;margin-bottom:20px;">
-      <select id="tm-type-select" onchange="selectTMType(this.value)" style="appearance:none;-webkit-appearance:none;background:var(--surface2);border:1px solid var(--border);border-radius:100px;color:var(--text);font-family:'Outfit',sans-serif;font-size:13px;font-weight:600;padding:7px 36px 7px 14px;outline:none;cursor:pointer;transition:border-color 0.2s;">
-        <option value="">All types</option>
-      </select>
-      <span style="position:absolute;right:12px;top:50%;transform:translateY(-50%);pointer-events:none;color:var(--text-muted);font-size:12px;">▾</span>
+    <div class="type-dd" style="margin-bottom:20px;">
+      <button class="type-dd-btn" id="tm-type-dd-btn" onclick="toggleTypeDd('tm-type-menu')">All types <span style="color:var(--text-muted);font-size:11px;">▾</span></button>
+      <div class="type-dd-menu" id="tm-type-menu"></div>
     </div>
     <div class="tm-grid" id="tm-grid"></div>
   </div>
@@ -1151,17 +1149,8 @@ function showTypeMatchup(type,el){
 }
 
 function renderTMs(data){document.getElementById('tm-grid').innerHTML=data.map(tm=>`<div class="tm-card"><span class="tm-num">${tm.num}</span><span class="tm-move">${tm.move}</span>${typeChip(tm.type)}<span class="tm-meta">${tm.power!=='—'?tm.power:'—'}</span></div>`).join('');}
-function renderTMFilters(){
-  const types=[...new Set(TM_DATA.map(t=>t.type))].sort();
-  const sel=document.getElementById('tm-type-select');
-  types.forEach(t=>{
-    const opt=document.createElement('option');
-    opt.value=t;
-    opt.textContent=(TYPE_EMOJI[t]||'') + ' ' + t.charAt(0).toUpperCase()+t.slice(1);
-    sel.appendChild(opt);
-  });
-}
-function selectTMType(t){tmTF=t||null;filterTMs();}
+function renderTMFilters(){buildTypeDdMenu('tm-type-menu','selectTMType');}
+function selectTMType(t){tmTF=t||null;updateTypeDdBtn('tm-type-dd-btn',tmTF);filterTMs();}
 
 function filterTMs(){const q=document.getElementById('tm-search').value.toLowerCase();let f=TM_DATA.filter(t=>t.move.toLowerCase().includes(q)||t.num.toLowerCase().includes(q)||t.location.toLowerCase().includes(q));if(tmTF)f=f.filter(t=>t.type===tmTF);renderTMs(f);}
 
