@@ -962,7 +962,7 @@ async function renderModalBody(){
     const bubble=(label,color,chips)=>{const[main,sub]=label.split('(');const labelHtml=sub?`${main}<span style="font-weight:400;color:#666;">(${sub}</span>`:main;return chips.length?`<div style="border-radius:12px;border:1px solid rgba(0,0,0,0.08);background:#fff;padding:10px 12px;margin-bottom:8px;"><div style="font-family:'Outfit',sans-serif;font-size:13px;font-weight:700;color:#222;margin-bottom:8px;">${labelHtml}</div><div style="display:flex;flex-wrap:wrap;gap:5px;">${chips.map(typeChip).join('')}</div></div>`:'';};
     const sectionTitle=(label)=>`<div style="font-size:16px;font-weight:800;color:var(--text);margin:18px 0 8px;">${label}</div>`;
     content=`<div>
-      ${sectionTitle('Attacking Against')}
+      ${sectionTitle('Attack')}
       ${bubble('Super Effective (×2 damage)','#34d399',atkSE)||bubble('','#9898aa',[])||'<div style="font-size:12px;color:var(--text-muted);padding:4px 0;">—</div>'}
       ${bubble('Not Very Effective (×0.5 damage)','#fbbf24',atkNVE)}
       ${bubble('No Effect (×0 damage)','#9898aa',atkNone)}
