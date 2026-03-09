@@ -1039,9 +1039,15 @@ function renderCoverage(){
   allTypes.forEach(t=>cov[t]=0);
   mons.forEach(m=>m.types.forEach(at=>allTypes.forEach(dt=>{const e=(TYPE_CHART[at]||{})[dt];if(e>=2)cov[dt]=Math.max(cov[dt],2);})));
   const strong=allTypes.filter(t=>cov[t]>=2),weak=allTypes.filter(t=>cov[t]===0);
-  c.innerHTML=`<div class="coverage-section"><div class="coverage-section-label"><span style="color:var(--green)">✓</span> Super Effective Against</div><div class="coverage-chips">${strong.map(typeChip).join('')}</div></div><div class="coverage-section"><div class="coverage-section-label"><span style="color:var(--accent)">✗</span> No Coverage Against</div><div class="coverage-chips">${weak.length?weak.map(typeChip).join(''):'<span style="font-size:13px;color:var(--green)">Full coverage! 🎉</span>'}</div></div>`;
+  const bubble=(label,chips,emptyMsg)=>
+    `<div style="border-radius:12px;border:1px solid rgba(0,0,0,0.08);background:#fff;padding:10px 12px;margin-bottom:8px;">
+      <div style="font-family:'Outfit',sans-serif;font-size:13px;font-weight:700;color:#222;margin-bottom:8px;">${label}</div>
+      <div style="display:flex;flex-wrap:wrap;gap:5px;">${chips.length?chips.map(typeChip).join(''):emptyMsg||''}</div>
+    </div>`;
+  c.innerHTML=
+    bubble('Super Effective Against',strong)+
+    bubble('No Coverage Against',weak,'<span style="font-size:13px;color:var(--green)">Full coverage!</span>');
 }
-
 function renderGymLeaders(){
   const TRAINER_SPRITES={
     'Brock':'brock','Misty':'misty-gen3','Lt. Surge':'ltsurge',
