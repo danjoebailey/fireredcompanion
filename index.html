@@ -626,6 +626,15 @@ const ITEM_DATA=[
 {icon:'🌙',name:'Moon Stone',cat:'stone',loc:'Mt. Moon, Clefairy (held), Jigglypuff (held)',fx:'Evolves Clefairy, Jigglypuff, Nidorina, Nidorino'},
 {icon:'🔑',name:"Oak's Parcel",cat:'key',loc:'Viridian City Mart → deliver to Prof. Oak',fx:'Unlocks the Pokédex'},{icon:'🗺️',name:'Town Map',cat:'key',loc:"Pallet Town — rival's sister",fx:'View Kanto region map'},{icon:'🚲',name:'Bicycle',cat:'key',loc:'Cerulean City Bike Shop (free with voucher)',fx:'Doubles movement speed'},{icon:'🎶',name:'Poké Flute',cat:'key',loc:'Mr. Fuji — rescue from Pokémon Tower, Lavender Town',fx:'Wakes sleeping Snorlax'},{icon:'🔭',name:'Silph Scope',cat:'key',loc:'Rocket Hideout, Celadon City (defeat Giovanni)',fx:'Reveals ghost Pokémon in Lavender Tower'},{icon:'🗝️',name:'Secret Key',cat:'key',loc:'Cinnabar Lab (fossil restoration area)',fx:'Unlocks Cinnabar Gym door'},{icon:'🪪',name:'Card Key',cat:'key',loc:'Silph Co. 5F',fx:'Opens all doors in Silph Co.'},{icon:'🔑',name:'Lift Key',cat:'key',loc:'Rocket Hideout B4F',fx:'Activates Team Rocket elevator'},{icon:'🦷',name:'Gold Teeth',cat:'key',loc:'Safari Zone (north area)',fx:'Trade to warden for HM Strength'},{icon:'💎',name:'Ruby',cat:'key',loc:'Mt. Ember — Sevii Islands (defeat Team Rocket)',fx:"Upgrades Celio's machine for Johto trading"},{icon:'💎',name:'Sapphire',cat:'key',loc:"Dotted Hole → recover from Five Isle Meadow",fx:"Completes Celio's machine"},{icon:'🎫',name:'Tri-Pass',cat:'key',loc:'Bill — after beating 7 gyms',fx:'Access to Islands 1–3'},{icon:'🎫',name:'Rainbow Pass',cat:'key',loc:'Celio — after Ruby/Sapphire quest',fx:'Access to all 7 Sevii Islands'},{icon:'🎣',name:'Old Rod',cat:'fishing',loc:'Vermilion City (Fisherman)',fx:'Fish for Magikarp'},{icon:'🎣',name:'Good Rod',cat:'fishing',loc:"Route 12 (Fisherman's house)",fx:'Fish for mid-level Water Pokémon'},{icon:'🎣',name:'Super Rod',cat:'fishing',loc:"Fuchsia City (Fishing Guru's house)",fx:'Fish for rare Pokémon including Dratini'},{icon:'⚙️',name:'Vs Seeker',cat:'useful',loc:'Vermilion City Pokémon Center',fx:'Re-battle trainers to grind EXP'},{icon:'💰',name:'Amulet Coin',cat:'useful',loc:'Rocket Hideout B1F',fx:'Doubles prize money after battle'},{icon:'🧬',name:'Exp. Share',cat:'useful',loc:"Route 15 (Oak's Aide, need 50+ caught)",fx:'Shares EXP to non-battling party members'},{icon:'🍀',name:'Lucky Egg',cat:'useful',loc:'Held by wild Chansey (rare, Safari Zone)',fx:'+50% EXP — best farming item in game'},{icon:'💪',name:'Macho Brace',cat:'useful',loc:'Viridian Gym (after Giovanni)',fx:'Doubles EV gain, halves Speed stat'}];
 
+
+const NPC_TRADES={
+  83: {give:'Spearow',where:'Vermilion City',nickname:'DUX'},
+  101:{give:'Raichu',where:'Cinnabar Lab',nickname:'Volty'},
+  114:{give:'Venonat',where:'Cinnabar Lab',nickname:'Tany'},
+  122:{give:'Abra',where:'Route 2 (south gate)',nickname:'Mimie'},
+  124:{give:'Poliwhirl',where:'Cerulean City',nickname:'Bella'},
+};
+
 const GYM_DATA=[
 {name:'Brock',title:'Pewter Gym',badge:'Boulder Badge',specialty:'rock',location:'Pewter City',pokemon:[{id:74,lv:12,types:['rock','ground']},{id:95,lv:14,types:['rock','ground']}]},
 {name:'Misty',title:'Cerulean Gym',badge:'Cascade Badge',specialty:'water',location:'Cerulean City',pokemon:[{id:120,lv:18,types:['water']},{id:121,lv:21,types:['water','psychic']}]},
@@ -907,6 +916,11 @@ async function renderModalBody(){
         : `<p class="modal-empty">Not found in the wild in Fire Red.</p>`;
     } else {
       content = `<div class="tm-grid">${locs.map(l=>`<div class="tm-card"><span class="tm-move">${l.area}</span><span class="tm-num">${l.method}</span><span class="tm-meta">${l.lvl}</span></div>`).join('')}</div>`;
+    }
+    const npcTrade=NPC_TRADES[p.id];
+    if(npcTrade){
+      const tradeCard=`<div class="tm-card" style="margin-top:8px;"><span class="tm-move">NPC Trade</span><span class="tm-num">Give ${npcTrade.give}</span><span class="tm-meta">${npcTrade.where}</span></div>`;
+      content=(content||'')+`<div class="tm-grid">${tradeCard}</div>`;
     }
 
   } else if(modalTab==='moves' || modalTab==='tms'){
