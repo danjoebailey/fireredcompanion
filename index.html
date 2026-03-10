@@ -220,6 +220,16 @@ body::before {
 .tm-move { font-size: 13px; font-weight: 700; flex: 1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; color:#222; }
 .tm-meta { font-size: 12px; font-weight: 700; color: #222; white-space:nowrap; flex-shrink:0; }
 .tm-loc { display:none; }
+#tm-grid { display: flex; flex-direction: column; gap: 10px; }
+#tm-grid .tm-card { flex-direction: column; align-items: stretch; cursor: pointer; gap: 0; padding: 0; }
+#tm-grid .tm-card:hover { border-color: rgba(0,0,0,0.18); background: #f9f9f9; }
+.tm-card-header { display: flex; align-items: center; gap: 10px; padding: 8px 12px; }
+.tm-learners { display: none; flex-wrap: wrap; gap: 2px; padding: 8px 12px; border-top: 1px solid rgba(0,0,0,0.07); }
+.tm-learners.open { display: flex; }
+.tm-learner-mon { display: flex; flex-direction: column; align-items: center; gap: 1px; cursor: pointer; padding: 4px 6px; border-radius: 6px; transition: background 0.12s; }
+.tm-learner-mon:hover { background: rgba(0,0,0,0.06); }
+.tm-learner-mon img { width: 48px; height: 48px; image-rendering: pixelated; }
+.tm-learner-mon span { font-size: 10px; color: var(--text-muted); text-transform: capitalize; text-align: center; }
 .evo-list { display: flex; flex-direction: column; gap: 10px; }
 .evo-card { background: #fff; border: 1px solid rgba(0,0,0,0.08); border-radius: var(--radius); padding: 20px 24px; transition: border-color 0.15s; }
 .evo-card:hover { border-color: rgba(0,0,0,0.15); }
@@ -1168,7 +1178,36 @@ function showTypeMatchup(type,el){
   </div>`;
 }
 
-function renderTMs(data){document.getElementById('tm-grid').innerHTML=data.map(tm=>`<div class="tm-card"><span class="tm-num">${tm.num}</span><span class="tm-move">${tm.move}</span>${typeChip(tm.type)}<span class="tm-meta">${tm.power!=='—'?tm.power:'—'}</span></div>`).join('');}
+const tmLearnerCache={};
+async function loadTMLearners(moveName){
+  if(tmLearnerCache[moveName])return tmLearnerCache[moveName];
+  try{
+    const slug=moveName.toLowerCase().replace(/\s+/g,'-');
+    const res=await fetch(`https://pokeapi.co/api/v2/move/${slug}`);
+    const data=await res.json();
+    const gen1Ids=new Set(POKEMON_DATA.map(p=>p.id));
+    const learners=data.learned_by_pokemon
+      .map(p=>{const id=parseInt(p.url.split('/').filter(Boolean).pop());return{id,name:p.name};})
+      .filter(p=>gen1Ids.has(p.id))
+      .sort((a,b)=>a.id-b.id);
+    tmLearnerCache[moveName]=learners;
+    return learners;
+  }catch{return[];}
+}
+async function toggleTMLearners(card,moveName){
+  const el=card.querySelector('.tm-learners');
+  if(el.classList.contains('open')){el.classList.remove('open');return;}
+  el.classList.add('open');
+  if(el.dataset.loaded)return;
+  el.innerHTML='<span style="color:var(--text-muted);font-size:12px;padding:4px 0;">Loading…</span>';
+  const learners=await loadTMLearners(moveName);
+  if(!el.classList.contains('open'))return;
+  el.dataset.loaded='1';
+  el.innerHTML=learners.length
+    ?learners.map(p=>`<div class="tm-learner-mon" onclick="event.stopPropagation();openPokeModal(${p.id})"><img src="${sprite(p.id)}" alt="${p.name}" loading="lazy"><span>${p.name}</span></div>`).join('')
+    :'<span style="color:var(--text-muted);font-size:12px;padding:4px 0;">No learners found.</span>';
+}
+function renderTMs(data){document.getElementById('tm-grid').innerHTML=data.map(tm=>`<div class="tm-card" onclick="toggleTMLearners(this,'${tm.move.replace(/'/g,"\\'")}')" ><div class="tm-card-header"><span class="tm-num">${tm.num}</span><span class="tm-move">${tm.move}</span>${typeChip(tm.type)}<span class="tm-meta">${tm.power!=='—'?tm.power:'—'}</span></div><div class="tm-learners"></div></div>`).join('');}
 function renderTMFilters(){buildTypeDdMenu('tm-type-menu','selectTMType');}
 function selectTMType(t){tmTF=t||null;updateTypeDdBtn('tm-type-dd-btn',tmTF);filterTMs();}
 
@@ -1289,6 +1328,5 @@ document.getElementById('picker-modal').addEventListener('click',e=>{if(e.target
 
 loadPokedex();renderTMFilters();renderTMs(TM_DATA);renderItemFilters();renderItems(ITEM_DATA);renderEvolutions(EVO_DATA);renderTeam();renderGymLeaders();
 </script>
-<script defer src="/_vercel/insights/script.js"></script>
 </body>
 </html>
