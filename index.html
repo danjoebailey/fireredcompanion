@@ -302,6 +302,16 @@ body::before {
 .matchup-section-label { font-size: 11px; font-weight: 600; color: var(--text-muted); margin-bottom: 7px; }
 .modal-empty { font-size: 13px; color: var(--text-muted); padding: 16px 0; }
 .modal-empty-inline { font-size: 12px; color: var(--text-muted); }
+.move-card-clickable { flex-direction: column !important; align-items: stretch !important; gap: 0 !important; padding: 0 !important; cursor: pointer; }
+.move-card-clickable:hover { border-color: rgba(0,0,0,0.15); background: #f9f9f9; }
+.move-card-clickable .tm-card-header { padding: 8px 12px; }
+.move-detail { display: none; padding: 8px 12px 10px; border-top: 1px solid rgba(0,0,0,0.07); }
+.move-detail.open { display: block; }
+.move-detail-stats { display: flex; gap: 20px; margin-bottom: 6px; }
+.move-detail-stat { display: flex; flex-direction: column; gap: 1px; }
+.move-detail-stat-label { font-size: 10px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.4px; }
+.move-detail-stat-val { font-family: 'DM Mono', monospace; font-size: 13px; font-weight: 700; color: var(--text); }
+.move-detail-desc { font-size: 12px; color: var(--text-muted); line-height: 1.5; }
 </style>
 </head>
 <body>
@@ -893,8 +903,12 @@ async function fetchPokeMovesAndTMs(id) {
       try {
         const r = await fetch(m.moveUrl);
         const d = await r.json();
-        return { lv: m.lv, name: m.name, type: d.type.name, pw: d.power || '—', acc: d.accuracy, pp: d.pp };
-      } catch { return { lv: m.lv, name: m.name, type: 'normal', pw: '—' }; }
+        const frFlavor = d.flavor_text_entries?.find(f => f.language.name === 'en' && f.version_group?.name === 'firered-leafgreen')?.flavor_text;
+        const anyFlavor = d.flavor_text_entries?.find(f => f.language.name === 'en')?.flavor_text;
+        const shortEffect = d.effect_entries?.find(e => e.language.name === 'en')?.short_effect?.replace(/\$effect_chance/g, d.effect_chance ?? '?');
+        const desc = (frFlavor || anyFlavor || shortEffect || '—').replace(/\n/g, ' ');
+        return { lv: m.lv, name: m.name, type: d.type.name, pw: d.power || '—', acc: d.accuracy, pp: d.pp, desc };
+      } catch { return { lv: m.lv, name: m.name, type: 'normal', pw: '—', acc: null, pp: null, desc: '—' }; }
     }));
 
     // Fetch TM move details in parallel
@@ -902,10 +916,14 @@ async function fetchPokeMovesAndTMs(id) {
       try {
         const r = await fetch(m.moveUrl);
         const d = await r.json();
+        const frFlavor = d.flavor_text_entries?.find(f => f.language.name === 'en' && f.version_group?.name === 'firered-leafgreen')?.flavor_text;
+        const anyFlavor = d.flavor_text_entries?.find(f => f.language.name === 'en')?.flavor_text;
+        const shortEffect = d.effect_entries?.find(e => e.language.name === 'en')?.short_effect?.replace(/\$effect_chance/g, d.effect_chance ?? '?');
+        const desc = (frFlavor || anyFlavor || shortEffect || '—').replace(/\n/g, ' ');
         // Find matching TM number from our TM_DATA
         const moveLookup = TM_DATA.find(t => t.move.toLowerCase() === m.name.toLowerCase());
-        return { name: m.name, type: d.type.name, pw: d.power || '—', num: moveLookup ? moveLookup.num : '' };
-      } catch { return { name: m.name, type: 'normal', pw: '—', num: '' }; }
+        return { name: m.name, type: d.type.name, pw: d.power || '—', acc: d.accuracy, pp: d.pp, num: moveLookup ? moveLookup.num : '', desc };
+      } catch { return { name: m.name, type: 'normal', pw: '—', acc: null, pp: null, num: '', desc: '—' }; }
     }));
 
     // Sort TMs by TM number
@@ -1027,14 +1045,16 @@ async function renderModalBody(){
       if (!moves.length) {
         content = `<p class="modal-empty">No level-up moves found for Fire Red.</p>`;
       } else {
-        content = `<div class="tm-grid">${moves.map(m=>`<div class="tm-card"><span class="tm-num">${m.lv?String(m.lv).padStart(2,'0'):'—'}</span><span class="tm-move">${m.name}</span>${typeChip(m.type)}<span class="tm-meta">${m.pw!=='—'?m.pw:'—'}</span></div>`).join('')}</div>`;
+        const moveDetailHtml = m => `<div class="move-detail-stats"><div class="move-detail-stat"><span class="move-detail-stat-label">Power</span><span class="move-detail-stat-val">${m.pw!=='—'?m.pw:'—'}</span></div><div class="move-detail-stat"><span class="move-detail-stat-label">Accuracy</span><span class="move-detail-stat-val">${m.acc!=null?m.acc+'%':'—'}</span></div><div class="move-detail-stat"><span class="move-detail-stat-label">PP</span><span class="move-detail-stat-val">${m.pp||'—'}</span></div></div><div class="move-detail-desc">${m.desc||'—'}</div>`;
+        content = `<div class="tm-grid">${moves.map(m=>`<div class="tm-card move-card-clickable" onclick="toggleMoveDetail(this)"><div class="tm-card-header"><span class="tm-num">${m.lv?String(m.lv).padStart(2,'0'):'—'}</span><span class="tm-move">${m.name}</span>${typeChip(m.type)}<span class="tm-meta">${m.pw!=='—'?m.pw:'—'}</span></div><div class="move-detail">${moveDetailHtml(m)}</div></div>`).join('')}</div>`;
       }
     } else {
       const tms = data.tms;
       if (!tms.length) {
         content = `<p class="modal-empty">No TM/HM compatibility found for Fire Red.</p>`;
       } else {
-        content = `<div class="tm-grid">${tms.map(t=>`<div class="tm-card">${t.num?`<span class="tm-num">${t.num}</span>`:''}<span class="tm-move">${t.name}</span>${typeChip(t.type)}<span class="tm-meta">${t.pw!=='—'?t.pw:'—'}</span></div>`).join('')}</div>`;
+        const tmDetailHtml = t => `<div class="move-detail-stats"><div class="move-detail-stat"><span class="move-detail-stat-label">Power</span><span class="move-detail-stat-val">${t.pw!=='—'?t.pw:'—'}</span></div><div class="move-detail-stat"><span class="move-detail-stat-label">Accuracy</span><span class="move-detail-stat-val">${t.acc!=null?t.acc+'%':'—'}</span></div><div class="move-detail-stat"><span class="move-detail-stat-label">PP</span><span class="move-detail-stat-val">${t.pp||'—'}</span></div></div><div class="move-detail-desc">${t.desc||'—'}</div>`;
+        content = `<div class="tm-grid">${tms.map(t=>`<div class="tm-card move-card-clickable" onclick="toggleMoveDetail(this)">${t.num?`<div class="tm-card-header"><span class="tm-num">${t.num}</span><span class="tm-move">${t.name}</span>${typeChip(t.type)}<span class="tm-meta">${t.pw!=='—'?t.pw:'—'}</span></div>`:`<div class="tm-card-header"><span class="tm-move">${t.name}</span>${typeChip(t.type)}<span class="tm-meta">${t.pw!=='—'?t.pw:'—'}</span></div>`}<div class="move-detail">${tmDetailHtml(t)}</div></div>`).join('')}</div>`;
       }
     }
 
@@ -1272,6 +1292,7 @@ async function loadTMLearners(moveName){
     return learners;
   }catch{return[];}
 }
+function toggleMoveDetail(item){ item.querySelector('.move-detail').classList.toggle('open'); }
 async function toggleTMLearners(card,moveName){
   const el=card.querySelector('.tm-learners');
   if(el.classList.contains('open')){el.classList.remove('open');return;}
