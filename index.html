@@ -336,15 +336,20 @@ body::before {
 .journey-overview-wrap { margin-top: 8px; }
 .journey-overview-label { font-size: 18px; font-weight: 800; margin-bottom: 4px; }
 .journey-overview-sub { font-size: 13px; color: var(--text-muted); margin-bottom: 16px; }
-.journey-overview-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 12px; }
-.journey-ov-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 14px 16px; cursor: pointer; transition: all 0.15s; }
-.journey-ov-card:hover { border-color: var(--border-hover); background: var(--surface2); }
-.journey-ov-card.filled { border-color: rgba(255,255,255,0.15); }
-.journey-ov-num { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--text-muted); margin-bottom: 2px; }
-.journey-ov-name { font-size: 14px; font-weight: 700; margin-bottom: 8px; }
-.journey-ov-sprites { display: flex; gap: 2px; flex-wrap: wrap; min-height: 36px; align-items: center; }
-.journey-ov-sprite { width: 36px; height: 36px; image-rendering: pixelated; }
-.journey-ov-empty { font-size: 11px; color: var(--text-muted); }
+.journey-ov-scroll { overflow-x: auto; padding-bottom: 12px; }
+.journey-ov-scroll::-webkit-scrollbar { height: 4px; }
+.journey-ov-scroll::-webkit-scrollbar-track { background: var(--surface2); border-radius: 4px; }
+.journey-ov-scroll::-webkit-scrollbar-thumb { background: var(--border-hover); border-radius: 4px; }
+.journey-ov-cols { display: flex; gap: 4px; min-width: max-content; align-items: flex-start; }
+.journey-col { display: flex; flex-direction: column; align-items: center; gap: 0; width: 72px; cursor: pointer; padding: 8px 4px; border-radius: var(--radius-sm); transition: background 0.15s; }
+.journey-col:hover { background: var(--surface2); }
+.journey-col-trainer { width: 60px; height: 60px; display: flex; align-items: center; justify-content: center; margin-bottom: 4px; }
+.journey-col-trainer img { width: 60px; height: 60px; object-fit: contain; image-rendering: pixelated; }
+.journey-col-e4 { width: 54px; height: 54px; background: var(--surface3); border: 1.5px solid var(--border); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 800; color: var(--text-sub); letter-spacing: 0.5px; }
+.journey-col-name { font-size: 10px; font-weight: 700; color: var(--text-sub); text-align: center; margin-bottom: 8px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 68px; }
+.journey-col-mons { display: flex; flex-direction: column; align-items: center; gap: 0; }
+.journey-col-mon { width: 48px; height: 48px; image-rendering: pixelated; display: block; }
+.journey-col-empty { width: 48px; height: 48px; }
 </style>
 </head>
 <body>
@@ -435,7 +440,7 @@ body::before {
     <div class="journey-overview-wrap">
       <div class="journey-overview-label">Overview</div>
       <div class="journey-overview-sub">Your team at a glance</div>
-      <div class="journey-overview-grid" id="journey-overview-grid"></div>
+      <div class="journey-ov-scroll"><div class="journey-ov-cols" id="journey-overview-grid"></div></div>
     </div>
     <div id="journey-picker-modal" class="modal-overlay" style="align-items:flex-start;padding-top:5vh;">
       <div class="modal" style="max-width:640px;">
@@ -1454,15 +1459,15 @@ function renderRankings() {
 }
 
 const JOURNEY_CHECKPOINTS=[
-  {id:'brock',name:'Brock',city:'Pewter City',type:'rock',badge:'Boulder Badge',num:1},
-  {id:'misty',name:'Misty',city:'Cerulean City',type:'water',badge:'Cascade Badge',num:2},
-  {id:'surge',name:'Lt. Surge',city:'Vermilion City',type:'electric',badge:'Thunder Badge',num:3},
-  {id:'erika',name:'Erika',city:'Celadon City',type:'grass',badge:'Rainbow Badge',num:4},
-  {id:'koga',name:'Koga',city:'Fuchsia City',type:'poison',badge:'Soul Badge',num:5},
-  {id:'sabrina',name:'Sabrina',city:'Saffron City',type:'psychic',badge:'Marsh Badge',num:6},
-  {id:'blaine',name:'Blaine',city:'Cinnabar Island',type:'fire',badge:'Volcano Badge',num:7},
-  {id:'giovanni',name:'Giovanni',city:'Viridian City',type:'ground',badge:'Earth Badge',num:8},
-  {id:'elite4',name:'Elite Four & Champion',city:'Indigo Plateau',type:null,badge:null,num:9},
+  {id:'brock',name:'Brock',city:'Pewter City',type:'rock',badge:'Boulder Badge',num:1,trainerKey:'brock'},
+  {id:'misty',name:'Misty',city:'Cerulean City',type:'water',badge:'Cascade Badge',num:2,trainerKey:'misty-gen3'},
+  {id:'surge',name:'Lt. Surge',city:'Vermilion City',type:'electric',badge:'Thunder Badge',num:3,trainerKey:'ltsurge'},
+  {id:'erika',name:'Erika',city:'Celadon City',type:'grass',badge:'Rainbow Badge',num:4,trainerKey:'erika-gen3'},
+  {id:'koga',name:'Koga',city:'Fuchsia City',type:'poison',badge:'Soul Badge',num:5,trainerKey:'koga-gen3'},
+  {id:'sabrina',name:'Sabrina',city:'Saffron City',type:'psychic',badge:'Marsh Badge',num:6,trainerKey:'sabrina'},
+  {id:'blaine',name:'Blaine',city:'Cinnabar Island',type:'fire',badge:'Volcano Badge',num:7,trainerKey:'blaine-gen3'},
+  {id:'giovanni',name:'Giovanni',city:'Viridian City',type:'ground',badge:'Earth Badge',num:8,trainerKey:'giovanni'},
+  {id:'elite4',name:'Elite Four',city:'Indigo Plateau',type:null,badge:null,num:9,trainerKey:null},
 ];
 let journeyData=JSON.parse(localStorage.getItem('frJourney')||'{}');
 let journeyPickingCheckpoint=null,journeyPickingSlot=null;
@@ -1558,17 +1563,20 @@ function renderJourney(){
 
   const og=document.getElementById('journey-overview-grid');
   if(!og)return;
+  const psBase='https://play.pokemonshowdown.com/sprites/trainers/';
   og.innerHTML=JOURNEY_CHECKPOINTS.map((cp,idx)=>{
     const slots=getJourneySlots(cp.id);
-    const filled=slots.filter(s=>s!==null);
-    const hasMon=filled.length>0;
-    const spritesHtml=hasMon
-      ?filled.map(id=>`<img class="journey-ov-sprite" src="${sprite(id)}" alt="">`).join('')
-      :`<span class="journey-ov-empty">No team recorded</span>`;
-    return`<div class="journey-ov-card${hasMon?' filled':''}" onclick="document.querySelectorAll('.journey-cp')[${idx}].scrollIntoView({behavior:'smooth',block:'center'})">
-      <div class="journey-ov-num">#${cp.num}</div>
-      <div class="journey-ov-name">${cp.name}</div>
-      <div class="journey-ov-sprites">${spritesHtml}</div>
+    const trainerEl=cp.trainerKey
+      ?`<img src="${psBase}${cp.trainerKey}.png" onerror="this.style.display='none'" alt="${cp.name}">`
+      :`<div class="journey-col-e4">E4</div>`;
+    const monsHtml=slots.map(id=>id
+      ?`<img class="journey-col-mon" src="${sprite(id)}" alt="">`
+      :`<div class="journey-col-empty"></div>`
+    ).join('');
+    return`<div class="journey-col" onclick="document.querySelectorAll('.journey-cp')[${idx}].scrollIntoView({behavior:'smooth',block:'center'})">
+      <div class="journey-col-trainer">${trainerEl}</div>
+      <div class="journey-col-name">${cp.name}</div>
+      <div class="journey-col-mons">${monsHtml}</div>
     </div>`;
   }).join('');
 }
