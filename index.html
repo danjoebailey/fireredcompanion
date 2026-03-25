@@ -312,6 +312,39 @@ body::before {
 .move-detail-stat-label { font-size: 10px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.4px; }
 .move-detail-stat-val { font-family: 'Outfit', sans-serif; font-size: 13px; font-weight: 700; color: #222; }
 .move-detail-desc { font-size: 12px; color: var(--text-muted); line-height: 1.5; }
+/* Journey */
+.journey-timeline { display: flex; flex-direction: column; margin-bottom: 48px; }
+.journey-cp { display: flex; gap: 16px; }
+.journey-connector { display: flex; flex-direction: column; align-items: center; width: 36px; flex-shrink: 0; }
+.journey-node { width: 34px; height: 34px; border-radius: 50%; background: var(--surface2); border: 2px solid var(--border); display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 800; color: var(--text-muted); flex-shrink: 0; transition: all 0.2s; }
+.journey-node.filled { background: var(--accent); border-color: var(--accent); color: #fff; box-shadow: 0 0 0 4px var(--accent-glow); }
+.journey-line { width: 2px; flex: 1; background: var(--border); min-height: 16px; }
+.journey-card { flex: 1; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 18px 20px; margin-bottom: 12px; transition: border-color 0.2s; }
+.journey-card.filled { border-color: rgba(255,255,255,0.18); }
+.journey-card-head { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 14px; }
+.journey-leader-name { font-size: 17px; font-weight: 800; }
+.journey-city-name { font-size: 12px; color: var(--text-muted); }
+.journey-slots { display: flex; gap: 8px; margin-bottom: 14px; flex-wrap: wrap; }
+.journey-slot { width: 54px; height: 54px; border-radius: 10px; background: var(--surface2); border: 1.5px dashed var(--border); display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.15s; position: relative; overflow: hidden; }
+.journey-slot:hover { border-color: var(--accent); background: rgba(255,61,61,0.06); }
+.journey-slot.has-mon { border-style: solid; border-color: var(--border-hover); background: var(--surface3); }
+.journey-slot img { width: 46px; height: 46px; image-rendering: pixelated; display: block; }
+.journey-slot .slot-plus { font-size: 20px; color: var(--text-muted); line-height: 1; }
+.journey-slot-remove { position: absolute; top: 2px; right: 2px; width: 14px; height: 14px; background: rgba(0,0,0,0.55); border-radius: 50%; font-size: 9px; color: #fff; display: none; align-items: center; justify-content: center; cursor: pointer; z-index: 2; }
+.journey-slot:hover .journey-slot-remove { display: flex; }
+.journey-card-actions { display: flex; gap: 8px; }
+.journey-overview-wrap { margin-top: 8px; }
+.journey-overview-label { font-size: 18px; font-weight: 800; margin-bottom: 4px; }
+.journey-overview-sub { font-size: 13px; color: var(--text-muted); margin-bottom: 16px; }
+.journey-overview-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 12px; }
+.journey-ov-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 14px 16px; cursor: pointer; transition: all 0.15s; }
+.journey-ov-card:hover { border-color: var(--border-hover); background: var(--surface2); }
+.journey-ov-card.filled { border-color: rgba(255,255,255,0.15); }
+.journey-ov-num { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--text-muted); margin-bottom: 2px; }
+.journey-ov-name { font-size: 14px; font-weight: 700; margin-bottom: 8px; }
+.journey-ov-sprites { display: flex; gap: 2px; flex-wrap: wrap; min-height: 36px; align-items: center; }
+.journey-ov-sprite { width: 36px; height: 36px; image-rendering: pixelated; }
+.journey-ov-empty { font-size: 11px; color: var(--text-muted); }
 </style>
 </head>
 <body>
@@ -335,6 +368,7 @@ body::before {
       <button class="snav-item" onclick="switchTab('items');toggleSiteNav()" data-label="Items">Items</button>
       <button class="snav-item" onclick="switchTab('types');toggleSiteNav()" data-label="Types">Types</button>
       <button class="snav-item" onclick="switchTab('gymleaders');toggleSiteNav()" data-label="Gym Leaders">Gym Leaders</button>
+      <button class="snav-item" onclick="switchTab('journey');toggleSiteNav()" data-label="Journey">Journey</button>
     </div>
   </div>
 </div>
@@ -390,6 +424,29 @@ body::before {
 
   <div id="panel-gymleaders" class="panel">
     <div id="gym-leaders-list"></div>
+  </div>
+
+  <div id="panel-journey" class="panel">
+    <div class="section-head">
+      <h2>Journey</h2>
+      <p>Track your team at each major checkpoint</p>
+    </div>
+    <div class="journey-timeline" id="journey-timeline"></div>
+    <div class="journey-overview-wrap">
+      <div class="journey-overview-label">Overview</div>
+      <div class="journey-overview-sub">Your team at a glance</div>
+      <div class="journey-overview-grid" id="journey-overview-grid"></div>
+    </div>
+    <div id="journey-picker-modal" class="modal-overlay" style="align-items:flex-start;padding-top:5vh;">
+      <div class="modal" style="max-width:640px;">
+        <div class="modal-top" style="text-align:left;padding:20px 24px;">
+          <div style="font-size:20px;font-weight:800;margin-bottom:12px;">Choose a Pokémon</div>
+          <button class="modal-close" onclick="closeJourneyPicker()">✕</button>
+          <div class="search-wrap" style="margin-bottom:0"><span class="search-icon"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="6.5" cy="6.5" r="5" stroke="currentColor" stroke-width="1.8"/><line x1="10.5" y1="10.5" x2="14" y2="14" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></span><input type="text" id="journey-picker-search" placeholder="Gotta search em all…" oninput="filterJourneyPicker()"></div>
+        </div>
+        <div style="padding:16px;"><div id="journey-picker-grid" class="pokemon-grid" style="max-height:52vh;overflow-y:auto;"></div></div>
+      </div>
+    </div>
   </div>
 
   <div id="panel-moves" class="panel">
@@ -1396,6 +1453,126 @@ function renderRankings() {
   }).join('');
 }
 
+const JOURNEY_CHECKPOINTS=[
+  {id:'brock',name:'Brock',city:'Pewter City',type:'rock',badge:'Boulder Badge',num:1},
+  {id:'misty',name:'Misty',city:'Cerulean City',type:'water',badge:'Cascade Badge',num:2},
+  {id:'surge',name:'Lt. Surge',city:'Vermilion City',type:'electric',badge:'Thunder Badge',num:3},
+  {id:'erika',name:'Erika',city:'Celadon City',type:'grass',badge:'Rainbow Badge',num:4},
+  {id:'koga',name:'Koga',city:'Fuchsia City',type:'poison',badge:'Soul Badge',num:5},
+  {id:'sabrina',name:'Sabrina',city:'Saffron City',type:'psychic',badge:'Marsh Badge',num:6},
+  {id:'blaine',name:'Blaine',city:'Cinnabar Island',type:'fire',badge:'Volcano Badge',num:7},
+  {id:'giovanni',name:'Giovanni',city:'Viridian City',type:'ground',badge:'Earth Badge',num:8},
+  {id:'elite4',name:'Elite Four & Champion',city:'Indigo Plateau',type:null,badge:null,num:9},
+];
+let journeyData=JSON.parse(localStorage.getItem('frJourney')||'{}');
+let journeyPickingCheckpoint=null,journeyPickingSlot=null;
+
+function saveJourney(){localStorage.setItem('frJourney',JSON.stringify(journeyData));}
+
+function getJourneySlots(cpId){return journeyData[cpId]||[null,null,null,null,null,null];}
+
+function journeyUseTeam(cpId){journeyData[cpId]=[...team];saveJourney();renderJourney();}
+
+function clearJourneyCheckpoint(cpId){journeyData[cpId]=[null,null,null,null,null,null];saveJourney();renderJourney();}
+
+function removeJourneySlot(cpId,slot){if(!journeyData[cpId])return;journeyData[cpId][slot]=null;saveJourney();renderJourney();}
+
+function openJourneyPicker(cpId,slot){
+  journeyPickingCheckpoint=cpId;journeyPickingSlot=slot;
+  document.getElementById('journey-picker-modal').classList.add('open');
+  document.body.style.overflow='hidden';
+  document.getElementById('journey-picker-search').value='';
+  renderJourneyPickerGrid(pokemonData);
+}
+function closeJourneyPicker(){
+  document.getElementById('journey-picker-modal').classList.remove('open');
+  document.body.style.overflow='';
+  journeyPickingCheckpoint=null;journeyPickingSlot=null;
+}
+function filterJourneyPicker(){
+  const q=document.getElementById('journey-picker-search').value.toLowerCase();
+  renderJourneyPickerGrid(q?pokemonData.filter(p=>p.name.includes(q)||String(p.id).includes(q)):pokemonData);
+}
+function renderJourneyPickerGrid(data){
+  document.getElementById('journey-picker-grid').innerHTML=data.map(p=>{
+    const c=TYPE_COLORS[p.types[0]]||'#888';
+    return`<div class="poke-card" onclick="journeyPickPokemon(${p.id})" style="--card-color:${c}22">
+      <div class="poke-num">#${String(p.id).padStart(3,'0')}</div>
+      <img class="poke-sprite" src="${sprite(p.id)}" alt="${p.name}" loading="lazy">
+      <div class="poke-name">${p.name}</div>
+      <div class="poke-types">${p.types.map(t=>{const tc=TYPE_COLORS[t]||'#888';return`<span class="type-chip" style="background:${tc}20;color:${tc};border:1px solid ${tc}40">${t}</span>`;}).join('')}</div>
+    </div>`;
+  }).join('');
+}
+function journeyPickPokemon(id){
+  if(journeyPickingCheckpoint===null||journeyPickingSlot===null)return;
+  if(!journeyData[journeyPickingCheckpoint])journeyData[journeyPickingCheckpoint]=[null,null,null,null,null,null];
+  journeyData[journeyPickingCheckpoint][journeyPickingSlot]=id;
+  saveJourney();closeJourneyPicker();renderJourney();
+}
+
+function renderJourney(){
+  const tl=document.getElementById('journey-timeline');
+  if(!tl)return;
+  tl.innerHTML=JOURNEY_CHECKPOINTS.map((cp,idx)=>{
+    const slots=getJourneySlots(cp.id);
+    const hasMon=slots.some(s=>s!==null);
+    const isLast=idx===JOURNEY_CHECKPOINTS.length-1;
+    const c=cp.type?TYPE_COLORS[cp.type]||'#888':null;
+    const typeChip=c?`<span class="type-chip" style="background:${c}20;color:${c};border:1px solid ${c}40;font-size:10px">${cp.type}</span>`:'';
+    const badgeLabel=cp.badge?`<span style="font-size:11px;color:var(--text-muted)">${cp.badge}</span>`:'';
+    const slotsHtml=slots.map((id,si)=>{
+      if(id){
+        const p=pokemonData.find(x=>x.id===id);
+        return`<div class="journey-slot has-mon" title="${p?p.name:''}">
+          <img src="${sprite(id)}" alt="">
+          <div class="journey-slot-remove" onclick="event.stopPropagation();removeJourneySlot('${cp.id}',${si})">✕</div>
+        </div>`;
+      }
+      return`<div class="journey-slot" onclick="openJourneyPicker('${cp.id}',${si})"><span class="slot-plus">+</span></div>`;
+    }).join('');
+    return`<div class="journey-cp">
+      <div class="journey-connector">
+        <div class="journey-node${hasMon?' filled':''}">${cp.num}</div>
+        ${!isLast?'<div class="journey-line"></div>':''}
+      </div>
+      <div class="journey-card${hasMon?' filled':''}">
+        <div class="journey-card-head">
+          <div>
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:3px">
+              <span class="journey-leader-name">${cp.name}</span>${typeChip}
+            </div>
+            <div style="display:flex;align-items:center;gap:8px">
+              <span class="journey-city-name">${cp.city}</span>${badgeLabel}
+            </div>
+          </div>
+        </div>
+        <div class="journey-slots">${slotsHtml}</div>
+        <div class="journey-card-actions">
+          <button class="btn btn-primary" style="font-size:12px;padding:6px 14px" onclick="journeyUseTeam('${cp.id}')">Use Team</button>
+          ${hasMon?`<button class="btn btn-secondary" style="font-size:12px;padding:6px 14px" onclick="clearJourneyCheckpoint('${cp.id}')">Clear</button>`:''}
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+
+  const og=document.getElementById('journey-overview-grid');
+  if(!og)return;
+  og.innerHTML=JOURNEY_CHECKPOINTS.map((cp,idx)=>{
+    const slots=getJourneySlots(cp.id);
+    const filled=slots.filter(s=>s!==null);
+    const hasMon=filled.length>0;
+    const spritesHtml=hasMon
+      ?filled.map(id=>`<img class="journey-ov-sprite" src="${sprite(id)}" alt="">`).join('')
+      :`<span class="journey-ov-empty">No team recorded</span>`;
+    return`<div class="journey-ov-card${hasMon?' filled':''}" onclick="document.querySelectorAll('.journey-cp')[${idx}].scrollIntoView({behavior:'smooth',block:'center'})">
+      <div class="journey-ov-num">#${cp.num}</div>
+      <div class="journey-ov-name">${cp.name}</div>
+      <div class="journey-ov-sprites">${spritesHtml}</div>
+    </div>`;
+  }).join('');
+}
+
 function switchTab(name){
   document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
   document.getElementById('panel-'+name).classList.add('active');
@@ -1428,8 +1605,9 @@ document.addEventListener('click', e => {
   if (!e.target.closest('.type-dd')) document.querySelectorAll('.type-dd-menu').forEach(m => m.classList.remove('open'));
 });
 document.getElementById('picker-modal').addEventListener('click',e=>{if(e.target===e.currentTarget)closePicker();});
+document.getElementById('journey-picker-modal').addEventListener('click',e=>{if(e.target===e.currentTarget)closeJourneyPicker();});
 
-loadPokedex();renderTMFilters();renderTMs(TM_DATA);renderItemFilters();renderItems(ITEM_DATA);renderEvolutions(EVO_DATA);renderTeam();renderGymLeaders();
+loadPokedex();renderTMFilters();renderTMs(TM_DATA);renderItemFilters();renderItems(ITEM_DATA);renderEvolutions(EVO_DATA);renderTeam();renderGymLeaders();renderJourney();
 </script>
   <script>
     window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };
