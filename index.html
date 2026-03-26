@@ -1585,6 +1585,7 @@ function renderJourney(){
 function switchTab(name){
   document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
   document.getElementById('panel-'+name).classList.add('active');
+  if(name==='journey')renderJourney();
   // update dropdown button label + active state
   const active = document.querySelector(`.snav-item[onclick*="'${name}'"]`);
   document.querySelectorAll('.snav-item').forEach(x=>x.classList.remove('active'));
@@ -1662,7 +1663,7 @@ function captureJourney(){
   }).catch(()=>document.body.removeChild(card));
 }
 
-loadPokedex();renderTMFilters();renderTMs(TM_DATA);renderItemFilters();renderItems(ITEM_DATA);renderEvolutions(EVO_DATA);renderTeam();renderGymLeaders();renderJourney();
+loadPokedex();renderTMFilters();renderTMs(TM_DATA);renderItemFilters();renderItems(ITEM_DATA);renderEvolutions(EVO_DATA);renderTeam();renderGymLeaders();
 </script>
   <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
   <script>
