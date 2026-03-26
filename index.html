@@ -1666,6 +1666,8 @@ function _doCapture(win,isIOS){
       <div style="text-align:center;margin-top:32px;font-size:11px;color:#6b6b80;letter-spacing:0.3px;">fireredcompanion.flosartis.com</div>
     </div>`;
   document.body.appendChild(card);
+  const imgs=Array.from(card.querySelectorAll('img'));
+  Promise.all(imgs.map(img=>new Promise(r=>{if(img.complete)r();else{img.onload=r;img.onerror=r;}}))).then(()=>{
   html2canvas(card,{backgroundColor:'#23232f',useCORS:true,scale:2,logging:false}).then(canvas=>{
     document.body.removeChild(card);
     const dataUrl=canvas.toDataURL('image/png');
@@ -1679,6 +1681,7 @@ function _doCapture(win,isIOS){
       a.click();
     }
   }).catch(()=>{document.body.removeChild(card);if(win)win.close();});
+  });
 }
 
 if(/iPad|iPhone|iPod/.test(navigator.userAgent))document.getElementById('journey-save-label').textContent='Open Image';
