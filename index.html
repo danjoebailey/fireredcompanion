@@ -1624,13 +1624,18 @@ document.getElementById('picker-modal').addEventListener('click',e=>{if(e.target
 document.getElementById('journey-picker-modal').addEventListener('click',e=>{if(e.target===e.currentTarget)closeJourneyPicker();});
 
 function captureJourney(){
+  const isIOS=/iPad|iPhone|iPod/.test(navigator.userAgent);
+  const win=isIOS?window.open('','_blank'):null;
   if(!window.html2canvas){
     const s=document.createElement('script');
     s.src='https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js';
-    s.onload=()=>captureJourney();
+    s.onload=()=>_doCapture(win,isIOS);
     document.head.appendChild(s);
     return;
   }
+  _doCapture(win,isIOS);
+}
+function _doCapture(win,isIOS){
   const date=new Date().toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'});
   const psBase='https://play.pokemonshowdown.com/sprites/trainers/';
   const colsHtml=JOURNEY_CHECKPOINTS.map(cp=>{
@@ -1664,16 +1669,16 @@ function captureJourney(){
   html2canvas(card,{backgroundColor:'#23232f',useCORS:true,scale:2,logging:false}).then(canvas=>{
     document.body.removeChild(card);
     const dataUrl=canvas.toDataURL('image/png');
-    const isIOS=/iPad|iPhone|iPod/.test(navigator.userAgent);
-    if(isIOS){
-      window.open(dataUrl,'_blank');
+    if(isIOS&&win){
+      win.document.write(`<img src="${dataUrl}" style="max-width:100%;display:block;">`);
+      win.document.close();
     } else {
       const a=document.createElement('a');
       a.download='my-kanto-journey.png';
       a.href=dataUrl;
       a.click();
     }
-  }).catch(()=>document.body.removeChild(card));
+  }).catch(()=>{document.body.removeChild(card);if(win)win.close();});
 }
 
 loadPokedex();renderTMFilters();renderTMs(TM_DATA);renderItemFilters();renderItems(ITEM_DATA);renderEvolutions(EVO_DATA);renderTeam();renderGymLeaders();
