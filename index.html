@@ -440,7 +440,7 @@ body::before {
     <div class="journey-overview-wrap">
       <div class="journey-overview-label">Overview</div>
       <div class="journey-overview-sub">Your team at a glance</div>
-      <button class="btn btn-secondary" onclick="captureJourney()" style="font-size:12px;padding:6px 14px;display:inline-flex;align-items:center;gap:6px;margin-bottom:16px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>Save Image</button>
+      <button id="journey-save-btn" class="btn btn-secondary" onclick="captureJourney()" style="font-size:12px;padding:6px 14px;display:inline-flex;align-items:center;gap:6px;margin-bottom:16px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg><span id="journey-save-label">Save Image</span></button>
       <div class="journey-ov-scroll"><div class="journey-ov-cols" id="journey-overview-grid"></div></div>
     </div>
     <div id="journey-picker-modal" class="modal-overlay" style="align-items:flex-start;padding-top:5vh;">
@@ -1681,6 +1681,7 @@ function _doCapture(win,isIOS){
   }).catch(()=>{document.body.removeChild(card);if(win)win.close();});
 }
 
+if(/iPad|iPhone|iPod/.test(navigator.userAgent))document.getElementById('journey-save-label').textContent='Open Image';
 loadPokedex();renderTMFilters();renderTMs(TM_DATA);renderItemFilters();renderItems(ITEM_DATA);renderEvolutions(EVO_DATA);renderTeam();renderGymLeaders();
 </script>
   <script>
