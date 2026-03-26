@@ -1624,6 +1624,13 @@ document.getElementById('picker-modal').addEventListener('click',e=>{if(e.target
 document.getElementById('journey-picker-modal').addEventListener('click',e=>{if(e.target===e.currentTarget)closeJourneyPicker();});
 
 function captureJourney(){
+  if(!window.html2canvas){
+    const s=document.createElement('script');
+    s.src='https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js';
+    s.onload=()=>captureJourney();
+    document.head.appendChild(s);
+    return;
+  }
   const date=new Date().toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'});
   const psBase='https://play.pokemonshowdown.com/sprites/trainers/';
   const colsHtml=JOURNEY_CHECKPOINTS.map(cp=>{
@@ -1665,7 +1672,6 @@ function captureJourney(){
 
 loadPokedex();renderTMFilters();renderTMs(TM_DATA);renderItemFilters();renderItems(ITEM_DATA);renderEvolutions(EVO_DATA);renderTeam();renderGymLeaders();
 </script>
-  <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
   <script>
     window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };
   </script>
