@@ -1663,10 +1663,16 @@ function captureJourney(){
   document.body.appendChild(card);
   html2canvas(card,{backgroundColor:'#23232f',useCORS:true,scale:2,logging:false}).then(canvas=>{
     document.body.removeChild(card);
-    const a=document.createElement('a');
-    a.download='my-kanto-journey.png';
-    a.href=canvas.toDataURL('image/png');
-    a.click();
+    const dataUrl=canvas.toDataURL('image/png');
+    const isIOS=/iPad|iPhone|iPod/.test(navigator.userAgent);
+    if(isIOS){
+      window.open(dataUrl,'_blank');
+    } else {
+      const a=document.createElement('a');
+      a.download='my-kanto-journey.png';
+      a.href=dataUrl;
+      a.click();
+    }
   }).catch(()=>document.body.removeChild(card));
 }
 
