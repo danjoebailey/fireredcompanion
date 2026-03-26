@@ -1608,6 +1608,12 @@ document.addEventListener('click',e=>{
   }
 });
 
+document.addEventListener('error',e=>{
+  if(e.target.tagName==='IMG'&&e.target.src.includes('generation-iii')){
+    const m=e.target.src.match(/\/(\d+)\.png$/);
+    if(m)e.target.src=`https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${m[1]}.png`;
+  }
+},true);
 document.getElementById('poke-modal').addEventListener('click',e=>{if(e.target===e.currentTarget)closePokeModal();});
 document.addEventListener('click', e => {
   if (!e.target.closest('.type-dd')) document.querySelectorAll('.type-dd-menu').forEach(m => m.classList.remove('open'));
