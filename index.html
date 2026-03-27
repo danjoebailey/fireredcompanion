@@ -808,8 +808,8 @@ const SPRITE_OVERRIDES = {1: "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAASABIAAD
 
 function sprite(id){
   return id<=151
-    ?`https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-iii/firered-leafgreen/${id}.png`
-    :`https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-iii/ruby-sapphire/${id}.png`;
+    ?`https://cdn.jsdelivr.net/gh/PokeAPI/sprites@master/sprites/pokemon/versions/generation-iii/firered-leafgreen/${id}.png`
+    :`https://cdn.jsdelivr.net/gh/PokeAPI/sprites@master/sprites/pokemon/versions/generation-iii/ruby-sapphire/${id}.png`;
 }
 function typeChip(t){const c=TYPE_COLORS[t]||'#888';return`<span class="type-chip" style="background:${c}20;color:${c};border:1px solid ${c}40">${t}</span>`;}
 function statColor(v){return v>=100?'#34d399':v>=60?'#fbbf24':'#f87171';}
