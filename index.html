@@ -849,13 +849,13 @@ function renderPokedex(data){
     g.className='';
     g.innerHTML=data.map(p=>`<div class="rank-row" onclick="openPokeModal(${p.id})">
         <span class="rank-pos">#${String(p.id).padStart(3,'0')}</span>
-        <img class="rank-sprite" src="${sprite(p.id)}" alt="${p.name}">
+        <img class="rank-sprite" src="${sprite(p.id)}" alt="${p.name}" crossorigin="anonymous">
         <span class="rank-name">${p.name}</span>
         <div class="rank-types">${p.types.map(typeChipFilter).join('')}</div>
       </div>`).join('');
   } else {
     g.className='pokemon-grid';
-    g.innerHTML=data.map(p=>`<div class="poke-card" onclick="openPokeModal(${p.id})" style="--card-color:${TYPE_COLORS[p.types[0]]||'#888'}22"><div class="poke-num">#${String(p.id).padStart(3,'0')}</div><img class="poke-sprite" src="${sprite(p.id)}" alt="${p.name}" loading="lazy"><div class="poke-name">${p.name}</div><div class="poke-types">${p.types.map(typeChipFilter).join('')}</div></div>`).join('');
+    g.innerHTML=data.map(p=>`<div class="poke-card" onclick="openPokeModal(${p.id})" style="--card-color:${TYPE_COLORS[p.types[0]]||'#888'}22"><div class="poke-num">#${String(p.id).padStart(3,'0')}</div><img class="poke-sprite" src="${sprite(p.id)}" alt="${p.name}" loading="lazy" crossorigin="anonymous"><div class="poke-name">${p.name}</div><div class="poke-types">${p.types.map(typeChipFilter).join('')}</div></div>`).join('');
   }
 }
 
@@ -868,7 +868,7 @@ function buildTypeDdMenu(menuId, callbackName) {
         const pid = TYPE_POKEMON[t];
         const c = TYPE_COLORS[t]||'#888';
         return `<div class="type-dd-opt" onclick="${callbackName}('${t}');closeTypeDd('${menuId}')">
-          ${pid?`<img src="${sprite(pid)}" style="width:24px;height:24px;image-rendering:pixelated;flex-shrink:0;">`:``}
+          ${pid?`<img src="${sprite(pid)}" style="width:24px;height:24px;image-rendering:pixelated;flex-shrink:0;" crossorigin="anonymous">`:``}
           <span style="font-size:13px;font-weight:500;color:var(--text);text-transform:capitalize;">${t}</span>
         </div>`;
       }).join('');
@@ -893,7 +893,7 @@ function updateTypeDdBtn(btnId, type) {
   } else {
     const pid = TYPE_POKEMON[type];
     const c = TYPE_COLORS[type]||'#888';
-    btn.innerHTML = `${pid?`<img src="${sprite(pid)}" style="width:22px;height:22px;image-rendering:pixelated;">`:``}<span style="text-transform:capitalize;">${type}</span> <span style="color:var(--text-muted);font-size:11px;">▾</span>`;
+    btn.innerHTML = `${pid?`<img src="${sprite(pid)}" style="width:22px;height:22px;image-rendering:pixelated;" crossorigin="anonymous">`:``}<span style="text-transform:capitalize;">${type}</span> <span style="color:var(--text-muted);font-size:11px;">▾</span>`;
   }
   // update active state in menu
   const menuId = btnId.replace('-dd-btn', '-menu');
@@ -1039,7 +1039,7 @@ function openPokeModal(id){
   document.getElementById('modal-top').innerHTML=`
     <button class="modal-close" onclick="closePokeModal()">✕</button>
     <div class="modal-num">#${String(p.id).padStart(3,'0')}</div>
-    <img class="modal-sprite" src="${sprite(p.id)}" alt="${p.name}">
+    <img class="modal-sprite" src="${sprite(p.id)}" alt="${p.name}" crossorigin="anonymous">
     <div class="modal-name">${p.name}</div>
     <div class="poke-types" style="justify-content:center;">${p.types.map(typeChip).join('')}</div>
     <div class="info-grid" style="margin-top:16px;">
@@ -1198,7 +1198,7 @@ function randomizeTeam(){const filled=team.filter(Boolean);const pool=pokemonDat
 
 function openPicker(slot){pickingSlot=slot!==undefined?slot:team.indexOf(null);if(pickingSlot===-1){alert('Team is full!');return;}document.getElementById('picker-modal').classList.add('open');document.body.style.overflow='hidden';renderPickerGrid(pokemonData);}
 function closePicker(){document.getElementById('picker-modal').classList.remove('open');document.body.style.overflow='';}
-function renderPickerGrid(data){const g=document.getElementById('picker-grid');if(!g)return;g.innerHTML=data.map(p=>`<div class="poke-card" onclick="pickPokemon(${p.id})"><div class="poke-num">#${String(p.id).padStart(3,'0')}</div><img class="poke-sprite" src="${sprite(p.id)}" alt="${p.name}" loading="lazy"><div class="poke-name">${p.name}</div><div class="poke-types">${p.types.map(typeChip).join('')}</div></div>`).join('');}
+function renderPickerGrid(data){const g=document.getElementById('picker-grid');if(!g)return;g.innerHTML=data.map(p=>`<div class="poke-card" onclick="pickPokemon(${p.id})"><div class="poke-num">#${String(p.id).padStart(3,'0')}</div><img class="poke-sprite" src="${sprite(p.id)}" alt="${p.name}" loading="lazy" crossorigin="anonymous"><div class="poke-name">${p.name}</div><div class="poke-types">${p.types.map(typeChip).join('')}</div></div>`).join('');}
 function filterPicker(){const q=document.getElementById('picker-search').value.toLowerCase();renderPickerGrid(pokemonData.filter(p=>p.name.includes(q)||String(p.id).includes(q)));}
 function pickPokemon(id){if(pickingSlot!==null)team[pickingSlot]=id;saveTeam();closePicker();renderTeam();switchTab('team');}
 
@@ -1504,7 +1504,7 @@ function renderJourneyPickerGrid(data){
     const c=TYPE_COLORS[p.types[0]]||'#888';
     return`<div class="poke-card" onclick="journeyPickPokemon(${p.id})" style="--card-color:${c}22">
       <div class="poke-num">#${String(p.id).padStart(3,'0')}</div>
-      <img class="poke-sprite" src="${sprite(p.id)}" alt="${p.name}" loading="lazy">
+      <img class="poke-sprite" src="${sprite(p.id)}" alt="${p.name}" loading="lazy" crossorigin="anonymous">
       <div class="poke-name">${p.name}</div>
       <div class="poke-types">${p.types.map(t=>{const tc=TYPE_COLORS[t]||'#888';return`<span class="type-chip" style="background:${tc}20;color:${tc};border:1px solid ${tc}40">${t}</span>`;}).join('')}</div>
     </div>`;
@@ -1531,7 +1531,7 @@ function renderJourney(){
       if(id){
         const p=pokemonData.find(x=>x.id===id);
         return`<div class="journey-slot has-mon" title="${p?p.name:''}">
-          <img src="${sprite(id)}" alt="">
+          <img src="${sprite(id)}" alt="" crossorigin="anonymous">
           <div class="journey-slot-remove" onclick="event.stopPropagation();removeJourneySlot('${cp.id}',${si})">✕</div>
         </div>`;
       }
@@ -1568,10 +1568,10 @@ function renderJourney(){
   og.innerHTML=JOURNEY_CHECKPOINTS.map((cp,idx)=>{
     const slots=getJourneySlots(cp.id);
     const trainerEl=cp.trainerKey
-      ?`<img src="${psBase}${cp.trainerKey}.png" onerror="this.style.display='none'" alt="${cp.name}">`
+      ?`<img src="${psBase}${cp.trainerKey}.png" onerror="this.style.display='none'" alt="${cp.name}" loading="lazy">`
       :`<div class="journey-col-e4">E4</div>`;
     const monsHtml=slots.map(id=>id
-      ?`<img class="journey-col-mon" src="${sprite(id)}" alt="">`
+      ?`<img class="journey-col-mon" src="${sprite(id)}" alt="" crossorigin="anonymous">`
       :`<div class="journey-col-empty"></div>`
     ).join('');
     return`<div class="journey-col" onclick="document.querySelectorAll('.journey-cp')[${idx}].scrollIntoView({behavior:'smooth',block:'center'})">
@@ -1638,16 +1638,12 @@ function captureJourney(){
 async function _doCapture(win,isIOS){
   const date=new Date().toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'});
   const psBase='https://play.pokemonshowdown.com/sprites/trainers/';
-  const toDataUrl=url=>fetch(url).then(r=>r.blob()).then(b=>new Promise(res=>{const fr=new FileReader();fr.onload=()=>res(fr.result);fr.readAsDataURL(b);})).catch(()=>null);
-  const trainerUrls={};
-  await Promise.all(JOURNEY_CHECKPOINTS.filter(cp=>cp.trainerKey).map(async cp=>{trainerUrls[cp.id]=await toDataUrl(psBase+cp.trainerKey+'.png');}));
   const colsHtml=JOURNEY_CHECKPOINTS.map(cp=>{
     const slots=getJourneySlots(cp.id);
-    const dataUrl=trainerUrls[cp.id];
     const initial=cp.name.charAt(0).toUpperCase();
-    const trainerEl=dataUrl
-      ?`<img src="${dataUrl}" style="width:64px;height:64px;object-fit:contain;image-rendering:pixelated;display:block;">`
-      :`<div style="width:64px;height:64px;background:#34344a;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:900;color:#c8c8e0;letter-spacing:0;">${cp.trainerKey?initial:'E4'}</div>`;
+    const trainerEl=cp.trainerKey
+      ?`<img src="${psBase}${cp.trainerKey}.png" crossorigin="anonymous" style="width:64px;height:64px;object-fit:contain;image-rendering:pixelated;display:block;">`
+      :`<div style="width:64px;height:64px;background:#34344a;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:900;color:#c8c8e0;letter-spacing:0;">E4</div>`;
     const monsHtml=slots.map(id=>id
       ?`<img src="${sprite(id)}" crossorigin="anonymous" style="width:56px;height:56px;image-rendering:pixelated;display:block;">`
       :`<div style="width:56px;height:56px;"></div>`
