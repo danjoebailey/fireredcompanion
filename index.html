@@ -1564,7 +1564,7 @@ function renderJourney(){
 
   const og=document.getElementById('journey-overview-grid');
   if(!og)return;
-  const psBase='https://play.pokemonshowdown.com/sprites/trainers/';
+  const psBase='/trainers/';
   og.innerHTML=JOURNEY_CHECKPOINTS.map((cp,idx)=>{
     const slots=getJourneySlots(cp.id);
     const trainerEl=cp.trainerKey
@@ -1637,7 +1637,7 @@ function captureJourney(){
 }
 async function _doCapture(win,isIOS){
   const date=new Date().toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'});
-  const psBase='https://play.pokemonshowdown.com/sprites/trainers/';
+  const psBase='/trainers/';
   const colsHtml=JOURNEY_CHECKPOINTS.map(cp=>{
     const slots=getJourneySlots(cp.id);
     const initial=cp.name.charAt(0).toUpperCase();
