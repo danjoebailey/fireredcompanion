@@ -331,7 +331,7 @@ body::before {
 .loc-enc-name{font-size:13px;font-weight:700;color:#222;text-transform:capitalize;}
 .loc-enc-meta{font-size:11px;color:#999;margin-top:1px;text-transform:capitalize;}
 .loc-enc-lvl{font-family:'DM Mono',monospace;font-size:11px;font-weight:700;color:#666;white-space:nowrap;}
-.loc-enc-chance{font-family:'DM Mono',monospace;font-size:11px;font-weight:800;color:var(--accent);white-space:nowrap;min-width:32px;text-align:right;}
+.loc-enc-chance{font-family:'DM Mono',monospace;font-size:11px;font-weight:800;white-space:nowrap;min-width:32px;text-align:right;}
 .loc-loading{display:flex;align-items:center;gap:10px;padding:16px;color:#999;font-size:13px;}
 .loc-empty{padding:16px;font-size:13px;color:#999;}
 /* Journey */
@@ -1863,7 +1863,7 @@ async function toggleLocRow(slug){
     <img src="${sprite(e.id)}" style="width:32px;height:32px;image-rendering:pixelated;" crossorigin="anonymous" alt="${e.name}">
     <div><div class="loc-enc-name">${e.name}</div><div class="loc-enc-meta">${e.method}</div></div>
     <div class="loc-enc-lvl">${e.lvl}</div>
-    <div class="loc-enc-chance">${e.chance}%</div>
+    <div class="loc-enc-chance" style="color:${e.chance>=30?'#22c55e':e.chance>=10?'#f59e0b':'#ef4444'}">${e.chance}%</div>
   </div>`).join('');
 }
 
