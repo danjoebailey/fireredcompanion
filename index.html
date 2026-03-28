@@ -853,6 +853,8 @@ function pwColor(v){return v==='—'?'var(--text-muted)':v>=90?'#34d399':v>=60?'
 function accColor(v){return v==null?'var(--text-muted)':v>=100?'#34d399':v>=85?'#fbbf24':'#f87171';}
 function ppColor(v){return !v?'var(--text-muted)':v>=30?'#34d399':v>=15?'#fbbf24':'#f87171';}
 
+function track(name,data){try{window.va('event',{name,...(data||{})});}catch{}}
+
 function loadPokedex(){
   pokemonData = POKEMON_DATA;
   renderPokedex(pokemonData);
@@ -1070,6 +1072,7 @@ let modalPoke = null;
 
 function openPokeModal(id){
   const p=pokemonData.find(x=>x.id===id);if(!p)return;
+  track('pokemon_modal_opened',{pokemon:p.name,id});
   modalPoke = p;
   modalTab = 'stats';
   document.getElementById('modal-top').innerHTML=`
@@ -1211,10 +1214,10 @@ async function renderModalBody(){
     <button class="btn btn-primary" style="width:100%;margin-top:16px;" onclick="addFromModal(${p.id})">+ Add to Team</button>`;
 }
 
-function switchModalTab(tab){ modalTab=tab; renderModalBody(); }
+function switchModalTab(tab){ track('modal_tab_switched',{tab,pokemon:modalPoke?.name}); modalTab=tab; renderModalBody(); }
 
 function closePokeModal(){document.getElementById('poke-modal').classList.remove('open'); modalPoke=null;}
-function addFromModal(id){const s=team.indexOf(null);if(s===-1){alert('Team is full!');return;}team[s]=id;saveTeam();closePokeModal();renderTeam();}
+function addFromModal(id){const s=team.indexOf(null);if(s===-1){alert('Team is full!');return;}team[s]=id;saveTeam();closePokeModal();renderTeam();const p=pokemonData.find(x=>x.id===id);track('pokemon_added_to_team',{pokemon:p?.name,source:'modal'});}
 
 function renderTeam(){
   document.getElementById('team-slots').innerHTML=team.map((id,i)=>{
@@ -1229,14 +1232,14 @@ function renderTeam(){
 
 function saveTeam(){localStorage.setItem('frTeam',JSON.stringify(team));}
 function removeFromTeam(i){team[i]=null;saveTeam();renderTeam();}
-function clearTeam(){team=[null,null,null,null,null,null];saveTeam();renderTeam();}
-function randomizeTeam(){const filled=team.filter(Boolean);const pool=pokemonData.filter(p=>!filled.includes(p.id));for(let i=0;i<team.length;i++){if(team[i]===null&&pool.length>0){const idx=Math.floor(Math.random()*pool.length);team[i]=pool[idx].id;pool.splice(idx,1);}}saveTeam();renderTeam();}
+function clearTeam(){team=[null,null,null,null,null,null];saveTeam();renderTeam();track('team_cleared');}
+function randomizeTeam(){const filled=team.filter(Boolean);const pool=pokemonData.filter(p=>!filled.includes(p.id));for(let i=0;i<team.length;i++){if(team[i]===null&&pool.length>0){const idx=Math.floor(Math.random()*pool.length);team[i]=pool[idx].id;pool.splice(idx,1);}}saveTeam();renderTeam();track('team_randomized');}
 
 function openPicker(slot){pickingSlot=slot!==undefined?slot:team.indexOf(null);if(pickingSlot===-1){alert('Team is full!');return;}document.getElementById('picker-modal').classList.add('open');document.body.style.overflow='hidden';renderPickerGrid(pokemonData);}
 function closePicker(){document.getElementById('picker-modal').classList.remove('open');document.body.style.overflow='';}
 function renderPickerGrid(data){const g=document.getElementById('picker-grid');if(!g)return;g.innerHTML=data.map(p=>`<div class="poke-card" onclick="pickPokemon(${p.id})"><div class="poke-num">#${String(p.id).padStart(3,'0')}</div><img class="poke-sprite" src="${sprite(p.id)}" alt="${p.name}" loading="lazy" crossorigin="anonymous"><div class="poke-name">${p.name}</div><div class="poke-types">${p.types.map(typeChip).join('')}</div></div>`).join('');}
 function filterPicker(){const q=document.getElementById('picker-search').value.toLowerCase();renderPickerGrid(pokemonData.filter(p=>p.name.includes(q)||String(p.id).includes(q)));}
-function pickPokemon(id){if(pickingSlot!==null)team[pickingSlot]=id;saveTeam();closePicker();renderTeam();switchTab('team');}
+function pickPokemon(id){if(pickingSlot!==null)team[pickingSlot]=id;saveTeam();closePicker();renderTeam();switchTab('team');const p=pokemonData.find(x=>x.id===id);track('pokemon_added_to_team',{pokemon:p?.name,source:'picker'});}
 
 function renderCoverage(){
   const c=document.getElementById('team-coverage');
@@ -1515,7 +1518,7 @@ function getJourneySlots(cpId){return journeyData[cpId]||[null,null,null,null,nu
 
 function journeyUseTeam(cpId){journeyData[cpId]=[...team];saveJourney();renderJourney();}
 
-function clearJourneyCheckpoint(cpId){journeyData[cpId]=[null,null,null,null,null,null];saveJourney();renderJourney();}
+function clearJourneyCheckpoint(cpId){journeyData[cpId]=[null,null,null,null,null,null];saveJourney();renderJourney();track('journey_checkpoint_cleared',{checkpoint:cpId});}
 
 function removeJourneySlot(cpId,slot){if(!journeyData[cpId])return;journeyData[cpId][slot]=null;saveJourney();renderJourney();}
 
@@ -1551,6 +1554,7 @@ function journeyPickPokemon(id){
   if(!journeyData[journeyPickingCheckpoint])journeyData[journeyPickingCheckpoint]=[null,null,null,null,null,null];
   journeyData[journeyPickingCheckpoint][journeyPickingSlot]=id;
   saveJourney();closeJourneyPicker();renderJourney();
+  const p=pokemonData.find(x=>x.id===id);track('journey_pokemon_added',{pokemon:p?.name,checkpoint:journeyPickingCheckpoint});
 }
 
 function renderJourney(){
@@ -1619,6 +1623,7 @@ function renderJourney(){
 }
 
 function switchTab(name){
+  track('tab_switched',{tab:name});
   document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
   document.getElementById('panel-'+name).classList.add('active');
   if(name==='journey')renderJourney();
@@ -1660,7 +1665,7 @@ document.addEventListener('click', e => {
 document.getElementById('picker-modal').addEventListener('click',e=>{if(e.target===e.currentTarget)closePicker();});
 document.getElementById('journey-picker-modal').addEventListener('click',e=>{if(e.target===e.currentTarget)closeJourneyPicker();});
 
-function captureJourney(){
+function captureJourney(){track('journey_save_image');
   const isIOS=/iPad|iPhone|iPod/.test(navigator.userAgent);
   const win=isIOS?window.open('','_blank'):null;
   if(!window.html2canvas){
@@ -1858,6 +1863,7 @@ async function toggleLocRow(slug){
   const body=document.getElementById('loc-body-'+slug);
   if(row.classList.contains('open')){row.classList.remove('open');return;}
   row.classList.add('open');
+  track('location_expanded',{location:slug});
   if(body.dataset.loaded)return;
   body.dataset.loaded='1';
   body.innerHTML=`<div class="loc-loading"><div class="spinner" style="width:18px;height:18px;border-width:2px;flex-shrink:0;"></div>Loading…</div>`;
