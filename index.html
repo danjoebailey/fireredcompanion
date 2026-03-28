@@ -1688,7 +1688,7 @@ async function _doCapture(win,isIOS){
     </div>`;
   }).join('');
   const card=document.createElement('div');
-  card.style.cssText='position:fixed;left:-9999px;top:0;width:820px;background:#23232f;padding:44px 40px 40px;font-family:Outfit,sans-serif;box-sizing:border-box;overflow:hidden;';
+  card.style.cssText='position:absolute;top:-9999px;left:0;width:820px;background:#23232f;padding:44px 40px 40px;font-family:Outfit,sans-serif;box-sizing:border-box;overflow:hidden;';
   card.innerHTML=`
     <div style="position:absolute;inset:0;background:radial-gradient(ellipse 600px 400px at 10% 20%,rgba(255,61,61,0.14) 0%,transparent 70%),radial-gradient(ellipse 500px 300px at 90% 80%,rgba(255,107,53,0.10) 0%,transparent 70%);pointer-events:none;"></div>
     <div style="position:relative;z-index:1;">
@@ -1714,7 +1714,7 @@ async function _doCapture(win,isIOS){
       a.href=dataUrl;
       a.click();
     }
-  }).catch(()=>{document.body.removeChild(card);if(win)win.close();});
+  }).catch(err=>{document.body.removeChild(card);if(win)win.close();console.error('captureJourney failed:',err);alert('Something went wrong generating the image. Please try again.');});
   });
 }
 
