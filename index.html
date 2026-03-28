@@ -312,6 +312,28 @@ body::before {
 .move-detail-stat-label { font-size: 10px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.4px; }
 .move-detail-stat-val { font-family: 'Outfit', sans-serif; font-size: 13px; font-weight: 700; color: #222; }
 .move-detail-desc { font-size: 12px; color: var(--text-muted); line-height: 1.5; }
+/* Locations */
+.loc-group-tabs{display:flex;gap:4px;margin-bottom:16px;flex-wrap:wrap;}
+.loc-group-tab{font-family:'Outfit',sans-serif;font-size:12px;font-weight:700;padding:6px 12px;border-radius:100px;border:1.5px solid var(--border);background:none;color:var(--text-muted);cursor:pointer;transition:all 0.15s;}
+.loc-group-tab.active{background:var(--accent);border-color:var(--accent);color:#fff;}
+.loc-row{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:6px;overflow:hidden;transition:border-color 0.15s;}
+.loc-row.open{border-color:rgba(255,255,255,0.18);}
+.loc-row-head{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;cursor:pointer;user-select:none;}
+.loc-row-head:hover{background:var(--surface2);}
+.loc-row-name{font-size:14px;font-weight:700;color:var(--text);}
+.loc-row-chevron{font-size:11px;color:var(--text-muted);transition:transform 0.2s;}
+.loc-row.open .loc-row-chevron{transform:rotate(180deg);}
+.loc-row-body{display:none;border-top:1px solid var(--border);}
+.loc-row.open .loc-row-body{display:block;}
+.loc-enc-row{display:grid;grid-template-columns:32px 1fr auto auto;align-items:center;gap:10px;padding:8px 16px;border-bottom:1px solid var(--border);cursor:pointer;transition:background 0.1s;}
+.loc-enc-row:last-child{border-bottom:none;}
+.loc-enc-row:hover{background:var(--surface2);}
+.loc-enc-name{font-size:13px;font-weight:700;color:var(--text);text-transform:capitalize;}
+.loc-enc-meta{font-size:11px;color:var(--text-muted);margin-top:1px;text-transform:capitalize;}
+.loc-enc-lvl{font-family:'DM Mono',monospace;font-size:11px;font-weight:700;color:var(--text-sub);white-space:nowrap;}
+.loc-enc-chance{font-family:'DM Mono',monospace;font-size:11px;font-weight:800;color:var(--accent);white-space:nowrap;min-width:32px;text-align:right;}
+.loc-loading{display:flex;align-items:center;gap:10px;padding:16px;color:var(--text-muted);font-size:13px;}
+.loc-empty{padding:16px;font-size:13px;color:var(--text-muted);}
 /* Journey */
 .journey-timeline { display: flex; flex-direction: column; margin-bottom: 48px; }
 .journey-cp { display: flex; gap: 16px; }
@@ -374,6 +396,7 @@ body::before {
       <button class="snav-item" onclick="switchTab('types');toggleSiteNav()" data-label="Types">Types</button>
       <button class="snav-item" onclick="switchTab('gymleaders');toggleSiteNav()" data-label="Gym Leaders">Gym Leaders</button>
       <button class="snav-item" onclick="switchTab('journey');toggleSiteNav()" data-label="Journey">Journey</button>
+      <button class="snav-item" onclick="switchTab('locations');toggleSiteNav()" data-label="Locations">Locations</button>
     </div>
   </div>
 </div>
@@ -453,6 +476,15 @@ body::before {
         <div style="padding:16px;"><div id="journey-picker-grid" class="pokemon-grid" style="max-height:52vh;overflow-y:auto;"></div></div>
       </div>
     </div>
+  </div>
+
+  <div id="panel-locations" class="panel">
+    <div class="section-head">
+      <h2>Locations</h2>
+      <p>Where to find Pokémon in Fire Red</p>
+    </div>
+    <div class="loc-group-tabs" id="loc-group-tabs"></div>
+    <div id="loc-list"></div>
   </div>
 
   <div id="panel-moves" class="panel">
@@ -1586,6 +1618,7 @@ function switchTab(name){
   document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
   document.getElementById('panel-'+name).classList.add('active');
   if(name==='journey')renderJourney();
+  if(name==='locations')renderLocations();
   // update dropdown button label + active state
   const active = document.querySelector(`.snav-item[onclick*="'${name}'"]`);
   document.querySelectorAll('.snav-item').forEach(x=>x.classList.remove('active'));
@@ -1686,6 +1719,154 @@ async function _doCapture(win,isIOS){
 }
 
 if(/iPad|iPhone|iPod/.test(navigator.userAgent))document.getElementById('journey-save-label').textContent='Open Image';
+
+// Locations
+const LOCATIONS=[
+  {name:'Route 1',slug:'kanto-route-1-area',group:'Routes'},
+  {name:'Route 2 (South)',slug:'kanto-route-2-south-towards-viridian-city',group:'Routes'},
+  {name:'Route 2 (North)',slug:'kanto-route-2-north-towards-pewter-city',group:'Routes'},
+  {name:'Route 3',slug:'kanto-route-3-area',group:'Routes'},
+  {name:'Route 4',slug:'kanto-route-4-area',group:'Routes'},
+  {name:'Route 5',slug:'kanto-route-5-area',group:'Routes'},
+  {name:'Route 6',slug:'kanto-route-6-area',group:'Routes'},
+  {name:'Route 7',slug:'kanto-route-7-area',group:'Routes'},
+  {name:'Route 8',slug:'kanto-route-8-area',group:'Routes'},
+  {name:'Route 9',slug:'kanto-route-9-area',group:'Routes'},
+  {name:'Route 10',slug:'kanto-route-10-area',group:'Routes'},
+  {name:'Route 11',slug:'kanto-route-11-area',group:'Routes'},
+  {name:'Route 12',slug:'kanto-route-12-area',group:'Routes'},
+  {name:'Route 13',slug:'kanto-route-13-area',group:'Routes'},
+  {name:'Route 14',slug:'kanto-route-14-area',group:'Routes'},
+  {name:'Route 15',slug:'kanto-route-15-area',group:'Routes'},
+  {name:'Route 16',slug:'kanto-route-16-area',group:'Routes'},
+  {name:'Route 17',slug:'kanto-route-17-area',group:'Routes'},
+  {name:'Route 18',slug:'kanto-route-18-area',group:'Routes'},
+  {name:'Route 22',slug:'kanto-route-22-area',group:'Routes'},
+  {name:'Route 23',slug:'kanto-route-23-area',group:'Routes'},
+  {name:'Route 24',slug:'kanto-route-24-area',group:'Routes'},
+  {name:'Route 25',slug:'kanto-route-25-area',group:'Routes'},
+  {name:'Sea Route 19',slug:'kanto-sea-route-19-area',group:'Routes'},
+  {name:'Sea Route 20',slug:'kanto-sea-route-20-area',group:'Routes'},
+  {name:'Sea Route 21',slug:'kanto-sea-route-21-area',group:'Routes'},
+  {name:'Viridian Forest',slug:'viridian-forest-area',group:'Dungeons'},
+  {name:'Mt. Moon 1F',slug:'mt-moon-1f',group:'Dungeons'},
+  {name:"Mt. Moon B1F",slug:'mt-moon-b1f',group:'Dungeons'},
+  {name:"Mt. Moon B2F",slug:'mt-moon-b2f',group:'Dungeons'},
+  {name:"Diglett's Cave",slug:'digletts-cave-area',group:'Dungeons'},
+  {name:'Rock Tunnel 1F',slug:'rock-tunnel-1f',group:'Dungeons'},
+  {name:'Rock Tunnel B1F',slug:'rock-tunnel-b1f',group:'Dungeons'},
+  {name:'Pokémon Tower 1F',slug:'pokemon-tower-1f',group:'Dungeons'},
+  {name:'Pokémon Tower 2F',slug:'pokemon-tower-2f',group:'Dungeons'},
+  {name:'Pokémon Tower 3F',slug:'pokemon-tower-3f',group:'Dungeons'},
+  {name:'Pokémon Tower 4F',slug:'pokemon-tower-4f',group:'Dungeons'},
+  {name:'Pokémon Tower 5F',slug:'pokemon-tower-5f',group:'Dungeons'},
+  {name:'Pokémon Tower 6F',slug:'pokemon-tower-6f',group:'Dungeons'},
+  {name:'Pokémon Tower 7F',slug:'pokemon-tower-7f',group:'Dungeons'},
+  {name:'Safari Zone (Middle)',slug:'kanto-safari-zone-middle',group:'Dungeons'},
+  {name:'Safari Zone (East)',slug:'kanto-safari-zone-area-1-east',group:'Dungeons'},
+  {name:'Safari Zone (North)',slug:'kanto-safari-zone-area-2-north',group:'Dungeons'},
+  {name:'Safari Zone (West)',slug:'kanto-safari-zone-area-3-west',group:'Dungeons'},
+  {name:'Seafoam Islands 1F',slug:'seafoam-islands-1f',group:'Dungeons'},
+  {name:'Seafoam Islands B1F',slug:'seafoam-islands-b1f',group:'Dungeons'},
+  {name:'Seafoam Islands B2F',slug:'seafoam-islands-b2f',group:'Dungeons'},
+  {name:'Seafoam Islands B3F',slug:'seafoam-islands-b3f',group:'Dungeons'},
+  {name:'Seafoam Islands B4F',slug:'seafoam-islands-b4f',group:'Dungeons'},
+  {name:'Power Plant',slug:'power-plant-area',group:'Dungeons'},
+  {name:'Pokémon Mansion 1F',slug:'pokemon-mansion-1f',group:'Dungeons'},
+  {name:'Pokémon Mansion 2F',slug:'pokemon-mansion-2f',group:'Dungeons'},
+  {name:'Pokémon Mansion 3F',slug:'pokemon-mansion-3f',group:'Dungeons'},
+  {name:'Pokémon Mansion B1F',slug:'pokemon-mansion-b1f',group:'Dungeons'},
+  {name:'Victory Road 1F',slug:'kanto-victory-road-1-1f',group:'Dungeons'},
+  {name:'Victory Road 2F',slug:'kanto-victory-road-1-2f',group:'Dungeons'},
+  {name:'Victory Road 3F',slug:'kanto-victory-road-1-3f',group:'Dungeons'},
+  {name:'Cerulean Cave 1F',slug:'cerulean-cave-1f',group:'Dungeons'},
+  {name:'Cerulean Cave 2F',slug:'cerulean-cave-2f',group:'Dungeons'},
+  {name:'Cerulean Cave B1F',slug:'cerulean-cave-b1f',group:'Dungeons'},
+  {name:'Kindle Road',slug:'kindle-road-area',group:'Sevii Islands'},
+  {name:'Treasure Beach',slug:'treasure-beach-area',group:'Sevii Islands'},
+  {name:'Cape Brink',slug:'cape-brink-area',group:'Sevii Islands'},
+  {name:'Bond Bridge',slug:'bond-bridge-area',group:'Sevii Islands'},
+  {name:'Three Isle Port',slug:'three-isle-port-area',group:'Sevii Islands'},
+  {name:'Resort Gorgeous',slug:'resort-gorgeous-area',group:'Sevii Islands'},
+  {name:'Water Labyrinth',slug:'water-labyrinth-area',group:'Sevii Islands'},
+  {name:'Five Isle Meadow',slug:'five-isle-meadow-area',group:'Sevii Islands'},
+  {name:'Memorial Pillar',slug:'memorial-pillar-area',group:'Sevii Islands'},
+  {name:'Outcast Island',slug:'outcast-island-area',group:'Sevii Islands'},
+  {name:'Green Path',slug:'green-path-area',group:'Sevii Islands'},
+  {name:'Water Path',slug:'water-path-area',group:'Sevii Islands'},
+  {name:'Ruin Valley',slug:'ruin-valley-area',group:'Sevii Islands'},
+  {name:'Sevault Canyon',slug:'sevault-canyon-area',group:'Sevii Islands'},
+  {name:'Berry Forest',slug:'berry-forest-area',group:'Sevii Islands'},
+  {name:'Pattern Bush',slug:'pattern-bush-area',group:'Sevii Islands'},
+  {name:'Mt. Ember',slug:'mt-ember-area',group:'Sevii Islands'},
+  {name:'Mt. Ember Cave',slug:'mt-ember-cave',group:'Sevii Islands'},
+  {name:'Icefall Cave (Entrance)',slug:'icefall-cave-entrance',group:'Sevii Islands'},
+  {name:'Icefall Cave 1F',slug:'icefall-cave-1f',group:'Sevii Islands'},
+  {name:'Icefall Cave B1F',slug:'icefall-cave-b1f',group:'Sevii Islands'},
+  {name:'Lost Cave',slug:'lost-cave-room-1',group:'Sevii Islands'},
+];
+const locAreaCache={};
+let locGroupFilter='All';
+
+async function fetchLocArea(slug){
+  if(locAreaCache[slug])return locAreaCache[slug];
+  try{
+    const res=await fetch(`https://pokeapi.co/api/v2/location-area/${slug}/`);
+    const data=await res.json();
+    const fmtMethod=m=>({'walk':'Walking','surf':'Surfing','old-rod':'Old Rod','good-rod':'Good Rod','super-rod':'Super Rod','rock-smash':'Rock Smash'}[m]||m.replace(/-/g,' ').replace(/\b\w/g,c=>c.toUpperCase()));
+    const merged={};
+    for(const enc of data.pokemon_encounters){
+      for(const vd of enc.version_details){
+        if(vd.version.name==='firered'){
+          const id=parseInt(enc.pokemon.url.split('/').filter(Boolean).pop());
+          for(const e of vd.encounter_details){
+            const key=`${id}|${e.method.name}`;
+            if(!merged[key])merged[key]={id,name:enc.pokemon.name,method:fmtMethod(e.method.name),chance:0,min:e.min_level,max:e.max_level};
+            else{merged[key].min=Math.min(merged[key].min,e.min_level);merged[key].max=Math.max(merged[key].max,e.max_level);}
+            merged[key].chance+=e.chance;
+          }
+        }
+      }
+    }
+    const result=Object.values(merged).map(e=>({...e,lvl:e.min===e.max?`Lv. ${e.min}`:`Lv. ${e.min}–${e.max}`})).sort((a,b)=>b.chance-a.chance);
+    locAreaCache[slug]=result;
+    return result;
+  }catch{return null;}
+}
+
+function renderLocations(){
+  const groups=['All','Routes','Dungeons','Sevii Islands'];
+  document.getElementById('loc-group-tabs').innerHTML=groups.map(g=>`<button class="loc-group-tab${locGroupFilter===g?' active':''}" onclick="setLocGroup('${g}')">${g}</button>`).join('');
+  const filtered=locGroupFilter==='All'?LOCATIONS:LOCATIONS.filter(l=>l.group===locGroupFilter);
+  document.getElementById('loc-list').innerHTML=filtered.map(l=>`<div class="loc-row" id="loc-row-${l.slug}">
+    <div class="loc-row-head" onclick="toggleLocRow('${l.slug}')">
+      <span class="loc-row-name">${l.name}</span>
+      <span class="loc-row-chevron">▼</span>
+    </div>
+    <div class="loc-row-body" id="loc-body-${l.slug}"></div>
+  </div>`).join('');
+}
+
+function setLocGroup(g){locGroupFilter=g;renderLocations();}
+
+async function toggleLocRow(slug){
+  const row=document.getElementById('loc-row-'+slug);
+  const body=document.getElementById('loc-body-'+slug);
+  if(row.classList.contains('open')){row.classList.remove('open');return;}
+  row.classList.add('open');
+  if(body.dataset.loaded)return;
+  body.dataset.loaded='1';
+  body.innerHTML=`<div class="loc-loading"><div class="spinner" style="width:18px;height:18px;border-width:2px;flex-shrink:0;"></div>Loading…</div>`;
+  const encs=await fetchLocArea(slug);
+  if(!encs||!encs.length){body.innerHTML=`<div class="loc-empty">No wild Pokémon found here in Fire Red.</div>`;return;}
+  body.innerHTML=encs.map(e=>`<div class="loc-enc-row" onclick="openPokeModal(${e.id})">
+    <img src="${sprite(e.id)}" style="width:32px;height:32px;image-rendering:pixelated;" crossorigin="anonymous" alt="${e.name}">
+    <div><div class="loc-enc-name">${e.name}</div><div class="loc-enc-meta">${e.method}</div></div>
+    <div class="loc-enc-lvl">${e.lvl}</div>
+    <div class="loc-enc-chance">${e.chance}%</div>
+  </div>`).join('');
+}
+
 loadPokedex();renderTMFilters();renderTMs(TM_DATA);renderItemFilters();renderItems(ITEM_DATA);renderEvolutions(EVO_DATA);renderTeam();renderGymLeaders();
 </script>
   <script>
