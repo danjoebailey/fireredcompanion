@@ -169,6 +169,26 @@ body::before {
 .btn-primary:hover { background: #ff5555; box-shadow: 0 4px 20px var(--accent-glow); transform: translateY(-1px); }
 .btn-secondary { background: var(--surface2); color: var(--text-sub); border: 1px solid var(--border); }
 .btn-secondary:hover { background: var(--surface3); color: var(--text); }
+/* Archive */
+.archive-entry { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; margin-bottom: 16px; }
+.archive-header { display: flex; align-items: center; gap: 10px; margin-bottom: 16px; flex-wrap: wrap; }
+.archive-label { background: transparent; border: none; border-bottom: 1.5px solid var(--border); color: var(--text); font-family: 'Outfit', sans-serif; font-size: 15px; font-weight: 700; padding: 2px 4px; flex: 1; min-width: 120px; outline: none; }
+.archive-label:focus { border-bottom-color: var(--accent); }
+.archive-date { background: transparent; border: 1.5px solid var(--border); border-radius: 8px; color: var(--text-muted); font-family: 'Outfit', sans-serif; font-size: 12px; padding: 4px 8px; outline: none; color-scheme: dark; }
+.archive-date:focus { border-color: var(--accent); }
+.archive-slots { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+@media(min-width:500px) { .archive-slots { grid-template-columns: repeat(3,1fr); } }
+.archive-slot { background: var(--surface2); border: 1.5px dashed var(--border); border-radius: var(--radius); padding: 12px 8px; min-height: 120px; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s; text-align: center; position: relative; }
+.archive-slot:hover { border-color: var(--border-hover); background: var(--surface3); }
+.archive-slot.filled { border-style: solid; border-color: rgba(255,61,61,0.3); background: #fff; cursor: default; }
+.archive-slot-name { font-size: 12px; font-weight: 700; text-transform: capitalize; color: #222; }
+.archive-level { width: 54px; background: rgba(0,0,0,0.06); border: 1px solid rgba(0,0,0,0.1); border-radius: 6px; color: #444; font-family: 'Outfit', sans-serif; font-size: 11px; font-weight: 600; text-align: center; padding: 2px 4px; margin-top: 4px; outline: none; }
+.archive-level:focus { border-color: rgba(255,61,61,0.4); }
+.archive-moves { display: flex; flex-wrap: wrap; gap: 3px; margin-top: 6px; justify-content: center; }
+.archive-move { font-size: 10px; font-weight: 600; padding: 2px 7px; border-radius: 5px; cursor: pointer; transition: opacity 0.15s; white-space: nowrap; }
+.archive-move.filled { background: rgba(0,0,0,0.07); color: #333; border: 1px solid rgba(0,0,0,0.1); }
+.archive-move.empty { background: rgba(255,61,61,0.08); color: var(--accent); border: 1px dashed rgba(255,61,61,0.3); }
+.archive-move:hover { opacity: 0.7; }
 .team-view-toggle { display:flex; margin-bottom:16px; }
 .team-view-btn { flex:1; padding:8px 0; font-size:13px; font-weight:700; border:1.5px solid var(--border); background:var(--surface2); color:var(--text-muted); cursor:pointer; transition:all 0.15s; }
 .team-view-btn:first-child { border-radius:10px 0 0 10px; border-right:none; }
@@ -406,6 +426,7 @@ body::before {
       <button class="snav-item" onclick="switchTab('items');toggleSiteNav()" data-label="Items">Items</button>
       <button class="snav-item" onclick="switchTab('types');toggleSiteNav()" data-label="Types">Types</button>
       <button class="snav-item" onclick="switchTab('gymleaders');toggleSiteNav()" data-label="Gym Leaders">Gym Leaders</button>
+      <button class="snav-item" onclick="switchTab('archive');toggleSiteNav()" data-label="Archive">Archive</button>
     </div>
   </div>
 </div>
@@ -546,6 +567,35 @@ body::before {
       </div>
     </div>
     <div id="rankings-list"></div>
+  </div>
+
+  <div id="panel-archive" class="panel">
+    <div class="section-head">
+      <h2>Archive</h2>
+      <p>Your past playthroughs</p>
+    </div>
+    <button class="btn btn-primary" onclick="addArchiveEntry()" style="margin-bottom:24px;">+ New Entry</button>
+    <div id="archive-list"></div>
+    <div id="archive-picker-modal" class="modal-overlay" style="align-items:flex-start;padding-top:5vh;">
+      <div class="modal" style="max-width:640px;">
+        <div class="modal-top" style="text-align:left;padding:20px 24px;">
+          <div style="font-size:20px;font-weight:800;margin-bottom:12px;">Choose a Pokémon</div>
+          <button class="modal-close" onclick="closeArchivePicker()">✕</button>
+          <div class="search-wrap" style="margin-bottom:0"><span class="search-icon"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="6.5" cy="6.5" r="5" stroke="currentColor" stroke-width="1.8"/><line x1="10.5" y1="10.5" x2="14" y2="14" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></span><input type="text" id="archive-picker-search" placeholder="Gotta search em all…" oninput="filterArchivePicker()"></div>
+        </div>
+        <div style="padding:16px;"><div id="archive-picker-grid" class="pokemon-grid" style="max-height:52vh;overflow-y:auto;"></div></div>
+      </div>
+    </div>
+    <div id="move-picker-modal" class="modal-overlay" style="align-items:flex-start;padding-top:5vh;">
+      <div class="modal" style="max-width:640px;">
+        <div class="modal-top" style="text-align:left;padding:20px 24px;">
+          <div style="font-size:20px;font-weight:800;margin-bottom:12px;">Choose a Move</div>
+          <button class="modal-close" onclick="closeMovePicker()">✕</button>
+          <div class="search-wrap" style="margin-bottom:0"><span class="search-icon"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="6.5" cy="6.5" r="5" stroke="currentColor" stroke-width="1.8"/><line x1="10.5" y1="10.5" x2="14" y2="14" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></span><input type="text" id="move-picker-search" placeholder="Search moves…" oninput="filterMovePicker()"></div>
+        </div>
+        <div style="padding:16px;"><div id="move-picker-list" style="max-height:52vh;overflow-y:auto;"></div></div>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -1640,6 +1690,7 @@ function switchTab(name){
   document.getElementById('panel-'+name).classList.add('active');
   if(name==='journey')renderJourney();
   if(name==='locations')renderLocations();
+  if(name==='archive')renderArchive();
   // update dropdown button label + active state
   const active = document.querySelector(`.snav-item[onclick*="'${name}'"]`);
   document.querySelectorAll('.snav-item').forEach(x=>x.classList.remove('active'));
@@ -1899,6 +1950,65 @@ async function toggleLocRow(slug){
       <div class="loc-enc-chance" style="color:${e.chance>=30?'#22c55e':e.chance>=10?'#f59e0b':'#ef4444'}">${e.chance}%</div>
     </div>`).join('')}
   `).join('');
+}
+
+// Archive
+let archiveData=JSON.parse(localStorage.getItem('frArchive')||'[]');
+let archivePickingEntry=null,archivePickingSlot=null,movePickingEntry=null,movePickingSlot=null,movePickingIndex=null,archiveMoveList=[],archiveMovesAll=[];
+function saveArchive(){localStorage.setItem('frArchive',JSON.stringify(archiveData));}
+function addArchiveEntry(){const entry={id:Date.now().toString(),label:'',date:'',team:[null,null,null,null,null,null]};archiveData.unshift(entry);saveArchive();renderArchive();}
+function deleteArchiveEntry(id){if(!confirm('Delete this entry?'))return;archiveData=archiveData.filter(e=>e.id!==id);saveArchive();renderArchive();}
+function updateArchiveLabel(id,val){const e=archiveData.find(e=>e.id===id);if(e){e.label=val;saveArchive();}}
+function updateArchiveDate(id,val){const e=archiveData.find(e=>e.id===id);if(e){e.date=val;saveArchive();}}
+function updateArchiveLevel(id,slot,val){const e=archiveData.find(e=>e.id===id);if(e&&e.team[slot])e.team[slot].level=val?parseInt(val):null;saveArchive();}
+function openArchivePicker(entryId,slot){archivePickingEntry=entryId;archivePickingSlot=slot;document.getElementById('archive-picker-modal').classList.add('open');document.body.style.overflow='hidden';renderArchivePickerGrid(pokemonData);}
+function closeArchivePicker(){document.getElementById('archive-picker-modal').classList.remove('open');document.body.style.overflow='';archivePickingEntry=null;archivePickingSlot=null;}
+function renderArchivePickerGrid(data){const g=document.getElementById('archive-picker-grid');if(!g)return;g.innerHTML=data.map(p=>`<div class="poke-card" onclick="pickArchivePokemon(${p.id})"><div class="poke-num">#${String(p.id).padStart(3,'0')}</div><img class="poke-sprite" src="${sprite(p.id)}" alt="${p.name}" loading="lazy" crossorigin="anonymous"><div class="poke-name">${p.name}</div><div class="poke-types">${p.types.map(typeChip).join('')}</div></div>`).join('');}
+function filterArchivePicker(){const q=document.getElementById('archive-picker-search').value.toLowerCase();renderArchivePickerGrid(pokemonData.filter(p=>p.name.includes(q)||String(p.id).includes(q)));}
+function pickArchivePokemon(pokemonId){const e=archiveData.find(e=>e.id===archivePickingEntry);if(e&&archivePickingSlot!==null)e.team[archivePickingSlot]={pokemonId,level:null,moves:[null,null,null,null]};saveArchive();closeArchivePicker();renderArchive();}
+function removeArchiveSlot(entryId,slot){const e=archiveData.find(e=>e.id===entryId);if(e){e.team[slot]=null;saveArchive();renderArchive();}}
+async function openMovePicker(entryId,slotIndex,moveIndex){
+  const e=archiveData.find(e=>e.id===entryId);
+  if(!e||!e.team[slotIndex])return;
+  movePickingEntry=entryId;movePickingSlot=slotIndex;movePickingIndex=moveIndex;
+  const modal=document.getElementById('move-picker-modal');
+  const list=document.getElementById('move-picker-list');
+  document.getElementById('move-picker-search').value='';
+  modal.classList.add('open');document.body.style.overflow='hidden';
+  list.innerHTML=`<div style="display:flex;align-items:center;gap:10px;padding:24px 0;color:var(--text-muted);font-size:13px;"><div class="spinner" style="width:20px;height:20px;border-width:2px;flex-shrink:0;"></div>Loading moves…</div>`;
+  const data=await fetchPokeMovesAndTMs(e.team[slotIndex].pokemonId);
+  if(!modal.classList.contains('open'))return;
+  if(!data){list.innerHTML=`<p style="color:var(--text-muted);font-size:13px;padding:16px 0;">Couldn't load moves. Check your connection.</p>`;return;}
+  const seen=new Set();const combined=[];
+  [...data.levelup,...data.tms].forEach(m=>{if(!seen.has(m.name)){seen.add(m.name);combined.push(m);}});
+  combined.sort((a,b)=>a.name.localeCompare(b.name));
+  archiveMovesAll=combined;renderMovePickerList(combined);
+}
+function renderMovePickerList(moves){
+  const list=document.getElementById('move-picker-list');
+  archiveMoveList=moves;
+  list.innerHTML=`<div class="tm-grid">${moves.map((m,i)=>`<div class="tm-card" style="cursor:pointer;" onclick="pickMove(${i})"><div class="tm-card-header"><span class="tm-move">${m.name}</span>${typeChip(m.type)}<span class="tm-meta">${m.pw!=='—'?m.pw:'—'}</span></div></div>`).join('')}</div>`;
+}
+function filterMovePicker(){const q=document.getElementById('move-picker-search').value.toLowerCase();renderMovePickerList(archiveMovesAll.filter(m=>m.name.toLowerCase().includes(q)));}
+function closeMovePicker(){document.getElementById('move-picker-modal').classList.remove('open');document.body.style.overflow='';movePickingEntry=null;movePickingSlot=null;movePickingIndex=null;}
+function pickMove(idx){const m=archiveMoveList[idx];if(!m)return;const e=archiveData.find(e=>e.id===movePickingEntry);if(e&&e.team[movePickingSlot])e.team[movePickingSlot].moves[movePickingIndex]=m.name;saveArchive();closeMovePicker();renderArchive();}
+function removeMove(entryId,slotIndex,moveIndex){const e=archiveData.find(e=>e.id===entryId);if(e&&e.team[slotIndex]){e.team[slotIndex].moves[moveIndex]=null;saveArchive();renderArchive();}}
+function renderArchive(){
+  const container=document.getElementById('archive-list');
+  if(!container)return;
+  if(!archiveData.length){container.innerHTML=`<p style="font-size:13px;color:var(--text-muted);">No entries yet. Add your first playthrough!</p>`;return;}
+  container.innerHTML=archiveData.map(entry=>{
+    const slots=entry.team.map((slot,i)=>{
+      if(!slot)return`<div class="archive-slot" onclick="openArchivePicker('${entry.id}',${i})"><div class="slot-label">Slot ${i+1}</div><div class="plus">+</div><div class="add-text">Add Pokémon</div></div>`;
+      const p=pokemonData.find(x=>x.id===slot.pokemonId);if(!p)return'';
+      const movesHtml=slot.moves.map((mv,mi)=>mv
+        ?`<span class="archive-move filled" onclick="event.stopPropagation();openMovePicker('${entry.id}',${i},${mi})">${mv}</span>`
+        :`<span class="archive-move empty" onclick="event.stopPropagation();openMovePicker('${entry.id}',${i},${mi})">+move</span>`
+      ).join('');
+      return`<div class="archive-slot filled"><button class="rm" onclick="removeArchiveSlot('${entry.id}',${i})">✕</button><div class="slot-label">Slot ${i+1}</div><img src="${sprite(slot.pokemonId)}" style="width:56px;height:56px;image-rendering:pixelated;filter:drop-shadow(0 2px 6px rgba(0,0,0,0.2))"><div class="archive-slot-name">${p.name}</div><input class="archive-level" type="number" min="1" max="100" placeholder="Lv" value="${slot.level||''}" oninput="updateArchiveLevel('${entry.id}',${i},this.value)" onclick="event.stopPropagation()"><div class="archive-moves">${movesHtml}</div></div>`;
+    }).join('');
+    return`<div class="archive-entry"><div class="archive-header"><input class="archive-label" type="text" placeholder="Playthrough name…" value="${entry.label}" oninput="updateArchiveLabel('${entry.id}',this.value)"><input class="archive-date" type="date" value="${entry.date}" oninput="updateArchiveDate('${entry.id}',this.value)"><button class="btn btn-secondary" style="font-size:12px;padding:4px 10px;flex-shrink:0;" onclick="deleteArchiveEntry('${entry.id}')">Delete</button></div><div class="archive-slots">${slots}</div></div>`;
+  }).join('');
 }
 
 loadPokedex();renderTMFilters();renderTMs(TM_DATA);renderItemFilters();renderItems(ITEM_DATA);renderEvolutions(EVO_DATA);renderTeam();renderGymLeaders();
