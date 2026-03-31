@@ -1962,6 +1962,7 @@ let archivePickingEntry=null,archivePickingSlot=null,movePickingEntry=null,moveP
 function saveArchive(){localStorage.setItem('frArchive',JSON.stringify(archiveData));}
 function addArchiveEntry(){const entry={id:Date.now().toString(),label:'',date:'',team:[null,null,null,null,null,null]};archiveData.unshift(entry);saveArchive();renderArchive();}
 function deleteArchiveEntry(id){if(!confirm('Delete this entry?'))return;archiveData=archiveData.filter(e=>e.id!==id);saveArchive();renderArchive();}
+function archiveUseTeam(id){const e=archiveData.find(e=>e.id===id);if(!e)return;e.team=team.map(id=>id?{pokemonId:id,level:null,moves:[null,null,null,null]}:null);saveArchive();renderArchive();}
 function updateArchiveLabel(id,val){const e=archiveData.find(e=>e.id===id);if(e){e.label=val;saveArchive();}}
 function updateArchiveDate(id,val){const e=archiveData.find(e=>e.id===id);if(e){e.date=val;saveArchive();}}
 function updateArchiveLevel(id,slot,val){const e=archiveData.find(e=>e.id===id);if(e&&e.team[slot])e.team[slot].level=val?parseInt(val):null;saveArchive();}
@@ -2013,7 +2014,7 @@ function renderArchive(){
       ).join('');
       return`<div class="archive-slot filled"><button class="rm" onclick="removeArchiveSlot('${entry.id}',${i})">✕</button><div class="slot-label">Slot ${i+1}</div><img src="${sprite(slot.pokemonId)}" style="width:56px;height:56px;image-rendering:pixelated;filter:drop-shadow(0 2px 6px rgba(0,0,0,0.2))"><div class="archive-slot-name">${p.name}</div><input class="archive-level" type="number" min="1" max="100" placeholder="Lv" value="${slot.level||''}" oninput="updateArchiveLevel('${entry.id}',${i},this.value)" onclick="event.stopPropagation()"><div class="archive-moves">${movesHtml}</div></div>`;
     }).join('');
-    return`<div class="archive-entry"><div class="archive-header"><input class="archive-label" type="text" placeholder="Playthrough name…" value="${entry.label}" oninput="updateArchiveLabel('${entry.id}',this.value)"><input class="archive-date" type="date" value="${entry.date}" oninput="updateArchiveDate('${entry.id}',this.value)"><button class="btn btn-secondary" style="font-size:12px;padding:4px 10px;flex-shrink:0;" onclick="deleteArchiveEntry('${entry.id}')">Delete</button></div><div class="archive-slots">${slots}</div></div>`;
+    return`<div class="archive-entry"><div class="archive-header"><input class="archive-label" type="text" placeholder="Playthrough name…" value="${entry.label}" oninput="updateArchiveLabel('${entry.id}',this.value)"><input class="archive-date" type="date" value="${entry.date}" oninput="updateArchiveDate('${entry.id}',this.value)"><button class="btn btn-primary" style="font-size:12px;padding:4px 10px;flex-shrink:0;" onclick="archiveUseTeam('${entry.id}')">Use Team</button><button class="btn btn-secondary" style="font-size:12px;padding:4px 10px;flex-shrink:0;" onclick="deleteArchiveEntry('${entry.id}')">Delete</button></div><div class="archive-slots">${slots}</div></div>`;
   }).join('');
 }
 
