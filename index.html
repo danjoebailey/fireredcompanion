@@ -1695,7 +1695,7 @@ function switchTab(name){
   document.getElementById('panel-'+name).classList.add('active');
   if(name==='journey')renderJourney();
   if(name==='locations')renderLocations();
-  if(name==='archive')renderArchive();
+  if(name==='archive'){renderArchive();if(!archivePickerRendered){renderArchivePickerGrid(pokemonData);archivePickerRendered=true;}}
   if(name!=='archive'){closeArchivePicker();closeMovePicker();}
   // update dropdown button label + active state
   const active = document.querySelector(`.snav-item[onclick*="'${name}'"]`);
@@ -1960,7 +1960,7 @@ async function toggleLocRow(slug){
 
 // Archive
 let archiveData=JSON.parse(localStorage.getItem('frArchive')||'[]');
-let archivePickingEntry=null,archivePickingSlot=null,movePickingEntry=null,movePickingSlot=null,movePickingIndex=null,movePickerTab='moves',archiveMoveList=[],archiveMovesData={levelup:[],tms:[]};
+let archivePickingEntry=null,archivePickingSlot=null,movePickingEntry=null,movePickingSlot=null,movePickingIndex=null,movePickerTab='moves',archiveMoveList=[],archiveMovesData={levelup:[],tms:[]},archivePickerRendered=false;
 function saveArchive(){localStorage.setItem('frArchive',JSON.stringify(archiveData));}
 function escAttr(s){return(s||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 function buildEntryHtml(entry){
@@ -1986,7 +1986,13 @@ function archiveUseTeam(id){const e=archiveData.find(e=>e.id===id);if(!e)return;
 function updateArchiveLabel(id,val){const e=archiveData.find(e=>e.id===id);if(e){e.label=val;saveArchive();}}
 function updateArchiveDate(id,val){const e=archiveData.find(e=>e.id===id);if(e){e.date=val;saveArchive();}}
 function updateArchiveLevel(id,slot,val){const e=archiveData.find(e=>e.id===id);if(e&&e.team[slot])e.team[slot].level=val?parseInt(val):null;saveArchive();}
-function openArchivePicker(entryId,slot){archivePickingEntry=entryId;archivePickingSlot=slot;document.getElementById('archive-picker-modal').classList.add('open');document.body.style.overflow='hidden';renderArchivePickerGrid(pokemonData);}
+function openArchivePicker(entryId,slot){
+  archivePickingEntry=entryId;archivePickingSlot=slot;
+  const search=document.getElementById('archive-picker-search');
+  if(search.value){search.value='';renderArchivePickerGrid(pokemonData);}
+  document.getElementById('archive-picker-modal').classList.add('open');
+  document.body.style.overflow='hidden';
+}
 function closeArchivePicker(){document.getElementById('archive-picker-modal').classList.remove('open');document.body.style.overflow='';archivePickingEntry=null;archivePickingSlot=null;}
 function renderArchivePickerGrid(data){const g=document.getElementById('archive-picker-grid');if(!g)return;g.innerHTML=data.map(p=>`<div class="poke-card" onclick="pickArchivePokemon(${p.id})"><div class="poke-num">#${String(p.id).padStart(3,'0')}</div><img class="poke-sprite" src="${sprite(p.id)}" alt="${p.name}" loading="lazy" crossorigin="anonymous"><div class="poke-name">${p.name}</div><div class="poke-types">${p.types.map(typeChip).join('')}</div></div>`).join('');}
 function filterArchivePicker(){const q=document.getElementById('archive-picker-search').value.toLowerCase();renderArchivePickerGrid(pokemonData.filter(p=>p.name.includes(q)||String(p.id).includes(q)));}
