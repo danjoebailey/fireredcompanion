@@ -576,30 +576,31 @@ body::before {
     </div>
     <button class="btn btn-primary" onclick="addArchiveEntry()" style="margin-bottom:24px;">+ New Entry</button>
     <div id="archive-list"></div>
-    <div id="archive-picker-modal" class="modal-overlay" style="align-items:flex-start;padding-top:5vh;">
-      <div class="modal" style="max-width:640px;">
-        <div class="modal-top" style="text-align:left;padding:20px 24px;">
-          <div style="font-size:20px;font-weight:800;margin-bottom:12px;">Choose a Pokémon</div>
-          <button class="modal-close" onclick="closeArchivePicker()">✕</button>
-          <div class="search-wrap" style="margin-bottom:0"><span class="search-icon"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="6.5" cy="6.5" r="5" stroke="currentColor" stroke-width="1.8"/><line x1="10.5" y1="10.5" x2="14" y2="14" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></span><input type="text" id="archive-picker-search" placeholder="Gotta search em all…" oninput="filterArchivePicker()"></div>
-        </div>
-        <div style="padding:16px;"><div id="archive-picker-grid" class="pokemon-grid" style="max-height:52vh;overflow-y:auto;"></div></div>
-      </div>
+  </div>
+</div>
+
+<div id="archive-picker-modal" class="modal-overlay" style="align-items:flex-start;padding-top:5vh;">
+  <div class="modal" style="max-width:640px;">
+    <div class="modal-top" style="text-align:left;padding:20px 24px;">
+      <div style="font-size:20px;font-weight:800;margin-bottom:12px;">Choose a Pokémon</div>
+      <button class="modal-close" onclick="closeArchivePicker()">✕</button>
+      <div class="search-wrap" style="margin-bottom:0"><span class="search-icon"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="6.5" cy="6.5" r="5" stroke="currentColor" stroke-width="1.8"/><line x1="10.5" y1="10.5" x2="14" y2="14" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></span><input type="text" id="archive-picker-search" placeholder="Gotta search em all…" oninput="filterArchivePicker()"></div>
     </div>
-    <div id="move-picker-modal" class="modal-overlay" style="align-items:flex-start;padding-top:5vh;">
-      <div class="modal" style="max-width:640px;">
-        <div class="modal-top" style="text-align:left;padding:20px 24px;">
-          <div style="font-size:20px;font-weight:800;margin-bottom:12px;">Choose a Move</div>
-          <button class="modal-close" onclick="closeMovePicker()">✕</button>
-          <div class="modal-tabs" style="margin-bottom:12px;">
-            <button id="move-tab-moves" class="modal-tab active" onclick="switchMovePickerTab('moves')">Moves</button>
-            <button id="move-tab-tms" class="modal-tab" onclick="switchMovePickerTab('tms')">TMs</button>
-          </div>
-          <div class="search-wrap" style="margin-bottom:0"><span class="search-icon"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="6.5" cy="6.5" r="5" stroke="currentColor" stroke-width="1.8"/><line x1="10.5" y1="10.5" x2="14" y2="14" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></span><input type="text" id="move-picker-search" placeholder="Search moves…" oninput="filterMovePicker()"></div>
-        </div>
-        <div style="padding:16px;"><div id="move-picker-list" style="max-height:52vh;overflow-y:auto;"></div></div>
+    <div style="padding:16px;"><div id="archive-picker-grid" class="pokemon-grid" style="max-height:52vh;overflow-y:auto;"></div></div>
+  </div>
+</div>
+<div id="move-picker-modal" class="modal-overlay" style="align-items:flex-start;padding-top:5vh;">
+  <div class="modal" style="max-width:640px;">
+    <div class="modal-top" style="text-align:left;padding:20px 24px;">
+      <div style="font-size:20px;font-weight:800;margin-bottom:12px;">Choose a Move</div>
+      <button class="modal-close" onclick="closeMovePicker()">✕</button>
+      <div class="modal-tabs" style="margin-bottom:12px;">
+        <button id="move-tab-moves" class="modal-tab active" onclick="switchMovePickerTab('moves')">Moves</button>
+        <button id="move-tab-tms" class="modal-tab" onclick="switchMovePickerTab('tms')">TMs</button>
       </div>
+      <div class="search-wrap" style="margin-bottom:0"><span class="search-icon"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="6.5" cy="6.5" r="5" stroke="currentColor" stroke-width="1.8"/><line x1="10.5" y1="10.5" x2="14" y2="14" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></span><input type="text" id="move-picker-search" placeholder="Search moves…" oninput="filterMovePicker()"></div>
     </div>
+    <div style="padding:16px;"><div id="move-picker-list" style="max-height:52vh;overflow-y:auto;"></div></div>
   </div>
 </div>
 
@@ -1695,6 +1696,7 @@ function switchTab(name){
   if(name==='journey')renderJourney();
   if(name==='locations')renderLocations();
   if(name==='archive')renderArchive();
+  if(name!=='archive'){closeArchivePicker();closeMovePicker();}
   // update dropdown button label + active state
   const active = document.querySelector(`.snav-item[onclick*="'${name}'"]`);
   document.querySelectorAll('.snav-item').forEach(x=>x.classList.remove('active'));
