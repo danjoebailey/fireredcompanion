@@ -1060,9 +1060,10 @@ async function fetchPokeMovesAndTMs(id) {
     const data = await res.json();
     const allMoves = data.moves;
 
-    // Level-up moves for firered version group
+    // Level-up moves, TMs, and tutor moves for firered version group
     const levelup = [];
     const tms = [];
+    const tutors = [];
 
     for (const m of allMoves) {
       for (const vg of m.version_group_details) {
@@ -1072,6 +1073,8 @@ async function fetchPokeMovesAndTMs(id) {
             levelup.push({ lv: vg.level_learned_at, name: moveName, moveUrl: m.move.url });
           } else if (vg.move_learn_method.name === 'machine') {
             tms.push({ name: moveName, moveUrl: m.move.url });
+          } else if (vg.move_learn_method.name === 'tutor') {
+            tutors.push({ name: moveName, moveUrl: m.move.url });
           }
         }
       }
@@ -1114,7 +1117,24 @@ async function fetchPokeMovesAndTMs(id) {
       return n(a) - n(b);
     });
 
-    moveCache[id] = { levelup: levelupDetails, tms: tmDetails };
+    // Fetch tutor move details in parallel
+    const tutorDetails = await Promise.all(tutors.map(async m => {
+      try {
+        const r = await fetch(m.moveUrl);
+        const d = await r.json();
+        const frFlavor = d.flavor_text_entries?.find(f => f.language.name === 'en' && f.version_group?.name === 'firered-leafgreen')?.flavor_text;
+        const anyFlavor = d.flavor_text_entries?.find(f => f.language.name === 'en')?.flavor_text;
+        const shortEffect = d.effect_entries?.find(e => e.language.name === 'en')?.short_effect?.replace(/\$effect_chance/g, d.effect_chance ?? '?');
+        const desc = (frFlavor || anyFlavor || shortEffect || '—').replace(/\n/g, ' ');
+        return { name: m.name, type: d.type.name, pw: d.power || '—', acc: d.accuracy, pp: d.pp, num: 'Tutor', desc };
+      } catch { return { name: m.name, type: 'normal', pw: '—', acc: null, pp: null, num: 'Tutor', desc: '—' }; }
+    }));
+
+    // Merge tutors into TMs list (TMs first sorted by number, then tutors alphabetically)
+    tutorDetails.sort((a, b) => a.name.localeCompare(b.name));
+    const allTms = [...tmDetails, ...tutorDetails];
+
+    moveCache[id] = { levelup: levelupDetails, tms: allTms };
     return moveCache[id];
   } catch (e) {
     return null;
