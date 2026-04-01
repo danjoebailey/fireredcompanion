@@ -2053,7 +2053,7 @@ async function openMovePicker(entryId,slotIndex,moveIndex){
   movePickerTab='moves';
   document.getElementById('move-tab-moves').classList.add('active');
   document.getElementById('move-tab-tms').classList.remove('active');
-  renderMovePickerList(data.levelup);
+  renderMovePickerList(mergedLevelup);
 }
 function renderMovePickerList(moves){
   const list=document.getElementById('move-picker-list');
