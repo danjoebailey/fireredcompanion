@@ -176,19 +176,26 @@ body::before {
 .archive-label:focus { border-bottom-color: var(--accent); }
 .archive-date { background: transparent; border: 1.5px solid var(--border); border-radius: 8px; color: var(--text-muted); font-family: 'Outfit', sans-serif; font-size: 12px; padding: 4px 8px; outline: none; color-scheme: dark; }
 .archive-date:focus { border-color: var(--accent); }
-.archive-slots { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
-@media(min-width:500px) { .archive-slots { grid-template-columns: repeat(3,1fr); } }
+.archive-slots { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; }
 .archive-slot { background: var(--surface2); border: 1.5px dashed var(--border); border-radius: var(--radius); padding: 12px 8px; min-height: 120px; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s; text-align: center; position: relative; }
 .archive-slot:hover { border-color: var(--border-hover); background: var(--surface3); }
-.archive-slot.filled { border-style: solid; border-color: rgba(255,61,61,0.3); background: #fff; cursor: default; }
-.archive-slot-name { font-size: 12px; font-weight: 700; text-transform: capitalize; color: #222; }
-.archive-level { width: 54px; background: rgba(0,0,0,0.06); border: 1px solid rgba(0,0,0,0.1); border-radius: 6px; color: #444; font-family: 'Outfit', sans-serif; font-size: 11px; font-weight: 600; text-align: center; padding: 2px 4px; margin-top: 4px; outline: none; }
-.archive-level:focus { border-color: rgba(255,61,61,0.4); }
-.archive-moves { display: flex; flex-wrap: wrap; gap: 3px; margin-top: 6px; justify-content: center; }
-.archive-move { font-size: 10px; font-weight: 600; padding: 2px 7px; border-radius: 5px; cursor: pointer; transition: opacity 0.15s; white-space: nowrap; }
-.archive-move.filled { background: rgba(0,0,0,0.07); color: #333; border: 1px solid rgba(0,0,0,0.1); }
-.archive-move.empty { background: rgba(255,61,61,0.08); color: var(--accent); border: 1px dashed rgba(255,61,61,0.3); }
-.archive-move:hover { opacity: 0.7; }
+.archive-card { border-radius: var(--radius); overflow: hidden; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; }
+.archive-card:hover { transform: translateY(-3px); box-shadow: 0 12px 32px rgba(0,0,0,0.3); }
+.archive-card-top { background: #fff; border-radius: var(--radius); padding: 16px 16px 22px; text-align: center; position: relative; border: 1px solid rgba(0,0,0,0.08); }
+.archive-card-name { font-size: 16px; font-weight: 800; color: #222; text-transform: capitalize; margin-bottom: 8px; }
+.archive-card-sprite { width: 80px; height: 80px; image-rendering: pixelated; display: block; margin: 0 auto; filter: drop-shadow(0 4px 8px rgba(0,0,0,0.15)); }
+.archive-card-level { position: absolute; bottom: 12px; right: 16px; width: 36px; height: 36px; background: #fff; border: 2.5px solid #222; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 800; color: #222; box-shadow: 0 2px 8px rgba(0,0,0,0.12); }
+.archive-card-moves { display: flex; flex-direction: column; gap: 5px; margin-top: 8px; }
+.archive-card-move { background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 10px 14px; display: flex; align-items: center; justify-content: space-between; }
+.archive-card-move-name { font-size: 14px; font-weight: 700; color: var(--text); }
+.archive-move-type { font-size: 10px; font-weight: 700; padding: 3px 10px; border-radius: 100px; text-transform: uppercase; letter-spacing: 0.5px; }
+.archive-card-empty-move { background: var(--surface2); border: 1px dashed var(--border); border-radius: var(--radius-sm); padding: 10px 14px; color: var(--text-muted); font-size: 13px; text-align: center; }
+.archive-edit-level { width: 70px; background: var(--surface3); border: 1.5px solid var(--border); border-radius: 8px; color: var(--text); font-family: 'Outfit', sans-serif; font-size: 15px; font-weight: 700; text-align: center; padding: 6px 8px; outline: none; }
+.archive-edit-level:focus { border-color: var(--accent); }
+.archive-edit-move { background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 12px 14px; display: flex; align-items: center; justify-content: space-between; cursor: pointer; transition: all 0.15s; }
+.archive-edit-move:hover { background: var(--surface3); border-color: var(--border-hover); }
+.archive-edit-move-rm { background: none; border: none; color: var(--text-muted); font-size: 14px; cursor: pointer; padding: 2px 6px; border-radius: 4px; transition: all 0.15s; }
+.archive-edit-move-rm:hover { color: var(--accent); background: rgba(255,61,61,0.1); }
 .team-view-toggle { display:flex; margin-bottom:16px; }
 .team-view-btn { flex:1; padding:8px 0; font-size:13px; font-weight:700; border:1.5px solid var(--border); background:var(--surface2); color:var(--text-muted); cursor:pointer; transition:all 0.15s; }
 .team-view-btn:first-child { border-radius:10px 0 0 10px; border-right:none; }
@@ -601,6 +608,12 @@ body::before {
       <div class="search-wrap" style="margin-bottom:0"><span class="search-icon"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="6.5" cy="6.5" r="5" stroke="currentColor" stroke-width="1.8"/><line x1="10.5" y1="10.5" x2="14" y2="14" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></span><input type="text" id="move-picker-search" placeholder="Search moves…" oninput="filterMovePicker()"></div>
     </div>
     <div style="padding:16px;"><div id="move-picker-list" style="max-height:52vh;overflow-y:auto;"></div></div>
+  </div>
+</div>
+<div id="archive-edit-modal" class="modal-overlay">
+  <div class="modal" style="max-width:400px;">
+    <div class="modal-top" id="archive-edit-top"></div>
+    <div class="modal-body" id="archive-edit-body"></div>
   </div>
 </div>
 
@@ -1960,18 +1973,24 @@ async function toggleLocRow(slug){
 
 // Archive
 let archiveData=JSON.parse(localStorage.getItem('frArchive')||'[]');
-let archivePickingEntry=null,archivePickingSlot=null,movePickingEntry=null,movePickingSlot=null,movePickingIndex=null,movePickerTab='moves',archiveMoveList=[],archiveMovesData={levelup:[],tms:[]},archivePickerRendered=false;
+let archivePickingEntry=null,archivePickingSlot=null,movePickingEntry=null,movePickingSlot=null,movePickingIndex=null,movePickerTab='moves',archiveMoveList=[],archiveMovesData={levelup:[],tms:[]},archivePickerRendered=false,archiveEditEntry=null,archiveEditSlot=null;
+function getMoveName(mv){return typeof mv==='string'?mv:mv?.name||null;}
+function getMoveType(mv,pokemonId){if(typeof mv==='object'&&mv)return mv.type;if(typeof mv==='string'&&moveCache[pokemonId]){const all=[...moveCache[pokemonId].levelup,...moveCache[pokemonId].tms];const f=all.find(m=>m.name===mv);if(f)return f.type;}return null;}
+function moveTypeBadge(type){if(!type)return'';const c=TYPE_COLORS[type]||'#888';return`<span class="archive-move-type" style="background:${c}25;color:${c}">${type}</span>`;}
 function saveArchive(){localStorage.setItem('frArchive',JSON.stringify(archiveData));}
 function escAttr(s){return(s||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 function buildEntryHtml(entry){
   const slots=entry.team.map((slot,i)=>{
     if(!slot)return`<div class="archive-slot" onclick="openArchivePicker('${entry.id}',${i})"><div class="slot-label">Slot ${i+1}</div><div class="plus">+</div><div class="add-text">Add Pokémon</div></div>`;
     const p=pokemonData.find(x=>x.id===slot.pokemonId);if(!p)return'';
-    const movesHtml=(slot.moves||[null,null,null,null]).map((mv,mi)=>mv
-      ?`<span class="archive-move filled" onclick="event.stopPropagation();openMovePicker('${entry.id}',${i},${mi})">${mv}</span>`
-      :`<span class="archive-move empty" onclick="event.stopPropagation();openMovePicker('${entry.id}',${i},${mi})">+move</span>`
-    ).join('');
-    return`<div class="archive-slot filled"><button class="rm" onclick="removeArchiveSlot('${entry.id}',${i})">✕</button><div class="slot-label">Slot ${i+1}</div><img src="${sprite(slot.pokemonId)}" style="width:56px;height:56px;image-rendering:pixelated;filter:drop-shadow(0 2px 6px rgba(0,0,0,0.2))"><div class="archive-slot-name">${p.name}</div><input class="archive-level" type="number" min="1" max="100" placeholder="Lv" value="${slot.level||''}" oninput="updateArchiveLevel('${entry.id}',${i},this.value)" onclick="event.stopPropagation()"><div class="archive-moves">${movesHtml}</div></div>`;
+    const movesHtml=(slot.moves||[null,null,null,null]).map(mv=>{
+      const name=getMoveName(mv);
+      if(!name)return`<div class="archive-card-empty-move">—</div>`;
+      const type=getMoveType(mv,slot.pokemonId);
+      return`<div class="archive-card-move"><span class="archive-card-move-name">${name}</span>${moveTypeBadge(type)}</div>`;
+    }).join('');
+    const lvl=slot.level||'?';
+    return`<div class="archive-card" onclick="openArchiveEditModal('${entry.id}',${i})"><div class="archive-card-top"><div class="archive-card-name">${p.name}</div><img class="archive-card-sprite" src="${sprite(slot.pokemonId)}" alt="${p.name}" crossorigin="anonymous"><div class="archive-card-level">${lvl}</div></div><div class="archive-card-moves">${movesHtml}</div></div>`;
   }).join('');
   return`<div class="archive-entry" data-id="${entry.id}"><div class="archive-header"><input class="archive-label" type="text" placeholder="Playthrough name…" value="${escAttr(entry.label)}" oninput="updateArchiveLabel('${entry.id}',this.value)"><input class="archive-date" type="date" value="${entry.date}" oninput="updateArchiveDate('${entry.id}',this.value)"><button class="btn btn-primary" style="font-size:12px;padding:4px 10px;flex-shrink:0;" onclick="archiveUseTeam('${entry.id}')">Use Team</button><button class="btn btn-secondary" style="font-size:12px;padding:4px 10px;flex-shrink:0;" onclick="deleteArchiveEntry('${entry.id}')">Delete</button></div><div class="archive-slots">${slots}</div></div>`;
 }
@@ -2023,14 +2042,55 @@ function renderMovePickerList(moves){
 }
 function switchMovePickerTab(tab){movePickerTab=tab;document.getElementById('move-tab-moves').classList.toggle('active',tab==='moves');document.getElementById('move-tab-tms').classList.toggle('active',tab==='tms');document.getElementById('move-picker-search').value='';renderMovePickerList(tab==='moves'?archiveMovesData.levelup:archiveMovesData.tms);}
 function filterMovePicker(){const q=document.getElementById('move-picker-search').value.toLowerCase();const src=movePickerTab==='moves'?archiveMovesData.levelup:archiveMovesData.tms;renderMovePickerList(q?src.filter(m=>m.name.toLowerCase().includes(q)):src);}
-function closeMovePicker(){document.getElementById('move-picker-modal').classList.remove('open');document.body.style.overflow='';movePickingEntry=null;movePickingSlot=null;movePickingIndex=null;movePickerTab='moves';}
-function pickMove(idx){const m=archiveMoveList[idx];if(!m)return;const eid=movePickingEntry;const si=movePickingSlot;const e=archiveData.find(e=>e.id===eid);if(e&&e.team[si])e.team[si].moves[movePickingIndex]=m.name;saveArchive();closeMovePicker();renderOneEntry(eid);}
-function removeMove(entryId,slotIndex,moveIndex){const e=archiveData.find(e=>e.id===entryId);if(e&&e.team[slotIndex]){e.team[slotIndex].moves[moveIndex]=null;saveArchive();renderOneEntry(entryId);}}
+function closeMovePicker(){document.getElementById('move-picker-modal').classList.remove('open');if(!archiveEditEntry)document.body.style.overflow='';movePickingEntry=null;movePickingSlot=null;movePickingIndex=null;movePickerTab='moves';}
+function pickMove(idx){const m=archiveMoveList[idx];if(!m)return;const eid=movePickingEntry;const si=movePickingSlot;const e=archiveData.find(e=>e.id===eid);if(e&&e.team[si])e.team[si].moves[movePickingIndex]={name:m.name,type:m.type};saveArchive();closeMovePicker();if(archiveEditEntry)renderArchiveEditContent();else renderOneEntry(eid);}
+function removeMove(entryId,slotIndex,moveIndex){const e=archiveData.find(e=>e.id===entryId);if(e&&e.team[slotIndex]){e.team[slotIndex].moves[moveIndex]=null;saveArchive();if(archiveEditEntry)renderArchiveEditContent();else renderOneEntry(entryId);}}
 function renderArchive(){
   const container=document.getElementById('archive-list');
   if(!container)return;
   if(!archiveData.length){container.innerHTML=`<p style="font-size:13px;color:var(--text-muted);">No entries yet. Add your first playthrough!</p>`;return;}
   container.innerHTML=archiveData.map(buildEntryHtml).join('');
+}
+function openArchiveEditModal(entryId,slotIndex){
+  archiveEditEntry=entryId;archiveEditSlot=slotIndex;
+  renderArchiveEditContent();
+  document.getElementById('archive-edit-modal').classList.add('open');
+  document.body.style.overflow='hidden';
+}
+function closeArchiveEditModal(){
+  document.getElementById('archive-edit-modal').classList.remove('open');
+  document.body.style.overflow='';
+  if(archiveEditEntry)renderOneEntry(archiveEditEntry);
+  archiveEditEntry=null;archiveEditSlot=null;
+}
+function renderArchiveEditContent(){
+  const e=archiveData.find(e=>e.id===archiveEditEntry);
+  if(!e||archiveEditSlot===null)return;
+  const slot=e.team[archiveEditSlot];
+  if(!slot){closeArchiveEditModal();return;}
+  const p=pokemonData.find(x=>x.id===slot.pokemonId);
+  if(!p){closeArchiveEditModal();return;}
+  const top=document.getElementById('archive-edit-top');
+  const body=document.getElementById('archive-edit-body');
+  top.innerHTML=`<button class="modal-close" onclick="closeArchiveEditModal()">✕</button>
+    <img src="${sprite(slot.pokemonId)}" style="width:100px;height:100px;image-rendering:pixelated;display:block;margin:0 auto 8px;filter:drop-shadow(0 6px 12px rgba(0,0,0,0.4));" alt="${p.name}" crossorigin="anonymous">
+    <div class="modal-name">${p.name}</div>
+    <div class="poke-types" style="justify-content:center;">${p.types.map(typeChip).join('')}</div>`;
+  const movesHtml=(slot.moves||[null,null,null,null]).map((mv,mi)=>{
+    const name=getMoveName(mv);
+    if(!name)return`<div class="archive-edit-move" onclick="openMovePicker('${archiveEditEntry}',${archiveEditSlot},${mi})"><span style="color:var(--text-muted);font-size:13px;">+ Add Move</span></div>`;
+    const type=getMoveType(mv,slot.pokemonId);
+    return`<div class="archive-edit-move"><span onclick="openMovePicker('${archiveEditEntry}',${archiveEditSlot},${mi})" style="flex:1;display:flex;align-items:center;justify-content:space-between;cursor:pointer;"><span style="font-size:14px;font-weight:700;color:var(--text)">${name}</span>${moveTypeBadge(type)}</span><button class="archive-edit-move-rm" onclick="event.stopPropagation();removeMove('${archiveEditEntry}',${archiveEditSlot},${mi})">✕</button></div>`;
+  }).join('');
+  body.innerHTML=`<div style="margin-bottom:20px;">
+      <div style="font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px;">Level</div>
+      <input class="archive-edit-level" type="number" min="1" max="100" placeholder="?" value="${slot.level||''}" oninput="updateArchiveLevel('${archiveEditEntry}',${archiveEditSlot},this.value)">
+    </div>
+    <div style="margin-bottom:20px;">
+      <div style="font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px;">Moves</div>
+      <div style="display:flex;flex-direction:column;gap:6px;">${movesHtml}</div>
+    </div>
+    <button class="btn btn-secondary" style="width:100%;" onclick="removeArchiveSlot('${archiveEditEntry}',${archiveEditSlot});closeArchiveEditModal();">Remove Pokémon</button>`;
 }
 
 loadPokedex();renderTMFilters();renderTMs(TM_DATA);renderItemFilters();renderItems(ITEM_DATA);renderEvolutions(EVO_DATA);renderTeam();renderGymLeaders();
