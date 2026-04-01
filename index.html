@@ -2028,10 +2028,28 @@ async function openMovePicker(entryId,slotIndex,moveIndex){
   document.getElementById('move-picker-search').value='';
   modal.classList.add('open');document.body.style.overflow='hidden';
   list.innerHTML=`<div style="display:flex;align-items:center;gap:10px;padding:24px 0;color:var(--text-muted);font-size:13px;"><div class="spinner" style="width:20px;height:20px;border-width:2px;flex-shrink:0;"></div>Loading moves…</div>`;
-  const data=await fetchPokeMovesAndTMs(e.team[slotIndex].pokemonId);
+  const pokemonId=e.team[slotIndex].pokemonId;
+  const data=await fetchPokeMovesAndTMs(pokemonId);
   if(!modal.classList.contains('open'))return;
   if(!data){list.innerHTML=`<p style="color:var(--text-muted);font-size:13px;padding:16px 0;">Couldn't load moves. Check your connection.</p>`;return;}
-  archiveMovesData={levelup:data.levelup,tms:data.tms};
+  // For stone/item evolutions, also include pre-evolution moves
+  let mergedLevelup=data.levelup, mergedTms=data.tms;
+  const evoEntry=EVO_DATA.find(({chain})=>chain.some(m=>m.id===pokemonId));
+  if(evoEntry){
+    const idx=evoEntry.chain.findIndex(m=>m.id===pokemonId);
+    if(idx>0&&!/^Lv\./i.test(evoEntry.chain[idx].m)){
+      const preEvoId=evoEntry.chain[idx-1].id;
+      const preData=await fetchPokeMovesAndTMs(preEvoId);
+      if(preData){
+        const seenLevelup=new Set(mergedLevelup.map(m=>m.name));
+        const preEvoMoves=preData.levelup.filter(m=>!seenLevelup.has(m.name)).map(m=>({...m,preEvo:true}));
+        mergedLevelup=[...mergedLevelup,...preEvoMoves].sort((a,b)=>a.lv-b.lv);
+        const seenTms=new Set(mergedTms.map(m=>m.name));
+        mergedTms=[...mergedTms,...preData.tms.filter(m=>!seenTms.has(m.name))];
+      }
+    }
+  }
+  archiveMovesData={levelup:mergedLevelup,tms:mergedTms};
   movePickerTab='moves';
   document.getElementById('move-tab-moves').classList.add('active');
   document.getElementById('move-tab-tms').classList.remove('active');
