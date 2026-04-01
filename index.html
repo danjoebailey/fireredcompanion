@@ -177,6 +177,7 @@ body::before {
 .archive-date { background: transparent; border: 1.5px solid var(--border); border-radius: 8px; color: var(--text-muted); font-family: 'Outfit', sans-serif; font-size: 12px; padding: 4px 8px; outline: none; color-scheme: dark; }
 .archive-date:focus { border-color: var(--accent); }
 .archive-slots { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; }
+@media(min-width:700px) { .archive-slots { grid-template-columns: repeat(3,1fr); } }
 .archive-slot { background: var(--surface2); border: 1.5px dashed var(--border); border-radius: var(--radius); padding: 12px 8px; min-height: 120px; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s; text-align: center; position: relative; }
 .archive-slot:hover { border-color: var(--border-hover); background: var(--surface3); }
 .archive-card { border-radius: var(--radius); overflow: hidden; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; }
