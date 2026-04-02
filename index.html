@@ -171,7 +171,16 @@ body::before {
 .btn-secondary:hover { background: var(--surface3); color: var(--text); }
 /* Archive */
 .archive-entry { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; margin-bottom: 16px; }
-.archive-header { display: flex; align-items: center; gap: 10px; margin-bottom: 16px; flex-wrap: wrap; }
+.archive-entry.collapsed .archive-body { display: none; }
+.archive-entry.collapsed .archive-header { margin-bottom: 0; }
+.archive-entry.collapsed .archive-preview { display: flex; }
+.archive-entry.collapsed .archive-header .btn { display: none; }
+.archive-entry.collapsed .archive-date { display: none; }
+.archive-preview { display: none; align-items: center; gap: 6px; margin-left: auto; flex-shrink: 0; }
+.archive-preview img { width: 28px; height: 28px; image-rendering: pixelated; filter: drop-shadow(0 1px 2px rgba(0,0,0,0.2)); }
+.archive-toggle { background: none; border: none; color: var(--text-muted); cursor: pointer; padding: 4px; font-size: 16px; transition: transform 0.2s; flex-shrink: 0; display: flex; align-items: center; }
+.archive-entry.collapsed .archive-toggle { transform: rotate(-90deg); }
+.archive-header { display: flex; align-items: center; gap: 10px; margin-bottom: 16px; flex-wrap: nowrap; }
 .archive-label { background: transparent; border: none; border-bottom: 1.5px solid var(--border); color: var(--text); font-family: 'Outfit', sans-serif; font-size: 15px; font-weight: 700; padding: 2px 4px; flex: 1; min-width: 120px; outline: none; }
 .archive-label:focus { border-bottom-color: var(--accent); }
 .archive-date { background: transparent; border: 1.5px solid var(--border); border-radius: 8px; color: var(--text-muted); font-family: 'Outfit', sans-serif; font-size: 12px; padding: 4px 8px; outline: none; color-scheme: dark; }
@@ -1995,7 +2004,10 @@ async function toggleLocRow(slug){
 
 // Archive
 let archiveData=JSON.parse(localStorage.getItem('frArchive')||'[]');
+let archiveCollapsed=JSON.parse(localStorage.getItem('frArchiveCollapsed')||'{}');
 let archivePickingEntry=null,archivePickingSlot=null,movePickingEntry=null,movePickingSlot=null,movePickingIndex=null,movePickerTab='moves',archiveMoveList=[],archiveMovesData={levelup:[],tms:[]},archivePickerRendered=false,archiveEditEntry=null,archiveEditSlot=null;
+function saveArchiveCollapsed(){localStorage.setItem('frArchiveCollapsed',JSON.stringify(archiveCollapsed));}
+function toggleArchiveEntry(id){archiveCollapsed[id]=!archiveCollapsed[id];saveArchiveCollapsed();const el=document.querySelector(`.archive-entry[data-id="${id}"]`);if(el)el.classList.toggle('collapsed',!!archiveCollapsed[id]);}
 function getMoveName(mv){return typeof mv==='string'?mv:mv?.name||null;}
 function getMoveType(mv,pokemonId){if(typeof mv==='object'&&mv)return mv.type;if(typeof mv==='string'&&moveCache[pokemonId]){const all=[...moveCache[pokemonId].levelup,...moveCache[pokemonId].tms];const f=all.find(m=>m.name===mv);if(f)return f.type;}return null;}
 function moveTypeBadge(type){if(!type)return'';const c=TYPE_COLORS[type]||'#888';return`<span class="archive-move-type" style="background:${c}25;color:${c}">${type}</span>`;}
@@ -2014,14 +2026,16 @@ function buildEntryHtml(entry){
     const lvl=slot.level||'?';
     return`<div class="archive-card" onclick="openArchiveEditModal('${entry.id}',${i})"><div class="archive-card-top"><div class="archive-card-name">${p.name}</div><img class="archive-card-sprite" src="${sprite(slot.pokemonId)}" alt="${p.name}" crossorigin="anonymous"><div class="archive-card-level">${lvl}</div></div><div class="archive-card-moves">${movesHtml}</div></div>`;
   }).join('');
-  return`<div class="archive-entry" data-id="${entry.id}"><div class="archive-header"><input class="archive-label" type="text" placeholder="Playthrough name…" value="${escAttr(entry.label)}" oninput="updateArchiveLabel('${entry.id}',this.value)"><input class="archive-date" type="date" value="${entry.date}" oninput="updateArchiveDate('${entry.id}',this.value)"><button class="btn btn-primary" style="font-size:12px;padding:4px 10px;flex-shrink:0;" onclick="archiveUseTeam('${entry.id}')">Use Team</button><button class="btn btn-secondary" style="font-size:12px;padding:4px 10px;flex-shrink:0;" onclick="deleteArchiveEntry('${entry.id}')">Delete</button></div><div class="archive-slots">${slots}</div></div>`;
+  const isCollapsed=!!archiveCollapsed[entry.id];
+  const previewSprites=entry.team.filter(s=>s&&s.pokemonId).map(s=>`<img src="${sprite(s.pokemonId)}" alt="" crossorigin="anonymous">`).join('');
+  return`<div class="archive-entry${isCollapsed?' collapsed':''}" data-id="${entry.id}"><div class="archive-header"><button class="archive-toggle" onclick="toggleArchiveEntry('${entry.id}')" title="Expand/Collapse">▼</button><input class="archive-label" type="text" placeholder="Playthrough name…" value="${escAttr(entry.label)}" oninput="updateArchiveLabel('${entry.id}',this.value)"><input class="archive-date" type="date" value="${entry.date}" oninput="updateArchiveDate('${entry.id}',this.value)"><div class="archive-preview">${previewSprites}</div><button class="btn btn-primary" style="font-size:12px;padding:4px 10px;flex-shrink:0;" onclick="archiveUseTeam('${entry.id}')">Use Team</button><button class="btn btn-secondary" style="font-size:12px;padding:4px 10px;flex-shrink:0;" onclick="deleteArchiveEntry('${entry.id}')">Delete</button></div><div class="archive-body"><div class="archive-slots">${slots}</div></div></div>`;
 }
 function renderOneEntry(entryId){
   const entry=archiveData.find(e=>e.id===entryId);if(!entry)return;
   const el=document.querySelector(`.archive-entry[data-id="${entryId}"]`);if(!el){renderArchive();return;}
   const tmp=document.createElement('div');tmp.innerHTML=buildEntryHtml(entry);el.replaceWith(tmp.firstElementChild);
 }
-function addArchiveEntry(){const entry={id:Date.now().toString(),label:'',date:'',team:[null,null,null,null,null,null]};archiveData.unshift(entry);saveArchive();renderArchive();}
+function addArchiveEntry(){const entry={id:Date.now().toString(),label:'',date:'',team:[null,null,null,null,null,null]};if(archiveData.length>0){const prevId=archiveData[0].id;if(!archiveCollapsed[prevId]){archiveCollapsed[prevId]=true;}}archiveCollapsed[entry.id]=false;saveArchiveCollapsed();archiveData.unshift(entry);saveArchive();renderArchive();}
 function deleteArchiveEntry(id){if(!confirm('Delete this entry?'))return;archiveData=archiveData.filter(e=>e.id!==id);saveArchive();renderArchive();}
 function archiveUseTeam(id){const e=archiveData.find(e=>e.id===id);if(!e)return;e.team=team.map(id=>id?{pokemonId:id,level:null,moves:[null,null,null,null]}:null);saveArchive();renderOneEntry(id);e.team.forEach(s=>{if(s)fetchPokeMovesAndTMs(s.pokemonId);});}
 function updateArchiveLabel(id,val){const e=archiveData.find(e=>e.id===id);if(e){e.label=val;saveArchive();}}
