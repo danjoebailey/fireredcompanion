@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>FireRed Companion</title>
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;900&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
 <style>
 * { font-feature-settings: "zero" 0; }
 :root {
@@ -2028,7 +2029,7 @@ function buildEntryHtml(entry){
   }).join('');
   const isCollapsed=!!archiveCollapsed[entry.id];
   const previewSprites=entry.team.filter(s=>s&&s.pokemonId).map(s=>`<img src="${sprite(s.pokemonId)}" alt="" crossorigin="anonymous">`).join('');
-  return`<div class="archive-entry${isCollapsed?' collapsed':''}" data-id="${entry.id}"><div class="archive-header"><button class="archive-toggle" onclick="toggleArchiveEntry('${entry.id}')" title="Expand/Collapse">▼</button><input class="archive-label" type="text" placeholder="Playthrough name…" value="${escAttr(entry.label)}" oninput="updateArchiveLabel('${entry.id}',this.value)"><input class="archive-date" type="date" value="${entry.date}" oninput="updateArchiveDate('${entry.id}',this.value)"></div><div class="archive-preview">${previewSprites}</div><div class="archive-body"><div style="text-align:center;margin-bottom:14px;"><button class="btn btn-primary" style="font-size:12px;padding:4px 10px;" onclick="archiveUseTeam('${entry.id}')">Use Team</button></div><div class="archive-slots">${slots}</div><div style="text-align:center;margin-top:16px;"><button class="btn btn-secondary" style="font-size:12px;padding:4px 10px;" onclick="deleteArchiveEntry('${entry.id}')">Delete</button></div></div></div>`;
+  return`<div class="archive-entry${isCollapsed?' collapsed':''}" data-id="${entry.id}"><div class="archive-header"><button class="archive-toggle" onclick="toggleArchiveEntry('${entry.id}')" title="Expand/Collapse">▼</button><input class="archive-label" type="text" placeholder="Playthrough name…" value="${escAttr(entry.label)}" oninput="updateArchiveLabel('${entry.id}',this.value)"><input class="archive-date" type="date" value="${entry.date}" oninput="updateArchiveDate('${entry.id}',this.value)"></div><div class="archive-preview">${previewSprites}</div><div class="archive-body"><div style="text-align:center;margin-bottom:14px;display:flex;justify-content:center;gap:8px;"><button class="btn btn-primary" style="font-size:12px;padding:4px 10px;" onclick="archiveUseTeam('${entry.id}')">Use Team</button><button class="btn btn-secondary copy-img-btn" style="font-size:12px;padding:4px 10px;" onclick="copyArchiveImage('${entry.id}')">Copy Image</button></div><div class="archive-slots">${slots}</div><div style="text-align:center;margin-top:16px;"><button class="btn btn-secondary" style="font-size:12px;padding:4px 10px;" onclick="deleteArchiveEntry('${entry.id}')">Delete</button></div></div></div>`;
 }
 function renderOneEntry(entryId){
   const entry=archiveData.find(e=>e.id===entryId);if(!entry)return;
@@ -2037,6 +2038,46 @@ function renderOneEntry(entryId){
 }
 function addArchiveEntry(){const entry={id:Date.now().toString(),label:'',date:'',team:[null,null,null,null,null,null]};if(archiveData.length>0){const prevId=archiveData[0].id;if(!archiveCollapsed[prevId]){archiveCollapsed[prevId]=true;}}archiveCollapsed[entry.id]=false;saveArchiveCollapsed();archiveData.unshift(entry);saveArchive();renderArchive();}
 function deleteArchiveEntry(id){if(!confirm('Delete this entry?'))return;archiveData=archiveData.filter(e=>e.id!==id);saveArchive();renderArchive();}
+async function copyArchiveImage(id){
+  const entry=archiveData.find(e=>e.id===id);if(!entry)return;
+  const el=document.querySelector(`.archive-entry[data-id="${id}"]`);if(!el)return;
+  const btn=el.querySelector('.copy-img-btn');
+  const origText=btn.textContent;btn.textContent='Capturing…';btn.disabled=true;
+  const reset=(msg)=>{btn.textContent=msg;setTimeout(()=>{btn.textContent=origText;btn.disabled=false;},2000);};
+  const cards=entry.team.map(slot=>{
+    if(!slot)return`<div style="background:#2a2a4a;border:1.5px dashed #3a3a5a;border-radius:12px;min-height:140px;display:flex;align-items:center;justify-content:center;color:#6b6b80;font-size:13px;">Empty</div>`;
+    const p=pokemonData.find(x=>x.id===slot.pokemonId);if(!p)return'';
+    const movesHtml=(slot.moves||[null,null,null,null]).map(mv=>{
+      const name=getMoveName(mv);
+      if(!name)return`<div style="background:#f5f5f5;border:1px dashed #ddd;border-radius:6px;padding:8px 12px;color:#999;font-size:12px;text-align:center;">—</div>`;
+      const type=getMoveType(mv,slot.pokemonId);const c=TYPE_COLORS[type]||'#888';
+      const badge=type?`<span style="font-size:9px;font-weight:700;padding:2px 6px;border-radius:100px;background:${c}25;color:${c};text-transform:uppercase;letter-spacing:0.5px;">${type}</span>`:'';
+      return`<div style="background:#fff;border:1px solid rgba(0,0,0,0.08);border-radius:6px;padding:10px 14px;display:flex;align-items:center;justify-content:space-between;"><span style="font-size:12px;font-weight:700;color:#222;">${name}</span>${badge}</div>`;
+    }).join('');
+    const lvl=slot.level||'?';
+    return`<div style="border-radius:12px;overflow:hidden;"><div style="background:#fff;border-radius:12px;padding:16px 16px 22px;text-align:center;position:relative;border:1px solid rgba(0,0,0,0.08);"><div style="font-size:16px;font-weight:800;color:#222;text-transform:capitalize;margin-bottom:8px;">${p.name}</div><img src="${sprite(slot.pokemonId)}" style="width:80px;height:80px;image-rendering:pixelated;display:block;margin:0 auto;filter:drop-shadow(0 4px 8px rgba(0,0,0,0.15));" crossorigin="anonymous"><div style="position:absolute;bottom:12px;right:16px;width:36px;height:36px;background:#fff;border:2.5px solid #222;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:800;color:#222;box-shadow:0 2px 8px rgba(0,0,0,0.12);">${lvl}</div></div><div style="display:flex;flex-direction:column;gap:5px;margin-top:8px;">${movesHtml}</div></div>`;
+  }).join('');
+  const label=entry.label||'Untitled';
+  const date=entry.date?new Date(entry.date+'T00:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}):'';
+  const dateHtml=date?`<div style="font-size:13px;color:#8888aa;margin-top:4px;">${date}</div>`:'';
+  const render=document.createElement('div');
+  render.style.cssText='position:fixed;left:-9999px;top:0;width:660px;padding:28px;background:#1a1a2e;border-radius:16px;font-family:Outfit,sans-serif;';
+  render.innerHTML=`<div style="margin-bottom:20px;"><div style="font-size:20px;font-weight:800;color:#e8e8f0;">${escAttr(label)}</div>${dateHtml}</div><div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px;">${cards}</div><div style="text-align:center;margin-top:16px;font-size:10px;color:#6b6b80;">fireredcompanion.flosartis.com</div>`;
+  document.body.appendChild(render);
+  try{
+    await new Promise(r=>setTimeout(r,100));
+    const canvas=await html2canvas(render,{backgroundColor:'#1a1a2e',useCORS:true,scale:2});
+    const blob=await new Promise(r=>canvas.toBlob(r,'image/png'));
+    const fname=`${label.replace(/[^a-z0-9]/gi,'_')||'team'}.png`;
+    try{await navigator.clipboard.write([new ClipboardItem({'image/png':blob})]);reset('Copied!');}
+    catch(e){
+      const file=new File([blob],fname,{type:'image/png'});
+      if(navigator.canShare&&navigator.canShare({files:[file]})){try{await navigator.share({files:[file]});reset('Shared!');}catch(e2){if(e2.name!=='AbortError'){const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=fname;a.click();URL.revokeObjectURL(a.href);reset('Downloaded!');}else reset(origText);}}
+      else{const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=fname;a.click();URL.revokeObjectURL(a.href);reset('Downloaded!');}
+    }
+  }catch(e){reset('Error');}
+  finally{document.body.removeChild(render);}
+}
 function archiveUseTeam(id){const e=archiveData.find(e=>e.id===id);if(!e)return;e.team=team.map(id=>id?{pokemonId:id,level:null,moves:[null,null,null,null]}:null);saveArchive();renderOneEntry(id);e.team.forEach(s=>{if(s)fetchPokeMovesAndTMs(s.pokemonId);});}
 function updateArchiveLabel(id,val){const e=archiveData.find(e=>e.id===id);if(e){e.label=val;saveArchive();}}
 function updateArchiveDate(id,val){const e=archiveData.find(e=>e.id===id);if(e){e.date=val;saveArchive();}}
