@@ -2036,11 +2036,12 @@ function renderOneEntry(entryId){
   const el=document.querySelector(`.archive-entry[data-id="${entryId}"]`);if(!el){renderArchive();return;}
   const tmp=document.createElement('div');tmp.innerHTML=buildEntryHtml(entry);el.replaceWith(tmp.firstElementChild);
 }
-function addArchiveEntry(){const entry={id:Date.now().toString(),label:'',date:'',team:[null,null,null,null,null,null]};if(archiveData.length>0){const prevId=archiveData[0].id;if(!archiveCollapsed[prevId]){archiveCollapsed[prevId]=true;}}archiveCollapsed[entry.id]=false;saveArchiveCollapsed();archiveData.unshift(entry);saveArchive();renderArchive();}
-function deleteArchiveEntry(id){if(!confirm('Delete this entry?'))return;archiveData=archiveData.filter(e=>e.id!==id);saveArchive();renderArchive();}
+function addArchiveEntry(){const entry={id:Date.now().toString(),label:'',date:'',team:[null,null,null,null,null,null]};if(archiveData.length>0){const prevId=archiveData[0].id;if(!archiveCollapsed[prevId]){archiveCollapsed[prevId]=true;}}archiveCollapsed[entry.id]=false;saveArchiveCollapsed();archiveData.unshift(entry);saveArchive();renderArchive();track('archive_entry_added');}
+function deleteArchiveEntry(id){if(!confirm('Delete this entry?'))return;archiveData=archiveData.filter(e=>e.id!==id);saveArchive();renderArchive();track('archive_entry_deleted');}
 async function copyArchiveImage(id){
   const entry=archiveData.find(e=>e.id===id);if(!entry)return;
   const el=document.querySelector(`.archive-entry[data-id="${id}"]`);if(!el)return;
+  track('archive_copy_image');
   const btn=el.querySelector('.copy-img-btn');
   const origText=btn.textContent;btn.textContent='Capturing…';btn.disabled=true;
   const reset=(msg)=>{btn.textContent=msg;setTimeout(()=>{btn.textContent=origText;btn.disabled=false;},2000);};
@@ -2092,7 +2093,7 @@ function openArchivePicker(entryId,slot){
 function closeArchivePicker(){document.getElementById('archive-picker-modal').classList.remove('open');document.body.style.overflow='';archivePickingEntry=null;archivePickingSlot=null;}
 function renderArchivePickerGrid(data){const g=document.getElementById('archive-picker-grid');if(!g)return;g.innerHTML=data.map(p=>`<div class="poke-card" onclick="pickArchivePokemon(${p.id})"><div class="poke-num">#${String(p.id).padStart(3,'0')}</div><img class="poke-sprite" src="${sprite(p.id)}" alt="${p.name}" loading="lazy" crossorigin="anonymous"><div class="poke-name">${p.name}</div><div class="poke-types">${p.types.map(typeChip).join('')}</div></div>`).join('');}
 function filterArchivePicker(){const q=document.getElementById('archive-picker-search').value.toLowerCase();renderArchivePickerGrid(pokemonData.filter(p=>p.name.includes(q)||String(p.id).includes(q)));}
-function pickArchivePokemon(pokemonId){const eid=archivePickingEntry;const e=archiveData.find(e=>e.id===eid);if(e&&archivePickingSlot!==null)e.team[archivePickingSlot]={pokemonId,level:null,moves:[null,null,null,null]};saveArchive();closeArchivePicker();renderOneEntry(eid);fetchPokeMovesAndTMs(pokemonId);}
+function pickArchivePokemon(pokemonId){const eid=archivePickingEntry;const e=archiveData.find(e=>e.id===eid);if(e&&archivePickingSlot!==null)e.team[archivePickingSlot]={pokemonId,level:null,moves:[null,null,null,null]};saveArchive();closeArchivePicker();renderOneEntry(eid);fetchPokeMovesAndTMs(pokemonId);const p=pokemonData.find(x=>x.id===pokemonId);track('archive_pokemon_added',{pokemon:p?.name});}
 function removeArchiveSlot(entryId,slot){const e=archiveData.find(e=>e.id===entryId);if(e){e.team[slot]=null;saveArchive();renderOneEntry(entryId);}}
 async function openMovePicker(entryId,slotIndex,moveIndex){
   const e=archiveData.find(e=>e.id===entryId);
@@ -2138,7 +2139,7 @@ function renderMovePickerList(moves){
 function switchMovePickerTab(tab){movePickerTab=tab;document.getElementById('move-tab-moves').classList.toggle('active',tab==='moves');document.getElementById('move-tab-tms').classList.toggle('active',tab==='tms');document.getElementById('move-picker-search').value='';renderMovePickerList(tab==='moves'?archiveMovesData.levelup:archiveMovesData.tms);}
 function filterMovePicker(){const q=document.getElementById('move-picker-search').value.toLowerCase();const src=movePickerTab==='moves'?archiveMovesData.levelup:archiveMovesData.tms;renderMovePickerList(q?src.filter(m=>m.name.toLowerCase().includes(q)):src);}
 function closeMovePicker(){document.getElementById('move-picker-modal').classList.remove('open');if(!archiveEditEntry)document.body.style.overflow='';movePickingEntry=null;movePickingSlot=null;movePickingIndex=null;movePickerTab='moves';}
-function pickMove(idx){const m=archiveMoveList[idx];if(!m)return;const eid=movePickingEntry;const si=movePickingSlot;const e=archiveData.find(e=>e.id===eid);if(e&&e.team[si])e.team[si].moves[movePickingIndex]={name:m.name,type:m.type};saveArchive();closeMovePicker();if(archiveEditEntry)renderArchiveEditContent();else renderOneEntry(eid);}
+function pickMove(idx){const m=archiveMoveList[idx];if(!m)return;const eid=movePickingEntry;const si=movePickingSlot;const e=archiveData.find(e=>e.id===eid);if(e&&e.team[si])e.team[si].moves[movePickingIndex]={name:m.name,type:m.type};saveArchive();closeMovePicker();if(archiveEditEntry)renderArchiveEditContent();else renderOneEntry(eid);track('archive_move_added',{move:m.name,type:m.type});}
 function removeMove(entryId,slotIndex,moveIndex){const e=archiveData.find(e=>e.id===entryId);if(e&&e.team[slotIndex]){e.team[slotIndex].moves[moveIndex]=null;saveArchive();if(archiveEditEntry)renderArchiveEditContent();else renderOneEntry(entryId);}}
 function renderArchive(){
   const container=document.getElementById('archive-list');
