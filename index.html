@@ -176,12 +176,13 @@ body::before {
 .archive-entry.collapsed .archive-preview { display: flex; }
 .archive-entry.collapsed .archive-header .btn { display: none; }
 .archive-entry.collapsed .archive-date { display: none; }
-.archive-preview { display: none; align-items: center; gap: 6px; margin-left: auto; flex-shrink: 0; }
-.archive-preview img { width: 28px; height: 28px; image-rendering: pixelated; filter: drop-shadow(0 1px 2px rgba(0,0,0,0.2)); }
+.archive-preview { display: none; align-items: center; gap: 3px; margin-left: auto; flex-shrink: 0; }
+.archive-preview img { width: 24px; height: 24px; image-rendering: pixelated; filter: drop-shadow(0 1px 2px rgba(0,0,0,0.2)); }
+@media(min-width:500px) { .archive-preview { gap: 6px; } .archive-preview img { width: 28px; height: 28px; } }
 .archive-toggle { background: none; border: none; color: var(--text-muted); cursor: pointer; padding: 4px; font-size: 16px; transition: transform 0.2s; flex-shrink: 0; display: flex; align-items: center; }
 .archive-entry.collapsed .archive-toggle { transform: rotate(-90deg); }
 .archive-header { display: flex; align-items: center; gap: 10px; margin-bottom: 16px; flex-wrap: nowrap; }
-.archive-label { background: transparent; border: none; border-bottom: 1.5px solid var(--border); color: var(--text); font-family: 'Outfit', sans-serif; font-size: 15px; font-weight: 700; padding: 2px 4px; flex: 1; min-width: 120px; outline: none; }
+.archive-label { background: transparent; border: none; border-bottom: 1.5px solid var(--border); color: var(--text); font-family: 'Outfit', sans-serif; font-size: 15px; font-weight: 700; padding: 2px 4px; flex: 1; min-width: 80px; outline: none; overflow: hidden; text-overflow: ellipsis; }
 .archive-label:focus { border-bottom-color: var(--accent); }
 .archive-date { background: transparent; border: 1.5px solid var(--border); border-radius: 8px; color: var(--text-muted); font-family: 'Outfit', sans-serif; font-size: 12px; padding: 4px 8px; outline: none; color-scheme: dark; }
 .archive-date:focus { border-color: var(--accent); }
