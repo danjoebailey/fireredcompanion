@@ -1057,7 +1057,7 @@ function renderMovesetPlanner(){
   if(recBtn)recBtn.style.display='flex';
   el.innerHTML=members.map(({pokemon:p})=>{
     const moves=getMovesForSlot(p.id);
-    return`<div class="moveset-pokemon"><div class="moveset-pokemon-header"><img src="${sprite(p.id)}" alt="${p.name}" crossorigin="anonymous"><div><div class="moveset-pokemon-name">${p.name}</div><div class="moveset-pokemon-types">${p.types.map(typeChip).join('')}</div></div></div><div class="moveset-moves-grid">${moves.map((mv,i)=>mv?`<div class="tm-card" style="cursor:pointer;position:relative;" onclick="openTeamMovePicker(${p.id},${i})"><div class="tm-card-header"><span class="tm-move">${mv.name}</span>${typeChip(mv.type)}<span class="tm-meta">${mv.pw!=='—'?mv.pw:'—'}</span></div><button class="moveset-slot-rm" style="position:absolute;top:8px;right:8px;" onclick="event.stopPropagation();removeMoveFromSlot(${p.id},${i})">✕</button></div>`:`<div class="moveset-slot" onclick="openTeamMovePicker(${p.id},${i})">+ Add move</div>`).join('')}</div></div>`;
+    return`<div class="moveset-pokemon"><div class="moveset-pokemon-header"><img src="${sprite(p.id)}" alt="${p.name}" crossorigin="anonymous"><div><div class="moveset-pokemon-name">${p.name}</div><div class="moveset-pokemon-types">${p.types.map(typeChip).join('')}</div></div></div><div class="moveset-moves-grid">${moves.map((mv,i)=>mv?`<div class="tm-card" style="cursor:pointer;position:relative;" onclick="openTeamMovePicker(${p.id},${i})"><div class="tm-card-header">${mv.num?`<span class="tm-num">${mv.num}</span>`:mv.lv?`<span class="tm-num">${String(mv.lv).padStart(2,'0')}</span>`:''}<span class="tm-move">${mv.name}</span>${typeChip(mv.type)}<span class="tm-meta">${mv.pw!=='—'?mv.pw:'—'}</span></div><button class="moveset-slot-rm" style="position:absolute;top:8px;right:8px;" onclick="event.stopPropagation();removeMoveFromSlot(${p.id},${i})">✕</button></div>`:`<div class="moveset-slot" onclick="openTeamMovePicker(${p.id},${i})">+ Add move</div>`).join('')}</div></div>`;
   }).join('');
   renderTeamMoveCoverage(members);
 }
@@ -1094,7 +1094,7 @@ function filterTeamMovePicker(){
 }
 function pickTeamMove(idx){
   const m=teamMoveMoveList[idx];if(!m)return;
-  setMoveForSlot(teamMovePickingSlot,teamMovePickingIdx,{name:m.name,type:m.type,pw:m.pw});
+  setMoveForSlot(teamMovePickingSlot,teamMovePickingIdx,{name:m.name,type:m.type,pw:m.pw,lv:m.lv||null,num:m.num||null});
   closeTeamMovePicker();
   renderMovesetPlanner();
 }
@@ -1240,7 +1240,7 @@ async function recommendAllMovesets(){
     const hmData=[...best.data.levelup,...best.data.tms].find(m=>m.name.toLowerCase()===hmName.toLowerCase());
     if(!hmData)continue;
     if(!teamMoveStore[best.p.id])teamMoveStore[best.p.id]=[null,null,null,null];
-    teamMoveStore[best.p.id][emptyIdx]={name:hmData.name,type:hmData.type,pw:hmData.pw};
+    teamMoveStore[best.p.id][emptyIdx]={name:hmData.name,type:hmData.type,pw:hmData.pw,lv:hmData.lv||null,num:hmData.num||null};
     if(hmData.type)coveredTypes.add(hmData.type);
     neededHMs.delete(hmName);
   }
@@ -1260,7 +1260,7 @@ async function recommendAllMovesets(){
     for(let i=0;i<4;i++){
       if(!merged[i]&&pickIdx<picked.length){
         const m=picked[pickIdx++];
-        merged[i]={name:m.name,type:m.type,pw:m.pw};
+        merged[i]={name:m.name,type:m.type,pw:m.pw,lv:m.lv||null,num:m.num||null};
         if(!lvNames.has(m.name.toLowerCase())&&isSingleUseMove(m.name))usedTMs.add(m.name.toLowerCase());
         if(m.type)coveredTypes.add(m.type);
       }
