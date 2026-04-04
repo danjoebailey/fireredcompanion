@@ -1361,7 +1361,7 @@ async function loadCatchLocations(p){
     const steps=evoChain.chain.slice(0,myIdx+1);
     const pathStr=steps.map((s,i)=>i===0?s.name:`${s.name} (${s.m})`).join(' → ');
     html+=`<div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:var(--text-muted);margin-bottom:8px;">Evolution Path</div>`;
-    html+=`<div class="catch-planner-loc"><span class="catch-planner-loc-order">⬆</span><span class="catch-planner-loc-area" style="text-transform:capitalize;">${pathStr}</span></div>`;
+    html+=`<div class="catch-planner-loc"><span class="catch-planner-loc-order"></span><span class="catch-planner-loc-area" style="text-transform:capitalize;">${pathStr}</span></div>`;
     // Show where to catch each pre-evolution
     const preEvos=evoChain.chain.slice(0,myIdx);
     for(const preEvo of preEvos){
