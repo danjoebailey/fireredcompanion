@@ -69,6 +69,10 @@ body::before {
 }
 .logo { display: flex; align-items: center; gap: 10px; font-weight: 900; font-size: 20px; letter-spacing: -0.5px; }
 .logo-sub { font-size: 11px; font-weight: 400; color: var(--text-muted); letter-spacing: 0.5px; display: block; line-height: 1; text-align: center; }
+.version-toggle { display:flex; border-radius:8px; overflow:hidden; border:1px solid var(--border); }
+.version-btn { font-family:'Outfit',sans-serif; font-size:11px; font-weight:700; padding:6px 12px; border:none; cursor:pointer; transition:all 0.15s; background:transparent; color:var(--text-muted); flex:1; }
+.version-btn.active-fr { background:#e53e3e; color:#fff; }
+.version-btn.active-lg { background:#38a169; color:#fff; }
 .nav { display: flex; gap: 2px; overflow-x: auto; scrollbar-width: none; margin-left: auto; }
 .nav::-webkit-scrollbar { display: none; }
 .nav-tab {
@@ -489,9 +493,19 @@ body::before {
 <div class="header">
   <div class="logo">
     <img src="/logo.png" alt="FireRed Logo" style="width:52px;height:52px;object-fit:contain;">
-    <div>FireRed <span class="logo-sub"><img src="/pokemonC.png" alt="C" style="height:1.2em;width:auto;object-fit:contain;vertical-align:middle;margin-right:1px;image-rendering:auto;">ompanion</span></div>
+    <div><span id="version-title">FireRed</span> <span class="logo-sub"><img src="/pokemonC.png" alt="C" style="height:1.2em;width:auto;object-fit:contain;vertical-align:middle;margin-right:1px;image-rendering:auto;">ompanion</span></div>
   </div>
-  <div style="margin-left:auto;position:relative;" id="site-nav-wrap">
+  <div style="margin-left:auto;position:relative;" id="settings-wrap">
+    <button id="version-sprite-btn" onclick="toggleSettings()" style="display:flex;align-items:center;justify-content:center;width:40px;height:40px;background:var(--surface2);border:1px solid var(--border);border-radius:10px;cursor:pointer;transition:all 0.15s;padding:4px;"><img id="version-sprite" src="https://cdn.jsdelivr.net/gh/PokeAPI/sprites@master/sprites/pokemon/versions/generation-iii/firered-leafgreen/6.png" alt="Version" style="width:28px;height:28px;image-rendering:pixelated;"></button>
+    <div id="settings-menu" style="display:none;position:absolute;top:calc(100% + 8px);right:0;background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px;min-width:180px;box-shadow:0 8px 32px rgba(0,0,0,0.4);z-index:100;">
+      <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:var(--text-muted);margin-bottom:10px;">Game Version</div>
+      <div class="version-toggle">
+        <button class="version-btn active-fr" onclick="switchVersion('firered')">FireRed</button>
+        <button class="version-btn" onclick="switchVersion('leafgreen')">LeafGreen</button>
+      </div>
+    </div>
+  </div>
+  <div style="position:relative;" id="site-nav-wrap">
     <button id="site-nav-btn" onclick="toggleSiteNav()" style="display:flex;align-items:center;gap:8px;background:var(--surface2);border:1px solid var(--border);border-radius:10px;color:var(--text);font-family:'Outfit',sans-serif;font-size:14px;font-weight:600;padding:9px 14px;cursor:pointer;transition:all 0.15s;">
       <span id="site-nav-label">Pokédex</span>
       <svg id="site-nav-arrow" width="12" height="12" viewBox="0 0 12 12" fill="none" style="transition:transform 0.2s;"><path d="M2 4l4 4 4-4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
@@ -615,7 +629,7 @@ body::before {
   <div id="panel-locations" class="panel">
     <div class="section-head">
       <h2>Locations</h2>
-      <p>Where to find Pokémon in Fire Red</p>
+      <p id="locations-subtitle">Where to find Pokémon in FireRed</p>
     </div>
     <div class="loc-group-tabs" id="loc-group-tabs"></div>
     <div id="loc-list"></div>
@@ -984,13 +998,21 @@ const ITEM_DATA=[
 {icon:'💊',name:'PP Max',cat:'vitamin',loc:'Cape Brink, Two Island (surf east from the house)',fx:"Raises a move's PP to its maximum"}];
 
 
-const NPC_TRADES={
-  83: {give:'Spearow',where:'Vermilion City',nickname:'DUX'},
-  101:{give:'Raichu',where:'Cinnabar Lab',nickname:'Volty'},
-  114:{give:'Venonat',where:'Cinnabar Lab',nickname:'Tany'},
-  122:{give:'Abra',where:'Route 2 (south gate)',nickname:'Mimie'},
-  124:{give:'Poliwhirl',where:'Cerulean City',nickname:'Bella'},
-};
+function getNpcTrades(){
+  const shared={
+    83: {give:'Spearow',where:'Vermilion City',nickname:'DUX'},
+    101:{give:'Raichu',where:'Cinnabar Lab',nickname:'Volty'},
+    114:{give:'Venonat',where:'Cinnabar Lab',nickname:'Tany'},
+    122:{give:'Abra',where:'Route 2 (south gate)',nickname:'Mimie'},
+    124:{give:'Poliwhirl',where:'Cerulean City',nickname:'Bella'},
+  };
+  if(gameVersion==='leafgreen'){
+    shared[108]={give:'Slowbro',where:'Route 18 gate',nickname:'Lingo'};
+  } else {
+    shared[108]={give:'Golduck',where:'Route 18 gate',nickname:'Lingo'};
+  }
+  return shared;
+}
 
 const GYM_DATA=[
 {name:'Brock',title:'Pewter Gym',badge:'Boulder Badge',specialty:'rock',location:'Pewter City',pokemon:[{id:74,lv:12,types:['rock','ground']},{id:95,lv:14,types:['rock','ground']}]},
@@ -1357,7 +1379,7 @@ async function loadCatchLocations(p){
   const el=document.getElementById('catch-locs-'+p.id);
   if(!el)return;
   // Check if it's a starter or gift/trade pokemon
-  const SPECIAL_POKEMON={122:'Trade Abra → Mr. Mime (Route 2 gate)',124:'Trade Poliwhirl → Jynx (Cerulean City)',101:'Gift — Power Plant',143:'Snorlax — Route 12 or Route 16 (need PokéFlute)',106:'Gift — Fighting Dojo (choose one)',107:'Gift — Fighting Dojo (choose one)',138:'Helix Fossil → Cinnabar Lab',140:'Dome Fossil → Cinnabar Lab',142:'Old Amber (Pewter Museum) → Cinnabar Lab',131:'Gift — Silph Co. 7F',133:'Gift — Celadon Mansion rooftop'};
+  const SPECIAL_POKEMON={122:'Trade Abra → Mr. Mime (Route 2 gate)',124:'Trade Poliwhirl → Jynx (Cerulean City)',101:'Gift — Power Plant',143:'Snorlax — Route 12 or Route 16 (need PokéFlute)',106:'Gift — Fighting Dojo (choose one)',107:'Gift — Fighting Dojo (choose one)',138:'Helix Fossil → Cinnabar Lab',140:'Dome Fossil → Cinnabar Lab',142:'Old Amber (Pewter Museum) → Cinnabar Lab',131:'Gift — Silph Co. 7F',133:'Gift — Celadon Mansion rooftop',108:gameVersion==='firered'?'Trade Golduck → Lickitung (Route 18 gate)':'Trade Slowbro → Lickitung (Route 18 gate)'};
   const STARTERS=new Set([1,4,7]);
   let locs=await fetchPokeLocations(p.id);
   let html='';
@@ -1404,7 +1426,7 @@ async function loadCatchLocations(p){
     html+=renderLocsHtml(locs);
   }
   if(!html){
-    html=`<div class="catch-planner-none">No wild encounters found in Fire Red</div>`;
+    html=`<div class="catch-planner-none">No wild encounters found in ${gameVersion==='leafgreen'?'LeafGreen':'FireRed'}</div>`;
   }
   el.innerHTML=html;
 }
@@ -1563,7 +1585,7 @@ function toggleDexType(t){
   filterPokedex();
 }
 
-// ── PER-POKÉMON LEVEL-UP MOVES (Fire Red) ──────────────────────────────────
+// ── PER-POKÉMON LEVEL-UP MOVES (FireRed/LeafGreen) ──────────────────────────────────
 // Move + TM data fetched live from PokeAPI, cached per session
 const TYPE_POKEMON = {normal:133,fire:4,water:7,grass:1,electric:25,ice:131,fighting:106,poison:109,ground:50,flying:16,psychic:63,bug:10,rock:74,ghost:92,dragon:147,dark:197,steel:81,fairy:35};
 const moveCache = {}; // id -> {levelup: [...], tms: [...]}
@@ -1668,7 +1690,7 @@ async function fetchPokeLocations(id) {
     const merged = {};
     for (const enc of data) {
       for (const vd of enc.version_details) {
-        if (vd.version.name === 'firered') {
+        if (vd.version.name === gameVersion) {
           for (const e of vd.encounter_details) {
             const key = `${fmtName(enc.location_area.name)}|${fmtMethod(e.method.name)}`;
             if (!merged[key]) merged[key] = { area: fmtName(enc.location_area.name), method: fmtMethod(e.method.name), min: e.min_level, max: e.max_level };
@@ -1737,11 +1759,11 @@ async function renderModalBody(){
       const prevEvo = evoChain ? evoChain.chain[evoChain.chain.findIndex(m=>m.id===p.id)-1] : null;
       content = prevEvo
         ? `<p class="modal-empty">Not found in the wild. Evolve from <strong>${prevEvo.name}</strong>.</p>`
-        : `<p class="modal-empty">Not found in the wild in Fire Red.</p>`;
+        : `<p class="modal-empty">Not found in the wild in ${gameVersion==='leafgreen'?'LeafGreen':'FireRed'}.</p>`;
     } else {
       content = `<div class="tm-grid">${locs.map(l=>`<div class="tm-card"><span class="tm-move">${l.area}</span><span class="tm-num">${l.method}</span><span class="tm-meta">${l.lvl}</span></div>`).join('')}</div>`;
     }
-    const npcTrade=NPC_TRADES[p.id];
+    const npcTrade=getNpcTrades()[p.id];
     if(npcTrade){
       const tradeCard=`<div class="tm-card" style="margin-top:8px;"><span class="tm-move">NPC Trade</span><span class="tm-num">Give ${npcTrade.give}</span><span class="tm-meta">${npcTrade.where}</span></div>`;
       content=(content||'')+`<div class="tm-grid">${tradeCard}</div>`;
@@ -1749,7 +1771,7 @@ async function renderModalBody(){
 
   } else if(modalTab==='moves' || modalTab==='tms'){
     // Show spinner immediately, then load
-    document.getElementById('modal-body').innerHTML = `${tabBar}<div class="modal-tab-content"><div style="display:flex;align-items:center;gap:10px;padding:24px 0;color:var(--text-muted);font-size:13px;"><div class="spinner" style="width:20px;height:20px;border-width:2px;flex-shrink:0;"></div>Loading Fire Red data…</div></div><button class="btn btn-primary" style="width:100%;margin-top:16px;" onclick="addFromModal(${p.id})">+ Add to Team</button>`;
+    document.getElementById('modal-body').innerHTML = `${tabBar}<div class="modal-tab-content"><div style="display:flex;align-items:center;gap:10px;padding:24px 0;color:var(--text-muted);font-size:13px;"><div class="spinner" style="width:20px;height:20px;border-width:2px;flex-shrink:0;"></div>Loading game data…</div></div><button class="btn btn-primary" style="width:100%;margin-top:16px;" onclick="addFromModal(${p.id})">+ Add to Team</button>`;
 
     const data = await fetchPokeMovesAndTMs(p.id);
 
@@ -1761,7 +1783,7 @@ async function renderModalBody(){
     } else if (modalTab === 'moves') {
       const moves = data.levelup;
       if (!moves.length) {
-        content = `<p class="modal-empty">No level-up moves found for Fire Red.</p>`;
+        content = `<p class="modal-empty">No level-up moves found for ${gameVersion==='leafgreen'?'LeafGreen':'FireRed'}.</p>`;
       } else {
         const moveDetailHtml = m => `<div class="move-detail-stats"><div class="move-detail-stat"><span class="move-detail-stat-label">Power</span><span class="move-detail-stat-val">${m.pw!=='—'?m.pw:'—'}</span></div><div class="move-detail-stat"><span class="move-detail-stat-label">Accuracy</span><span class="move-detail-stat-val">${m.acc!=null?m.acc+'%':'—'}</span></div><div class="move-detail-stat"><span class="move-detail-stat-label">PP</span><span class="move-detail-stat-val">${m.pp||'—'}</span></div></div><div class="move-detail-desc">${m.desc||'—'}</div>`;
         content = `<div class="tm-grid">${moves.map(m=>`<div class="tm-card move-card-clickable" onclick="toggleMoveDetail(this)"><div class="tm-card-header"><span class="tm-num">${m.lv?String(m.lv).padStart(2,'0'):'—'}</span><span class="tm-move">${m.name}</span>${typeChip(m.type)}<span class="tm-meta">${m.pw!=='—'?m.pw:'—'}</span></div><div class="move-detail">${moveDetailHtml(m)}</div></div>`).join('')}</div>`;
@@ -1769,7 +1791,7 @@ async function renderModalBody(){
     } else {
       const tms = data.tms;
       if (!tms.length) {
-        content = `<p class="modal-empty">No TM/HM compatibility found for Fire Red.</p>`;
+        content = `<p class="modal-empty">No TM/HM compatibility found for ${gameVersion==='leafgreen'?'LeafGreen':'FireRed'}.</p>`;
       } else {
         const tmDetailHtml = t => `<div class="move-detail-stats"><div class="move-detail-stat"><span class="move-detail-stat-label">Power</span><span class="move-detail-stat-val">${t.pw!=='—'?t.pw:'—'}</span></div><div class="move-detail-stat"><span class="move-detail-stat-label">Accuracy</span><span class="move-detail-stat-val">${t.acc!=null?t.acc+'%':'—'}</span></div><div class="move-detail-stat"><span class="move-detail-stat-label">PP</span><span class="move-detail-stat-val">${t.pp||'—'}</span></div></div><div class="move-detail-desc">${t.desc||'—'}</div>`;
         content = `<div class="tm-grid">${tms.map(t=>`<div class="tm-card move-card-clickable" onclick="toggleMoveDetail(this)">${t.num?`<div class="tm-card-header"><span class="tm-num">${t.num}</span><span class="tm-move">${t.name}</span>${typeChip(t.type)}<span class="tm-meta">${t.pw!=='—'?t.pw:'—'}</span></div>`:`<div class="tm-card-header"><span class="tm-move">${t.name}</span>${typeChip(t.type)}<span class="tm-meta">${t.pw!=='—'?t.pw:'—'}</span></div>`}<div class="move-detail">${tmDetailHtml(t)}</div></div>`).join('')}</div>`;
@@ -2242,6 +2264,40 @@ function renderJourney(){
   }).join('');
 }
 
+let gameVersion=localStorage.getItem('frGameVersion')||'firered';
+function toggleSettings(){const m=document.getElementById('settings-menu');m.style.display=m.style.display==='none'?'block':'none';}
+document.addEventListener('click',e=>{const w=document.getElementById('settings-wrap');if(w&&!w.contains(e.target)){document.getElementById('settings-menu').style.display='none';}});
+function updateVersionUI(){
+  const img=document.getElementById('version-sprite');
+  const title=document.getElementById('version-title');
+  if(img)img.src=gameVersion==='leafgreen'
+    ?'https://cdn.jsdelivr.net/gh/PokeAPI/sprites@master/sprites/pokemon/versions/generation-iii/firered-leafgreen/3.png'
+    :'https://cdn.jsdelivr.net/gh/PokeAPI/sprites@master/sprites/pokemon/versions/generation-iii/firered-leafgreen/6.png';
+  if(title)title.textContent=gameVersion==='leafgreen'?'LeafGreen':'FireRed';
+  const locSub=document.getElementById('locations-subtitle');
+  if(locSub)locSub.textContent=`Where to find Pokémon in ${gameVersion==='leafgreen'?'LeafGreen':'FireRed'}`;
+}
+function switchVersion(ver){
+  gameVersion=ver;localStorage.setItem('frGameVersion',ver);
+  document.querySelectorAll('.version-btn').forEach(b=>{b.classList.remove('active-fr','active-lg');});
+  const btns=document.querySelectorAll('.version-btn');
+  btns.forEach(b=>{if(b.textContent.toLowerCase().replace(/\s/g,'')===ver.replace(/\s/g,''))b.classList.add(ver==='firered'?'active-fr':'active-lg');});
+  updateVersionUI();
+  Object.keys(locationCache).forEach(k=>delete locationCache[k]);
+  // Reset loaded location rows so they re-fetch for new version
+  document.querySelectorAll('.loc-row-body').forEach(b=>{delete b.dataset.loaded;b.innerHTML='';});
+  document.querySelectorAll('.loc-row.open').forEach(r=>r.classList.remove('open'));
+  renderCatchPlanner();
+  track('version_switched',{version:ver});
+}
+// Apply saved version on load
+(function(){
+  const btns=document.querySelectorAll('.version-btn');
+  btns.forEach(b=>{b.classList.remove('active-fr','active-lg');});
+  if(gameVersion==='leafgreen'){btns[1]?.classList.add('active-lg');}
+  else{btns[0]?.classList.add('active-fr');}
+  updateVersionUI();
+})();
 function switchTab(name){
   track('tab_switched',{tab:name});
   document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
@@ -2440,7 +2496,8 @@ const locAreaCache={};
 let locGroupFilter='All';
 
 async function fetchLocArea(slug){
-  if(locAreaCache[slug])return locAreaCache[slug];
+  const cacheKey=slug+'_'+gameVersion;
+  if(locAreaCache[cacheKey])return locAreaCache[cacheKey];
   try{
     const res=await fetch(`https://pokeapi.co/api/v2/location-area/${slug}/`);
     const data=await res.json();
@@ -2448,7 +2505,7 @@ async function fetchLocArea(slug){
     const merged={};
     for(const enc of data.pokemon_encounters){
       for(const vd of enc.version_details){
-        if(vd.version.name==='firered'){
+        if(vd.version.name===gameVersion){
           const id=parseInt(enc.pokemon.url.split('/').filter(Boolean).pop());
           for(const e of vd.encounter_details){
             const key=`${id}|${e.method.name}`;
@@ -2460,7 +2517,7 @@ async function fetchLocArea(slug){
       }
     }
     const result=Object.values(merged).map(e=>({...e,lvl:e.min===e.max?`Lv. ${e.min}`:`Lv. ${e.min}–${e.max}`})).sort((a,b)=>b.chance-a.chance);
-    locAreaCache[slug]=result;
+    locAreaCache[cacheKey]=result;
     return result;
   }catch{return null;}
 }
@@ -2490,7 +2547,7 @@ async function toggleLocRow(slug){
   body.dataset.loaded='1';
   body.innerHTML=`<div class="loc-loading"><div class="spinner" style="width:18px;height:18px;border-width:2px;flex-shrink:0;"></div>Loading…</div>`;
   const encs=await fetchLocArea(slug);
-  if(!encs||!encs.length){body.innerHTML=`<div class="loc-empty">No wild Pokémon found here in Fire Red.</div>`;return;}
+  if(!encs||!encs.length){body.innerHTML=`<div class="loc-empty">No wild Pokémon found here in ${gameVersion==='leafgreen'?'LeafGreen':'FireRed'}.</div>`;return;}
   const methodOrder=['Walking','Surfing','Super Rod','Good Rod','Old Rod','Rock Smash'];
   const groups={};
   for(const e of encs){if(!groups[e.method])groups[e.method]=[];groups[e.method].push(e);}
