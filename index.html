@@ -1094,7 +1094,8 @@ function renderMovesetPlanner(){
   if(recBtn)recBtn.style.display='flex';
   el.innerHTML=members.map(({pokemon:p})=>{
     const moves=getMovesForSlot(p.id);
-    return`<div class="moveset-pokemon"><div class="moveset-pokemon-header"><img src="${sprite(p.id)}" alt="${p.name}" crossorigin="anonymous"><div><div class="moveset-pokemon-name">${p.name}</div><div class="moveset-pokemon-types">${p.types.map(typeChip).join('')}</div></div></div><div class="moveset-moves-grid">${moves.map((mv,i)=>mv?`<div class="tm-card" style="cursor:pointer;position:relative;padding:0;" onclick="openTeamMovePicker(${p.id},${i})"><div class="tm-card-header" style="padding:10px 40px 10px 14px;">${mv.num?`<span class="tm-num">${mv.num}</span>`:mv.lv?`<span class="tm-num">${String(mv.lv).padStart(2,'0')}</span>`:''}<span class="tm-move">${mv.name}</span>${typeChip(mv.type)}<span class="tm-meta">${mv.pw!=='—'?mv.pw:'—'}</span></div><button class="moveset-slot-rm" style="position:absolute;top:50%;right:10px;transform:translateY(-50%);" onclick="event.stopPropagation();removeMoveFromSlot(${p.id},${i})">✕</button></div>`:`<div class="moveset-slot" onclick="openTeamMovePicker(${p.id},${i})">+ Add move</div>`).join('')}</div></div>`;
+    const hasEmpty=moves.some(m=>!m);
+    return`<div class="moveset-pokemon"><div class="moveset-pokemon-header"><img src="${sprite(p.id)}" alt="${p.name}" crossorigin="anonymous"><div><div class="moveset-pokemon-name">${p.name}</div><div class="moveset-pokemon-types">${p.types.map(typeChip).join('')}</div></div><div style="margin-left:auto;display:flex;gap:6px;">${hasEmpty?`<button class="btn btn-primary" style="font-size:11px;padding:5px 10px;" onclick="recommendSingleMoveset(${p.id})">Recommend</button>`:''}<button class="btn btn-secondary" style="font-size:11px;padding:5px 10px;" onclick="clearSingleMoveset(${p.id})">Clear</button></div></div><div class="moveset-moves-grid">${moves.map((mv,i)=>mv?`<div class="tm-card" style="cursor:pointer;position:relative;padding:0;" onclick="openTeamMovePicker(${p.id},${i})"><div class="tm-card-header" style="padding:10px 40px 10px 14px;">${mv.num?`<span class="tm-num">${mv.num}</span>`:mv.lv?`<span class="tm-num">${String(mv.lv).padStart(2,'0')}</span>`:''}<span class="tm-move">${mv.name}</span>${typeChip(mv.type)}<span class="tm-meta">${mv.pw!=='—'?mv.pw:'—'}</span></div><button class="moveset-slot-rm" style="position:absolute;top:50%;right:10px;transform:translateY(-50%);" onclick="event.stopPropagation();removeMoveFromSlot(${p.id},${i})">✕</button></div>`:`<div class="moveset-slot" onclick="openTeamMovePicker(${p.id},${i})">+ Add move</div>`).join('')}</div></div>`;
   }).join('');
   renderTeamMoveCoverage(members);
 }
@@ -1195,7 +1196,7 @@ const MOVE_PREREQUISITES={
   'snore':['rest'],
   'sleep talk':['rest'],
 };
-function pickMovesForPokemon(p,allMoves,levelupNames,coveredTypes,usedTMs){
+function pickMovesForPokemon(p,allMoves,levelupNames,coveredTypes,usedTMs,existingTypes){
   // Filter: allow level-up moves freely, but block single-use TMs/tutors already claimed
   const available=allMoves.filter(m=>{
     if(levelupNames.has(m.name.toLowerCase()))return true;
@@ -1211,15 +1212,18 @@ function pickMovesForPokemon(p,allMoves,levelupNames,coveredTypes,usedTMs){
   const scored=damageMoves.map(m=>({...m,score:scoreDamageMove(m,p,coveredTypes)})).sort((a,b)=>b.score-a.score);
   const statusMoves=available.filter(m=>!m.pw||m.pw==='—'||parseInt(m.pw)===0);
   const scoredStatus=statusMoves.map(m=>({...m,score:scoreStatusMove(m,p)})).filter(m=>m.score>0).sort((a,b)=>b.score-a.score);
-  const picked=[];const usedTypes=new Set();
+  const picked=[];const typeCounts={};
+  (existingTypes||[]).forEach(t=>{typeCounts[t]=(typeCounts[t]||0)+1;});
   for(const m of scored){
     if(picked.length>=3)break;
     if(picked.some(x=>x.name===m.name))continue;
     if(!hasPrereq(m,picked))continue;
-    if(usedTypes.has(m.type)){const existing=picked.find(x=>x.type===m.type);if(existing&&m.score<existing.score*1.3)continue;}
-    picked.push(m);usedTypes.add(m.type);
+    const typeCount=typeCounts[m.type]||0;
+    if(typeCount>=2)continue;
+    if(typeCount===1){const existing=picked.find(x=>x.type===m.type);if(existing&&m.score<existing.score*1.3)continue;}
+    picked.push(m);typeCounts[m.type]=(typeCounts[m.type]||0)+1;
   }
-  const fourthOffense=scored.find(m=>!picked.some(x=>x.name===m.name)&&hasPrereq(m,picked)&&(!usedTypes.has(m.type)||m.score>50));
+  const fourthOffense=scored.find(m=>!picked.some(x=>x.name===m.name)&&hasPrereq(m,picked)&&((typeCounts[m.type]||0)<2||m.score>50));
   const bestStatus=scoredStatus[0];
   if(bestStatus&&(!fourthOffense||bestStatus.score>fourthOffense.score*0.8)){picked.push(bestStatus);}
   else if(fourthOffense){picked.push(fourthOffense);}
@@ -1291,8 +1295,9 @@ async function recommendAllMovesets(){
     const allMoves=[...data.levelup,...data.tms];
     const lvNames=new Set(data.levelup.map(m=>m.name.toLowerCase()));
     const existingNames=new Set(existing.filter(Boolean).map(m=>m.name.toLowerCase()));
+    const existingTypes=existing.filter(Boolean).map(m=>m.type).filter(Boolean);
     const available=allMoves.filter(m=>!existingNames.has(m.name.toLowerCase()));
-    const picked=pickMovesForPokemon(p,available,lvNames,coveredTypes,usedTMs);
+    const picked=pickMovesForPokemon(p,available,lvNames,coveredTypes,usedTMs,existingTypes);
     const merged=[...existing];
     let pickIdx=0;
     for(let i=0;i<4;i++){
@@ -1430,6 +1435,49 @@ async function loadCatchLocations(p){
   }
   el.innerHTML=html;
 }
+async function recommendSingleMoveset(pokemonId){
+  const p=pokemonData.find(x=>x.id===pokemonId);if(!p)return;
+  const data=await fetchPokeMovesAndTMs(pokemonId);if(!data)return;
+  const t=getActiveTeam();
+  // Gather TMs/tutors already used by OTHER team members
+  const usedTMs=new Set();
+  t.forEach(id=>{
+    if(!id||id===pokemonId)return;
+    const moves=getMovesForSlot(id);
+    moves.forEach(mv=>{if(mv&&isSingleUseMove(mv.name))usedTMs.add(mv.name.toLowerCase());});
+  });
+  // Gather team coverage from other members' moves
+  const coveredTypes=new Set();
+  t.forEach(id=>{
+    if(!id||id===pokemonId)return;
+    getMovesForSlot(id).forEach(mv=>{if(mv&&mv.type)coveredTypes.add(mv.type);});
+  });
+  const existing=getMovesForSlot(pokemonId);
+  // Claim TMs from this Pokemon's existing manual picks
+  existing.forEach(mv=>{if(mv&&isSingleUseMove(mv.name))usedTMs.add(mv.name.toLowerCase());});
+  const emptyCount=existing.filter(m=>!m).length;
+  if(emptyCount===0)return;
+  const allMoves=[...data.levelup,...data.tms];
+  const lvNames=new Set(data.levelup.map(m=>m.name.toLowerCase()));
+  const existingNames=new Set(existing.filter(Boolean).map(m=>m.name.toLowerCase()));
+  const existingTypes=existing.filter(Boolean).map(m=>m.type).filter(Boolean);
+  const available=allMoves.filter(m=>!existingNames.has(m.name.toLowerCase()));
+  const picked=pickMovesForPokemon(p,available,lvNames,coveredTypes,usedTMs,existingTypes);
+  const merged=[...existing];
+  let pickIdx=0;
+  for(let i=0;i<4;i++){
+    if(!merged[i]&&pickIdx<picked.length){
+      const m=picked[pickIdx++];
+      merged[i]={name:m.name,type:m.type,pw:m.pw,lv:m.lv||null,num:m.num||null};
+    }
+  }
+  const store=getActiveTeamMoves();
+  store[pokemonId]=merged;
+  saveTeamMoves();
+  renderMovesetPlanner();
+  track('team_moveset_recommended_single',{pokemon:p.name});
+}
+function clearSingleMoveset(pokemonId){const m=getActiveTeamMoves();m[pokemonId]=[null,null,null,null];saveTeamMoves();renderMovesetPlanner();track('team_moveset_cleared_single');}
 function clearAllMovesets(){const t=getActiveTeam();const m=getActiveTeamMoves();t.forEach(id=>{if(id)m[id]=[null,null,null,null];});saveTeamMoves();renderMovesetPlanner();track('team_movesets_cleared');}
 function renderTeamMoveCoverage(members){
   const el=document.getElementById('team-move-coverage');
