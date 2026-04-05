@@ -998,7 +998,7 @@ const GYM_DATA=[
 let pokemonData=[],team=JSON.parse(localStorage.getItem('frTeam')||'[null,null,null,null,null,null]'),plannedTeam=JSON.parse(localStorage.getItem('frPlannedTeam')||'[null,null,null,null,null,null]'),activeView='current',pickingSlot=null,dexTF=null,tmTF=null,itemCF=null,genFilter=null;
 function getActiveTeam(){return activeView==='current'?team:plannedTeam;}
 function switchTeamView(view){activeView=view;document.getElementById('view-current').classList.toggle('active',view==='current');document.getElementById('view-planned').classList.toggle('active',view==='planned');renderTeam();}
-function switchTeamTab(tab){document.querySelectorAll('.team-tab').forEach(b=>b.classList.toggle('active',b.dataset.teamTab===tab));document.querySelectorAll('.team-tab-panel').forEach(p=>p.classList.toggle('active',p.id==='team-tab-'+tab));}
+function switchTeamTab(tab){document.querySelectorAll('.team-tab').forEach(b=>b.classList.toggle('active',b.dataset.teamTab===tab));document.querySelectorAll('.team-tab-panel').forEach(p=>p.classList.toggle('active',p.id==='team-tab-'+tab));track('team_tab_switched',{tab});}
 function renderTeamStats(){
   const el=document.getElementById('team-stats-content');
   const t=getActiveTeam();
@@ -1049,7 +1049,7 @@ function getActiveTeamMoves(){return activeView==='current'?teamMoves:plannedTea
 function saveTeamMoves(){localStorage.setItem('frTeamMoves',JSON.stringify(teamMoves));localStorage.setItem('frPlannedTeamMoves',JSON.stringify(plannedTeamMoves));}
 function getMovesForSlot(pokemonId){const m=getActiveTeamMoves();return(m[pokemonId]||[null,null,null,null]).slice(0,4);}
 function setMoveForSlot(pokemonId,moveIdx,moveObj){const m=getActiveTeamMoves();if(!m[pokemonId])m[pokemonId]=[null,null,null,null];m[pokemonId][moveIdx]=moveObj;saveTeamMoves();}
-function removeMoveFromSlot(pokemonId,moveIdx){const m=getActiveTeamMoves();if(m[pokemonId])m[pokemonId][moveIdx]=null;saveTeamMoves();renderMovesetPlanner();}
+function removeMoveFromSlot(pokemonId,moveIdx){const m=getActiveTeamMoves();if(m[pokemonId])m[pokemonId][moveIdx]=null;saveTeamMoves();renderMovesetPlanner();track('team_move_removed');}
 function renderMovesetPlanner(){
   const el=document.getElementById('team-movesets-content');
   const t=getActiveTeam();
@@ -1099,6 +1099,7 @@ function pickTeamMove(idx){
   setMoveForSlot(teamMovePickingSlot,teamMovePickingIdx,{name:m.name,type:m.type,pw:m.pw,lv:m.lv||null,num:m.num||null});
   closeTeamMovePicker();
   renderMovesetPlanner();
+  track('team_move_selected',{move:m.name,type:m.type});
 }
 function closeTeamMovePicker(){
   document.getElementById('move-picker-modal').classList.remove('open');document.body.style.overflow='';
@@ -1271,6 +1272,7 @@ async function recommendAllMovesets(){
   }
   saveTeamMoves();
   renderMovesetPlanner();
+  track('team_movesets_recommended');
 }
 
 const ROUTE_PROGRESSION=[
@@ -1393,7 +1395,7 @@ async function loadCatchLocations(p){
   }
   el.innerHTML=html;
 }
-function clearAllMovesets(){const t=getActiveTeam();const m=getActiveTeamMoves();t.forEach(id=>{if(id)m[id]=[null,null,null,null];});saveTeamMoves();renderMovesetPlanner();}
+function clearAllMovesets(){const t=getActiveTeam();const m=getActiveTeamMoves();t.forEach(id=>{if(id)m[id]=[null,null,null,null];});saveTeamMoves();renderMovesetPlanner();track('team_movesets_cleared');}
 function renderTeamMoveCoverage(members){
   const el=document.getElementById('team-move-coverage');
   const allTypes=Object.keys(TYPE_COLORS);
