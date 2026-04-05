@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://fireredcompanion.flosartis.com/sitemap.xml
