@@ -1654,8 +1654,17 @@ function toggleDexType(t){
 // Move + TM data fetched live from PokeAPI, cached per session
 const TYPE_POKEMON = {normal:133,fire:4,water:7,grass:1,electric:25,ice:131,fighting:106,poison:109,ground:50,flying:16,psychic:63,bug:10,rock:74,ghost:92,dragon:147,dark:197,steel:81};
 const moveCache = {}; // id -> {levelup: [...], tms: [...]}
-// Moves retyped to Fairy in Gen 6 — in Gen 3 these were Normal
-const GEN3_MOVE_TYPE={'fairy':'normal'};
+// Extract Gen 3 accurate power/accuracy/type from PokeAPI past_values
+const VG_GEN={'red-blue':1,'yellow':1,'gold-silver':2,'crystal':2,'ruby-sapphire':3,'emerald':3,'firered-leafgreen':3,'colosseum':3,'xd':3,'diamond-pearl':4,'platinum':4,'heartgold-soulsilver':4,'black-white':5,'black-2-white-2':5,'x-y':6,'omega-ruby-alpha-sapphire':6,'sun-moon':7,'ultra-sun-ultra-moon':7,'lets-go-pikachu-lets-go-eevee':7,'sword-shield':8,'brilliant-diamond-and-shining-pearl':8,'legends-arceus':8,'scarlet-violet':9};
+function gen3MoveStats(d){
+  let pw=d.power,acc=d.accuracy,type=d.type.name;
+  const pv=(d.past_values||[]).filter(p=>(VG_GEN[p.version_group?.name]||99)>=3).sort((a,b)=>(VG_GEN[a.version_group?.name]||99)-(VG_GEN[b.version_group?.name]||99));
+  for(const p of pv){if(p.power!=null){pw=p.power;break;}}
+  for(const p of pv){if(p.accuracy!=null){acc=p.accuracy;break;}}
+  for(const p of pv){if(p.type){type=p.type.name;break;}}
+  if(type==='fairy')type='normal';
+  return{pw,acc,type};
+}
 
 async function fetchPokeMovesAndTMs(id) {
   if (moveCache[id]) return moveCache[id];
@@ -1696,8 +1705,8 @@ async function fetchPokeMovesAndTMs(id) {
         const anyFlavor = d.flavor_text_entries?.find(f => f.language.name === 'en')?.flavor_text;
         const shortEffect = d.effect_entries?.find(e => e.language.name === 'en')?.short_effect?.replace(/\$effect_chance/g, d.effect_chance ?? '?');
         const desc = (frFlavor || anyFlavor || shortEffect || '—').replace(/\n/g, ' ');
-        const mtype=GEN3_MOVE_TYPE[d.type.name]||d.type.name;
-        return { lv: m.lv, name: m.name, type: mtype, pw: d.power || '—', acc: d.accuracy, pp: d.pp, desc };
+        const g3=gen3MoveStats(d);
+        return { lv: m.lv, name: m.name, type: g3.type, pw: g3.pw || '—', acc: g3.acc, pp: d.pp, desc };
       } catch { return { lv: m.lv, name: m.name, type: 'normal', pw: '—', acc: null, pp: null, desc: '—' }; }
     }));
 
@@ -1712,8 +1721,8 @@ async function fetchPokeMovesAndTMs(id) {
         const desc = (frFlavor || anyFlavor || shortEffect || '—').replace(/\n/g, ' ');
         // Find matching TM number from our TM_DATA
         const moveLookup = TM_DATA.find(t => t.move.toLowerCase() === m.name.toLowerCase());
-        const mtype=GEN3_MOVE_TYPE[d.type.name]||d.type.name;
-        return { name: m.name, type: mtype, pw: d.power || '—', acc: d.accuracy, pp: d.pp, num: moveLookup ? moveLookup.num : '', desc };
+        const g3=gen3MoveStats(d);
+        return { name: m.name, type: g3.type, pw: g3.pw || '—', acc: g3.acc, pp: d.pp, num: moveLookup ? moveLookup.num : '', desc };
       } catch { return { name: m.name, type: 'normal', pw: '—', acc: null, pp: null, num: '', desc: '—' }; }
     }));
 
@@ -1732,7 +1741,8 @@ async function fetchPokeMovesAndTMs(id) {
         const anyFlavor = d.flavor_text_entries?.find(f => f.language.name === 'en')?.flavor_text;
         const shortEffect = d.effect_entries?.find(e => e.language.name === 'en')?.short_effect?.replace(/\$effect_chance/g, d.effect_chance ?? '?');
         const desc = (frFlavor || anyFlavor || shortEffect || '—').replace(/\n/g, ' ');
-        return { name: m.name, type: d.type.name, pw: d.power || '—', acc: d.accuracy, pp: d.pp, num: 'Tutor', desc };
+        const g3=gen3MoveStats(d);
+        return { name: m.name, type: g3.type, pw: g3.pw || '—', acc: g3.acc, pp: d.pp, num: 'Tutor', desc };
       } catch { return { name: m.name, type: 'normal', pw: '—', acc: null, pp: null, num: 'Tutor', desc: '—' }; }
     }));
 
