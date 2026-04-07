@@ -1117,7 +1117,24 @@ async function openTeamMovePicker(pokemonId,moveIdx){
   const data=await fetchPokeMovesAndTMs(pokemonId);
   if(!modal.classList.contains('open'))return;
   if(!data){list.innerHTML=`<p style="color:var(--text-muted);font-size:13px;padding:16px 0;">Couldn't load moves.</p>`;return;}
-  archiveMovesData=data;
+  // For stone/item evolutions, also include pre-evolution moves
+  let mergedLevelup=data.levelup, mergedTms=data.tms;
+  const evoEntry=EVO_DATA.find(({chain})=>chain.some(m=>m.id===pokemonId));
+  if(evoEntry){
+    const idx=evoEntry.chain.findIndex(m=>m.id===pokemonId);
+    if(idx>0&&!/^Lv\./i.test(evoEntry.chain[idx].m)){
+      const preEvoId=evoEntry.chain[idx-1].id;
+      const preData=await fetchPokeMovesAndTMs(preEvoId);
+      if(preData){
+        const seenLevelup=new Set(mergedLevelup.map(m=>m.name));
+        const preEvoMoves=preData.levelup.filter(m=>!seenLevelup.has(m.name)).map(m=>({...m,preEvo:true}));
+        mergedLevelup=[...mergedLevelup,...preEvoMoves].sort((a,b)=>a.lv-b.lv);
+        const seenTms=new Set(mergedTms.map(m=>m.name));
+        mergedTms=[...mergedTms,...preData.tms.filter(m=>!seenTms.has(m.name))];
+      }
+    }
+  }
+  archiveMovesData={levelup:mergedLevelup,tms:mergedTms};
   filterTeamMovePicker();
 }
 function filterTeamMovePicker(){
