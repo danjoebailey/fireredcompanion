@@ -1499,14 +1499,17 @@ function clearAllMovesets(){const t=getActiveTeam();const m=getActiveTeamMoves()
 function renderTeamMoveCoverage(members){
   const el=document.getElementById('team-move-coverage');
   const allTypes=Object.keys(TYPE_COLORS);
-  const coveredTypes=new Set();
+  const moveTypes=new Set();
   const movesByType={};
   members.forEach(({pokemon:p})=>{
     const moves=getMovesForSlot(p.id);
-    moves.forEach(mv=>{if(mv&&mv.type){coveredTypes.add(mv.type);if(!movesByType[mv.type])movesByType[mv.type]=[];movesByType[mv.type].push({move:mv.name,pokemon:p.name});}});
+    moves.forEach(mv=>{if(mv&&mv.type){moveTypes.add(mv.type);if(!movesByType[mv.type])movesByType[mv.type]=[];movesByType[mv.type].push({move:mv.name,pokemon:p.name});}});
   });
+  // Coverage = types the team can hit super-effectively, based on TYPE_CHART
+  const coveredTypes=new Set();
+  moveTypes.forEach(mt=>{const matchups=TYPE_CHART[mt]||{};Object.entries(matchups).forEach(([def,mult])=>{if(mult>=2)coveredTypes.add(def);});});
   const uncovered=allTypes.filter(t=>!coveredTypes.has(t));
-  if(!coveredTypes.size){el.innerHTML='';return;}
+  if(!moveTypes.size){el.innerHTML='';return;}
   // HM coverage check
   const requiredHMs=['Cut','Fly','Surf','Strength'];
   const allAssignedMoves=[];
@@ -1515,9 +1518,9 @@ function renderTeamMoveCoverage(members){
   const hmMissing=requiredHMs.filter(h=>!allAssignedMoves.some(m=>m.toLowerCase()===h.toLowerCase()));
   let html=`<div class="moveset-coverage"><div class="moveset-coverage-title">Team Move Coverage</div>`;
   html+=`<div class="moveset-coverage-label">HM Coverage:</div><div class="moveset-coverage-types" style="margin-bottom:14px;">${requiredHMs.map(h=>hmHave.includes(h)?`<span style="font-size:10px;font-weight:700;padding:3px 8px;border-radius:100px;letter-spacing:0.5px;background:rgba(34,197,94,0.15);color:#16a34a;border:1px solid rgba(34,197,94,0.3);">${h} ✓</span>`:`<span style="font-size:10px;font-weight:700;padding:3px 8px;border-radius:100px;letter-spacing:0.5px;background:var(--surface3);color:var(--text-muted);border:1px dashed var(--border);">${h}</span>`).join('')}</div>`;
-  html+=`<div class="moveset-coverage-label">Your moves cover these types:</div><div class="moveset-coverage-types">${[...coveredTypes].sort().map(t=>typeChip(t)).join('')}</div>`;
+  html+=`<div class="moveset-coverage-label">Coverage against:</div><div class="moveset-coverage-types">${[...coveredTypes].sort().map(t=>typeChip(t)).join('')}</div>`;
   if(uncovered.length){
-    html+=`<div class="moveset-coverage-label" style="margin-top:12px;">Missing coverage:</div><div class="moveset-coverage-types">${uncovered.map(t=>`<span style="font-size:10px;font-weight:700;padding:3px 8px;border-radius:100px;text-transform:uppercase;letter-spacing:0.5px;background:var(--surface3);color:var(--text-muted);border:1px dashed var(--border);">${t}</span>`).join('')}</div>`;
+    html+=`<div class="moveset-coverage-label" style="margin-top:12px;">No coverage against:</div><div class="moveset-coverage-types">${uncovered.map(t=>`<span style="font-size:10px;font-weight:700;padding:3px 8px;border-radius:100px;text-transform:uppercase;letter-spacing:0.5px;background:var(--surface3);color:var(--text-muted);border:1px dashed var(--border);">${t}</span>`).join('')}</div>`;
   }
   html+=`</div>`;
   el.innerHTML=html;
