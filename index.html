@@ -1114,27 +1114,11 @@ async function openTeamMovePicker(pokemonId,moveIdx){
   document.getElementById('move-tab-tms').classList.remove('active');
   modal.classList.add('open');document.body.style.overflow='hidden';
   list.innerHTML=`<div style="display:flex;align-items:center;gap:10px;padding:24px 0;color:var(--text-muted);font-size:13px;"><div class="spinner" style="width:20px;height:20px;border-width:2px;flex-shrink:0;"></div>Loading moves…</div>`;
-  const data=await fetchPokeMovesAndTMs(pokemonId);
+  const rawData=await fetchPokeMovesAndTMs(pokemonId);
   if(!modal.classList.contains('open'))return;
-  if(!data){list.innerHTML=`<p style="color:var(--text-muted);font-size:13px;padding:16px 0;">Couldn't load moves.</p>`;return;}
-  // For stone/item evolutions, also include pre-evolution moves
-  let mergedLevelup=data.levelup, mergedTms=data.tms;
-  const evoEntry=EVO_DATA.find(({chain})=>chain.some(m=>m.id===pokemonId));
-  if(evoEntry){
-    const idx=evoEntry.chain.findIndex(m=>m.id===pokemonId);
-    if(idx>0&&!/^Lv\./i.test(evoEntry.chain[idx].m)){
-      const preEvoId=evoEntry.chain[idx-1].id;
-      const preData=await fetchPokeMovesAndTMs(preEvoId);
-      if(preData){
-        const seenLevelup=new Set(mergedLevelup.map(m=>m.name));
-        const preEvoMoves=preData.levelup.filter(m=>!seenLevelup.has(m.name)).map(m=>({...m,preEvo:true}));
-        mergedLevelup=[...mergedLevelup,...preEvoMoves].sort((a,b)=>a.lv-b.lv);
-        const seenTms=new Set(mergedTms.map(m=>m.name));
-        mergedTms=[...mergedTms,...preData.tms.filter(m=>!seenTms.has(m.name))];
-      }
-    }
-  }
-  archiveMovesData={levelup:mergedLevelup,tms:mergedTms};
+  if(!rawData){list.innerHTML=`<p style="color:var(--text-muted);font-size:13px;padding:16px 0;">Couldn't load moves.</p>`;return;}
+  const data=await mergePreEvoMoves(pokemonId,rawData);
+  archiveMovesData={levelup:data.levelup,tms:data.tms};
   filterTeamMovePicker();
 }
 function filterTeamMovePicker(){
@@ -1176,6 +1160,31 @@ function getGen3AtkStat(p,moveType){
   const statName=isPhys?'attack':'sp-atk';
   return p.stats.find(s=>s.name===statName)?.val||50;
 }
+// Merge pre-evolution moves for stone/item/trade evolutions
+async function mergePreEvoMoves(pokemonId,data){
+  let mergedLevelup=data.levelup, mergedTms=data.tms;
+  const evoEntry=EVO_DATA.find(({chain})=>chain.some(m=>m.id===pokemonId));
+  if(evoEntry){
+    const idx=evoEntry.chain.findIndex(m=>m.id===pokemonId);
+    if(idx>0&&!/^Lv\./i.test(evoEntry.chain[idx].m)){
+      const preEvoId=evoEntry.chain[idx-1].id;
+      const preData=await fetchPokeMovesAndTMs(preEvoId);
+      if(preData){
+        const seenLevelup=new Set(mergedLevelup.map(m=>m.name));
+        const preEvoMoves=preData.levelup.filter(m=>!seenLevelup.has(m.name)).map(m=>({...m,preEvo:true}));
+        mergedLevelup=[...mergedLevelup,...preEvoMoves].sort((a,b)=>a.lv-b.lv);
+        const seenTms=new Set(mergedTms.map(m=>m.name));
+        mergedTms=[...mergedTms,...preData.tms.filter(m=>!seenTms.has(m.name))];
+      }
+    }
+  }
+  return{levelup:mergedLevelup,tms:mergedTms};
+}
+// Moves with major drawbacks — penalize in recommendation scoring
+const RECHARGE_MOVES=new Set(['hyper beam','hydro cannon','blast burn','frenzy plant','giga impact']);
+const TWO_TURN_MOVES=new Set(['skull bash','solar beam','sky attack','razor wind','fly','dig','bounce','dive']);
+const FOCUS_PUNCH=new Set(['focus punch']);
+const SELF_KO_MOVES=new Set(['explosion','self-destruct','selfdestruct']);
 function scoreDamageMove(m,p,coveredTypes){
   if(!m.pw||m.pw==='—'||m.pw===0)return 0;
   const power=typeof m.pw==='number'?m.pw:parseInt(m.pw)||0;
@@ -1184,6 +1193,14 @@ function scoreDamageMove(m,p,coveredTypes){
   const stab=p.types.includes(m.type)?1.5:1;
   const atk=getGen3AtkStat(p,m.type);
   let score=power*acc*stab*(atk/100);
+  // Penalize moves with major in-game drawbacks
+  const mn=m.name.toLowerCase();
+  if(RECHARGE_MOVES.has(mn))score*=0.5;
+  else if(TWO_TURN_MOVES.has(mn))score*=0.5;
+  if(FOCUS_PUNCH.has(mn))score*=0.3;
+  if(SELF_KO_MOVES.has(mn))score*=0.3;
+  // Slight penalty for very low PP moves (5 or fewer)
+  if(m.pp&&m.pp<=5)score*=0.85;
   // Boost moves covering types the team is missing
   if(!coveredTypes.has(m.type))score*=1.3;
   return score;
@@ -1220,14 +1237,20 @@ function pickMovesForPokemon(p,allMoves,levelupNames,coveredTypes,usedTMs,existi
     if(isSingleUseMove(m.name)&&usedTMs.has(m.name.toLowerCase()))return false;
     return true;
   });
+  // Deduplicate: prefer level-up version over TM/tutor when both exist
+  const deduped=[];const seen=new Set();
+  // Level-up moves first so they win ties
+  for(const m of available){if(m.lv!=null&&!seen.has(m.name.toLowerCase())){seen.add(m.name.toLowerCase());deduped.push(m);}}
+  for(const m of available){if(!seen.has(m.name.toLowerCase())){seen.add(m.name.toLowerCase());deduped.push(m);}}
+  const dedupedAvailable=deduped;
   const hasPrereq=(m,pickedSoFar)=>{
     const prereqs=MOVE_PREREQUISITES[m.name.toLowerCase()];
     if(!prereqs)return true;
     return pickedSoFar.some(p=>prereqs.includes(p.name.toLowerCase()));
   };
-  const damageMoves=available.filter(m=>m.pw&&m.pw!=='—'&&parseInt(m.pw)>0);
+  const damageMoves=dedupedAvailable.filter(m=>m.pw&&m.pw!=='—'&&parseInt(m.pw)>0);
   const scored=damageMoves.map(m=>({...m,score:scoreDamageMove(m,p,coveredTypes)})).sort((a,b)=>b.score-a.score);
-  const statusMoves=available.filter(m=>!m.pw||m.pw==='—'||parseInt(m.pw)===0);
+  const statusMoves=dedupedAvailable.filter(m=>!m.pw||m.pw==='—'||parseInt(m.pw)===0);
   const scoredStatus=statusMoves.map(m=>({...m,score:scoreStatusMove(m,p)})).filter(m=>m.score>0).sort((a,b)=>b.score-a.score);
   const picked=[];const typeCounts={};
   (existingTypes||[]).forEach(t=>{typeCounts[t]=(typeCounts[t]||0)+1;});
@@ -1251,8 +1274,9 @@ async function recommendAllMovesets(){
   const t=getActiveTeam();
   const members=t.map(id=>id?pokemonData.find(p=>p.id===id):null).filter(Boolean);
   if(!members.length)return;
-  // Fetch all move data in parallel
-  const allData=await Promise.all(members.map(p=>fetchPokeMovesAndTMs(p.id)));
+  // Fetch all move data in parallel, including pre-evo moves for stone evolutions
+  const rawData=await Promise.all(members.map(p=>fetchPokeMovesAndTMs(p.id)));
+  const allData=await Promise.all(members.map((p,i)=>rawData[i]?mergePreEvoMoves(p.id,rawData[i]):null));
   const usedTMs=new Set();
   const teamMoveStore=getActiveTeamMoves();
   // Sort members by fewer available moves first (more constrained Pokemon pick first)
@@ -1454,7 +1478,8 @@ async function loadCatchLocations(p){
 }
 async function recommendSingleMoveset(pokemonId){
   const p=pokemonData.find(x=>x.id===pokemonId);if(!p)return;
-  const data=await fetchPokeMovesAndTMs(pokemonId);if(!data)return;
+  const rawData=await fetchPokeMovesAndTMs(pokemonId);if(!rawData)return;
+  const data=await mergePreEvoMoves(pokemonId,rawData);
   const t=getActiveTeam();
   // Gather TMs/tutors already used by OTHER team members
   const usedTMs=new Set();
