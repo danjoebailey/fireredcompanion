@@ -1994,7 +1994,8 @@ async function renderModalBody(){
     // Show spinner immediately, then load
     document.getElementById('modal-body').innerHTML = `${tabBar}<div class="modal-tab-content"><div style="display:flex;align-items:center;gap:10px;padding:24px 0;color:var(--text-muted);font-size:13px;"><div class="spinner" style="width:20px;height:20px;border-width:2px;flex-shrink:0;"></div>Loading game data…</div></div><button class="btn btn-primary" style="width:100%;margin-top:16px;" onclick="addFromModal(${p.id})">+ Add to Team</button>`;
 
-    const data = await fetchPokeMovesAndTMs(p.id);
+    const rawData = await fetchPokeMovesAndTMs(p.id);
+    const data = rawData ? await mergePreEvoMoves(p.id, rawData) : null;
 
     // Check modal is still open for same pokemon
     if (!modalPoke || modalPoke.id !== p.id) return;
@@ -2006,8 +2007,11 @@ async function renderModalBody(){
       if (!moves.length) {
         content = `<p class="modal-empty">No level-up moves found for ${gameVersion==='leafgreen'?'LeafGreen':'FireRed'}.</p>`;
       } else {
+        const evoC=EVO_DATA.find(({chain})=>chain.some(m=>m.id===p.id));
+        const preEvoName=evoC?evoC.chain[evoC.chain.findIndex(m=>m.id===p.id)-1]?.name:null;
+        const preEvoLabel=preEvoName?preEvoName.charAt(0).toUpperCase()+preEvoName.slice(1):'';
         const moveDetailHtml = m => `<div class="move-detail-stats"><div class="move-detail-stat"><span class="move-detail-stat-label">Power</span><span class="move-detail-stat-val">${m.pw!=='—'?m.pw:'—'}</span></div><div class="move-detail-stat"><span class="move-detail-stat-label">Accuracy</span><span class="move-detail-stat-val">${m.acc!=null?m.acc+'%':'—'}</span></div><div class="move-detail-stat"><span class="move-detail-stat-label">PP</span><span class="move-detail-stat-val">${m.pp||'—'}</span></div></div><div class="move-detail-desc">${m.desc||'—'}</div>`;
-        content = `<div class="tm-grid">${moves.map(m=>`<div class="tm-card move-card-clickable" onclick="toggleMoveDetail(this)"><div class="tm-card-header"><span class="tm-num">${m.lv?String(m.lv).padStart(2,'0'):'—'}</span><span class="tm-move">${m.name}</span>${typeChip(m.type)}<span class="tm-meta">${m.pw!=='—'?m.pw:'—'}</span></div><div class="move-detail">${moveDetailHtml(m)}</div></div>`).join('')}</div>`;
+        content = `<div class="tm-grid">${moves.map(m=>`<div class="tm-card move-card-clickable" onclick="toggleMoveDetail(this)"><div class="tm-card-header"><span class="tm-num">${m.lv?String(m.lv).padStart(2,'0'):'—'}</span><span class="tm-move">${m.name}</span>${m.preEvo&&preEvoName?`<img src="${sprite(evoC.chain[evoC.chain.findIndex(x=>x.id===p.id)-1].id)}" style="width:20px;height:20px;image-rendering:pixelated;margin-left:4px;" alt="${preEvoLabel}" title="Learned as ${preEvoLabel}">`:``}${typeChip(m.type)}<span class="tm-meta">${m.pw!=='—'?m.pw:'—'}</span></div><div class="move-detail">${moveDetailHtml(m)}</div></div>`).join('')}</div>`;
       }
     } else {
       const tms = data.tms;
