@@ -944,6 +944,9 @@ const POKEMON_DATA = [
 ,{"id":246,"name":"larvitar","types":["rock","ground"],"stats":[{"name":"hp","val":50},{"name":"attack","val":64},{"name":"defense","val":50},{"name":"sp-atk","val":45},{"name":"sp-def","val":50},{"name":"speed","val":41}],"height":6,"weight":720}
 ,{"id":247,"name":"pupitar","types":["rock","ground"],"stats":[{"name":"hp","val":70},{"name":"attack","val":84},{"name":"defense","val":70},{"name":"sp-atk","val":65},{"name":"sp-def","val":70},{"name":"speed","val":51}],"height":12,"weight":1520}
 ,{"id":248,"name":"tyranitar","types":["rock","dark"],"stats":[{"name":"hp","val":100},{"name":"attack","val":134},{"name":"defense","val":110},{"name":"sp-atk","val":95},{"name":"sp-def","val":100},{"name":"speed","val":61}],"height":20,"weight":2020}
+,{"id":249,"name":"lugia","types":["psychic","flying"],"stats":[{"name":"hp","val":106},{"name":"attack","val":90},{"name":"defense","val":130},{"name":"sp-atk","val":154},{"name":"sp-def","val":154},{"name":"speed","val":110}],"height":52,"weight":2160}
+,{"id":250,"name":"ho-oh","types":["fire","flying"],"stats":[{"name":"hp","val":106},{"name":"attack","val":130},{"name":"defense","val":90},{"name":"sp-atk","val":110},{"name":"sp-def","val":154},{"name":"speed","val":80}],"height":38,"weight":1990}
+,{"id":386,"name":"deoxys","types":["psychic"],"stats":[{"name":"hp","val":50},{"name":"attack","val":150},{"name":"defense","val":50},{"name":"sp-atk","val":150},{"name":"sp-def","val":50},{"name":"speed","val":150}],"height":17,"weight":608}
 ];
 
 const TYPE_COLORS={normal:'#9ca3af',fire:'#f97316',water:'#3b82f6',electric:'#eab308',grass:'#22c55e',ice:'#67e8f9',fighting:'#ef4444',poison:'#a855f7',ground:'#d97706',flying:'#818cf8',psychic:'#ec4899',bug:'#84cc16',rock:'#92400e',ghost:'#6d28d9',dragon:'#7c3aed',dark:'#6b7280',steel:'#94a3b8'};
@@ -1736,9 +1739,44 @@ function gen3MoveStats(d){
   return{pw,acc,type};
 }
 
+// Hardcoded Deoxys movesets — PokeAPI merges formes incorrectly
+const DEOXYS_DATA={
+  firered:{levelup:[
+    {lv:1,name:'Leer',type:'normal',pw:'—',acc:100,pp:30,desc:'Lowers the foe\'s Defense.'},
+    {lv:1,name:'Wrap',type:'normal',pw:15,acc:85,pp:20,desc:'Squeezes the foe for 2–5 turns.'},
+    {lv:5,name:'Night Shade',type:'ghost',pw:'—',acc:100,pp:15,desc:'Inflicts damage equal to the user\'s level.'},
+    {lv:10,name:'Teleport',type:'psychic',pw:'—',acc:null,pp:20,desc:'Use it to flee from any wild Pokémon.'},
+    {lv:15,name:'Taunt',type:'dark',pw:'—',acc:100,pp:20,desc:'Taunts the foe into only using attack moves.'},
+    {lv:20,name:'Pursuit',type:'dark',pw:40,acc:100,pp:20,desc:'Deals double damage if the foe is switching out.'},
+    {lv:25,name:'Psychic',type:'psychic',pw:90,acc:100,pp:10,desc:'A strong telekinetic attack. May lower Sp. Def.'},
+    {lv:30,name:'Superpower',type:'fighting',pw:120,acc:100,pp:5,desc:'A powerful attack, but lowers the user\'s Attack and Defense.'},
+    {lv:35,name:'Cosmic Power',type:'psychic',pw:'—',acc:null,pp:20,desc:'Raises Defense and Sp. Def by absorbing cosmic power.'},
+    {lv:40,name:'Zap Cannon',type:'electric',pw:100,acc:50,pp:5,desc:'An electric blast with a low hit rate. Always paralyzes.'},
+    {lv:45,name:'Psycho Boost',type:'psychic',pw:140,acc:90,pp:5,desc:'The user\'s strongest attack. Sharply lowers Sp. Atk.'},
+    {lv:50,name:'Hyper Beam',type:'normal',pw:150,acc:90,pp:5,desc:'Powerful, but the user must rest on the next turn.'}
+  ],tms:[]},
+  leafgreen:{levelup:[
+    {lv:1,name:'Leer',type:'normal',pw:'—',acc:100,pp:30,desc:'Lowers the foe\'s Defense.'},
+    {lv:1,name:'Wrap',type:'normal',pw:15,acc:85,pp:20,desc:'Squeezes the foe for 2–5 turns.'},
+    {lv:5,name:'Night Shade',type:'ghost',pw:'—',acc:100,pp:15,desc:'Inflicts damage equal to the user\'s level.'},
+    {lv:10,name:'Teleport',type:'psychic',pw:'—',acc:null,pp:20,desc:'Use it to flee from any wild Pokémon.'},
+    {lv:15,name:'Knock Off',type:'dark',pw:20,acc:100,pp:20,desc:'Knocks the foe\'s held item off.'},
+    {lv:20,name:'Spikes',type:'ground',pw:'—',acc:null,pp:20,desc:'Sets spikes that hurt a foe switching in.'},
+    {lv:25,name:'Psychic',type:'psychic',pw:90,acc:100,pp:10,desc:'A strong telekinetic attack. May lower Sp. Def.'},
+    {lv:30,name:'Snatch',type:'dark',pw:'—',acc:null,pp:10,desc:'Steals the effects of the foe\'s healing or status move.'},
+    {lv:35,name:'Amnesia',type:'psychic',pw:'—',acc:null,pp:20,desc:'Sharply raises the user\'s Sp. Def.'},
+    {lv:35,name:'Iron Defense',type:'steel',pw:'—',acc:null,pp:15,desc:'Hardens the body\'s surface to sharply raise Defense.'},
+    {lv:40,name:'Recover',type:'normal',pw:'—',acc:null,pp:10,desc:'Restores up to half the user\'s max HP.'},
+    {lv:45,name:'Psycho Boost',type:'psychic',pw:140,acc:90,pp:5,desc:'The user\'s strongest attack. Sharply lowers Sp. Atk.'},
+    {lv:50,name:'Counter',type:'fighting',pw:'—',acc:100,pp:20,desc:'Retaliates any physical hit with double the power.'},
+    {lv:50,name:'Mirror Coat',type:'psychic',pw:'—',acc:100,pp:20,desc:'Retaliates any special hit with double the power.'}
+  ],tms:[]}
+};
 async function fetchPokeMovesAndTMs(id) {
   if (moveCache[id]) return moveCache[id];
   try {
+    // Deoxys: use hardcoded forme-specific data
+    if(id===386){const d=DEOXYS_DATA[gameVersion]||DEOXYS_DATA.firered;moveCache[id]=d;return d;}
     const res = await fetch(`https://pokeapi.co/api/v2/pokemon/${id}`);
     const data = await res.json();
     const allMoves = data.moves;
@@ -1925,6 +1963,9 @@ async function renderModalBody(){
         243:'Roaming Kanto after beating Elite Four (chose Squirtle as starter)',
         244:'Roaming Kanto after beating Elite Four (chose Bulbasaur as starter)',
         245:'Roaming Kanto after beating Elite Four (chose Charmander as starter)',
+        249:'Navel Rock (requires Mystic Ticket event item)',
+        250:'Navel Rock (requires Mystic Ticket event item)',
+        386:'Birth Island (requires Aurora Ticket event item)',
       };
       const special=SPECIAL_OBTAIN[p.id];
       let msg='';
@@ -2451,11 +2492,21 @@ function updateVersionUI(){
   const logo=document.getElementById('logo-img');
   if(logo){logo.src=gameVersion==='leafgreen'?'/logo-leafgreen.png':'/logo.png';logo.alt=gameVersion==='leafgreen'?'LeafGreen Logo':'FireRed Logo';}
 }
+const DEOXYS_STATS={firered:{atk:180,def:20,spatk:180,spdef:20,speed:150},leafgreen:{atk:70,def:160,spatk:70,spdef:160,speed:90}};
+function applyDeoxysStats(){
+  const d=pokemonData.find(p=>p.id===386);if(!d)return;
+  const s=DEOXYS_STATS[gameVersion]||DEOXYS_STATS.firered;
+  d.stats.find(x=>x.name==='attack').val=s.atk;d.stats.find(x=>x.name==='defense').val=s.def;
+  d.stats.find(x=>x.name==='sp-atk').val=s.spatk;d.stats.find(x=>x.name==='sp-def').val=s.spdef;
+  d.stats.find(x=>x.name==='speed').val=s.speed;
+  delete moveCache[386];
+}
 function switchVersion(ver){
   gameVersion=ver;localStorage.setItem('frGameVersion',ver);
   document.querySelectorAll('.version-btn').forEach(b=>{b.classList.remove('active-fr','active-lg');});
   const btns=document.querySelectorAll('.version-btn');
   btns.forEach(b=>{if(b.textContent.toLowerCase().replace(/\s/g,'')===ver.replace(/\s/g,''))b.classList.add(ver==='firered'?'active-fr':'active-lg');});
+  applyDeoxysStats();
   updateVersionUI();
   Object.keys(locationCache).forEach(k=>delete locationCache[k]);
   // Reset loaded location rows so they re-fetch for new version
@@ -2470,6 +2521,7 @@ function switchVersion(ver){
   btns.forEach(b=>{b.classList.remove('active-fr','active-lg');});
   if(gameVersion==='leafgreen'){btns[1]?.classList.add('active-lg');}
   else{btns[0]?.classList.add('active-fr');}
+  applyDeoxysStats();
   updateVersionUI();
 })();
 function switchTab(name){
