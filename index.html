@@ -1801,6 +1801,14 @@ async function fetchPokeMovesAndTMs(id) {
       }
     }
 
+    // Filter out level-1 "reminder" moves that no pre-evolution learns (not obtainable in FRLG)
+    const evoEntry=EVO_DATA.find(({chain})=>chain.some(m=>m.id===id));
+    if(evoEntry){const idx=evoEntry.chain.findIndex(m=>m.id===id);if(idx>0){
+      const preEvoIds=evoEntry.chain.slice(0,idx).map(m=>m.id);
+      const preEvoMoveNames=new Set();
+      for(const pid of preEvoIds){const pd=await fetchPokeMovesAndTMs(pid);if(pd)pd.levelup.forEach(m=>preEvoMoveNames.add(m.name));}
+      levelup.splice(0,levelup.length,...levelup.filter(m=>m.lv>1||preEvoMoveNames.has(m.name)));
+    }}
     // Sort level-up moves by level
     levelup.sort((a, b) => a.lv - b.lv);
 
